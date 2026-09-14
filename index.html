@@ -219,6 +219,34 @@ select{width:100%;min-height:var(--tap);border:1.5px solid var(--line);border-ra
 .noplain{background:#f2f4f7;border-left:4px solid var(--literary);border-radius:0 10px 10px 0;
   padding:12px 14px;margin-bottom:16px;font-size:14px;color:var(--tx-2);line-height:1.5;}
 
+/* ---- progress spine: streak, last seven days, XP ---- */
+.spine{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:14px;}
+.spine .flame{display:flex;align-items:center;gap:7px;color:var(--line);}
+.spine .flame svg{flex:0 0 auto;}
+.spine .flame b{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;line-height:1;color:var(--ink);}
+.spine .lab{font-size:11.5px;color:var(--tx-2);}
+.spine .days{display:flex;gap:5px;margin-left:auto;}
+.spine .days i{width:11px;height:11px;border-radius:50%;background:var(--line-2);border:1.5px solid var(--line);display:block;}
+.spine .days i.on{background:var(--focus);border-color:var(--focus);}
+.spine .days i.frz{background:#dbe9ec;border-color:var(--focus);}
+.spine .days i.now{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--ink);}
+.spine .xp{display:flex;align-items:baseline;gap:4px;}
+.spine .xp b{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--ink);}
+.spine .frz{font-size:12px;font-weight:600;color:var(--focus);border:1.5px solid #b9d6da;border-radius:99px;padding:3px 9px;}
+.spine.tier-ember .flame{color:var(--contested);}
+.spine.tier-bronze .flame{color:#b5581f;}
+.spine.tier-silver .flame{color:var(--focus);}
+.spine.tier-gold .flame{color:#c99a2e;}
+.spine.tier-gold{border-color:#e6cf9e;background:#fffaf0;}
+.today{background:var(--card);border:1.5px solid var(--line);border-left:5px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:16px;}
+.today b{display:block;font-size:15.5px;color:var(--ink);margin-bottom:4px;}
+.today span{font-size:14px;color:var(--tx-2);line-height:1.5;display:block;}
+.today.risk{border-left-color:var(--contested);}
+.today.done{border-left-color:var(--solid);}
+.today .plbtn{margin-top:10px;}
+.today small{display:block;font-size:12px;color:var(--tx-2);margin-top:6px;}
+.gain{font-size:14px;color:var(--focus);font-weight:600;margin-top:8px;}
+
 /* ================= PLAY ================= */
 .plintro{font-size:14px;color:var(--tx-2);line-height:1.55;margin-bottom:16px;}
 .plmodes{display:grid;gap:10px;margin-bottom:20px;}
@@ -903,6 +931,72 @@ function pSave(){try{localStorage.setItem(PKEY,JSON.stringify(P));}catch(e){}}
 const P=pLoad();
 P.quizBest=P.quizBest||0;P.quizRounds=P.quizRounds||0;P.exped=P.exped||{};P.puz=P.puz||{};
 
+/* ---------- streak, XP, energy ---------- */
+/* Local calendar day, not UTC: a streak is about the day the person lived through. */
+function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function dayShift(key,n){const p=key.split("-").map(Number);return dayKey(new Date(p[0],p[1]-1,p[2]+n));}
+P.streak=P.streak||{count:0,best:0,last:null,freezes:0,frozen:[]};
+P.xp=P.xp||0;
+P.log=P.log||{};
+/* Reserved for the energy system. Declared now so it never needs a migration;
+   nothing reads it yet. */
+P.energy=P.energy||{cur:5,max:5,last:null};
+
+const FREEZE_EVERY=7,FREEZE_CAP=2;
+const TIERS=[[100,"gold","Gold"],[30,"silver","Silver"],[7,"bronze","Bronze"],[1,"ember","Ember"]];
+function tierOf(n){for(const t of TIERS)if(n>=t[0])return{cls:t[1],name:t[2]};return{cls:"none",name:""};}
+
+/* Extends the streak at most once per calendar day. One missed day is covered by
+   a freeze if one is held; a freeze is earned every seven consecutive days. */
+function touchStreak(){
+  const s=P.streak,today=dayKey();
+  if(s.last===today)return{extended:false,frozen:false};
+  let frozen=false;
+  if(s.last===dayShift(today,-1)){s.count++;}
+  else if(s.last===dayShift(today,-2)&&s.freezes>0){s.freezes--;s.frozen.push(dayShift(today,-1));s.count++;frozen=true;}
+  else{s.count=1;}
+  s.last=today;
+  if(s.count>s.best)s.best=s.count;
+  if(s.count%FREEZE_EVERY===0&&s.freezes<FREEZE_CAP)s.freezes++;
+  return{extended:true,frozen};
+}
+function award(xp){
+  const today=dayKey();
+  P.xp+=xp;P.log[today]=(P.log[today]||0)+xp;
+  const r=touchStreak();
+  pSave();
+  return r;
+}
+function streakMsg(r){
+  if(!r||!r.extended)return"";
+  const n=P.streak.count;
+  return r.frozen?" · streak kept with a freeze, now "+n+" days":" · streak "+n+" day"+(n===1?"":"s");
+}
+const FLAME='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 1-3-1-6 1-10z" fill="currentColor"/></svg>';
+function spineHtml(){
+  const s=P.streak,t=tierOf(s.count),today=dayKey(),days=[];
+  for(let i=6;i>=0;i--){const k=dayShift(today,-i);days.push({k,on:!!P.log[k],frz:s.frozen.indexOf(k)!==-1,now:i===0});}
+  return `<div class="spine tier-${t.cls}" role="status" aria-label="${s.count}-day streak, ${P.xp} XP">
+    <div class="flame">${FLAME}<b>${s.count}</b><span class="lab">day${s.count===1?"":"s"}${t.name?" · "+t.name:""}</span></div>
+    <div class="days" aria-hidden="true">${days.map(d=>`<i class="${d.on?"on":d.frz?"frz":""}${d.now?" now":""}" title="${d.k}"></i>`).join("")}</div>
+    <div class="xp"><b>${P.xp}</b><span class="lab">XP</span></div>
+    ${s.freezes?`<div class="frz">${s.freezes} freeze${s.freezes>1?"s":""}</div>`:""}
+  </div>`;
+}
+/* A reminder that fires only while this tab is open (or the site is installed
+   to the home screen). Real push needs a server; this is labelled as what it is. */
+function armReminder(){
+  if(!P.remind||!("Notification" in window)||Notification.permission!=="granted")return;
+  if(P.streak.last===dayKey())return;
+  const now=new Date(),at=new Date(now.getFullYear(),now.getMonth(),now.getDate(),20,0,0);
+  if(at<=now)return;
+  clearTimeout(armReminder.t);
+  armReminder.t=setTimeout(()=>{
+    if(P.streak.last!==dayKey())new Notification("Human Atlas",{body:"Your "+P.streak.count+"-day streak ends at midnight."});
+  },at-now);
+}
+armReminder();
+
 function shuf(a,rnd){rnd=rnd||Math.random;const x=a.slice();
   for(let i=x.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));const t=x[i];x[i]=x[j];x[j]=t;}return x;}
 function pick(a,rnd){return a[Math.floor((rnd||Math.random)()*a.length)];}
@@ -1107,11 +1201,24 @@ function paintPlayHub(el){
        <span style="flex:1"><b>${m.name}</b><span>${m.blurb}</span>
        ${best?`<span class="best">${best}</span>`:""}</span></button>`;
   }).join("");
+  const s=P.streak,doneToday=s.last===dayKey();
+  const canNotify=("Notification" in window)&&Notification.permission!=="denied";
+  const remindBtn=!doneToday&&s.count&&canNotify&&!P.remind
+    ?`<button class="plbtn" id="plRemind">Remind me at 8pm</button><small>Only fires while this tab stays open, or if you add the site to your home screen. Real push would need a server.</small>`
+    :(P.remind&&!doneToday?`<small>Reminder set for 8pm while this tab is open.</small>`:"");
+  const today=doneToday
+    ?`<div class="today done"><b>Today is counted.</b><span>Your streak is safe until midnight tomorrow. Anything else you do adds XP.</span></div>`
+    :s.count
+      ?`<div class="today risk"><b>Your ${s.count}-day streak ends at midnight.</b><span>Any one round, route or puzzle keeps it.${s.freezes?" You hold "+s.freezes+" freeze"+(s.freezes>1?"s":"")+" for a missed day.":""}</span>${remindBtn}</div>`
+      :`<div class="today"><b>Start a streak.</b><span>Finish any one thing today. Seven days running earns a freeze — a missed day that does not count against you.</span></div>`;
   el.innerHTML=
   `<p class="plintro">Ways to actually work the material rather than read past it. Progress is saved on this device only — no account, nothing sent anywhere.</p>
+   ${today}
    <div class="plmodes">${cards}</div>
    <p class="hint">Every answer, route and hop links back to the full bubble — sources, boundary conditions, disputes and all.</p>`;
   el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>playGo(b.dataset.m));
+  const rb=document.getElementById("plRemind");
+  if(rb)rb.onclick=()=>Notification.requestPermission().then(p=>{if(p==="granted"){P.remind=true;pSave();armReminder();}paintPlay();});
 }
 
 /* ---------- quiz ---------- */
@@ -1124,12 +1231,13 @@ function paintQuiz(el){
     const pc=Math.round(Q.score/Q.qs.length*100);
     const rec=Q.score>P.quizBest;
     if(rec)P.quizBest=Q.score;
-    P.quizRounds++;pSave();
+    if(!Q.done){Q.done=true;P.quizRounds++;Q.gain=Q.score*10;Q.sr=award(Q.gain);}
     el.innerHTML=
     `<div class="plbar"><button class="plback" id="plHome">← All modes</button></div>
      <div class="plwin">
        <div class="big">${Q.score}/${Q.qs.length}</div>
-       <div class="lab">${pc}% · longest streak ${Q.best}</div>
+       <div class="lab">${pc}% · longest run ${Q.best}</div>
+       <p class="gain">+${Q.gain} XP${streakMsg(Q.sr)}</p>
        <p>${rec?"<b>New best.</b> ":""}${pc===100?"Clean sweep — every grade and dispute called correctly.":pc>=70?"Solid. The misses are the useful part — they point at bubbles worth reading properly.":pc>=40?"Middling, which is the honest result for a first pass. The evidence grades are the hardest part and they are the point.":"Low, and not embarrassing: most of this contradicts what gets taught. Try an expedition first, then come back."}</p>
      </div>
      <div class="plnav">
@@ -1204,13 +1312,14 @@ function paintExped(el){
   }
   const x=E.x,last=E.i>=x.stops.length;
   if(last){
-    P.exped[x.id]=1;pSave();
+    if(!E.done){E.done=true;P.exped[x.id]=1;E.sr=award(60);}
     const nextUp=EXPED.filter(z=>!P.exped[z.id]);
     el.innerHTML=
     `<div class="plbar"><button class="plback" id="plBack">← Routes</button><span class="grow plcount">${x.name.toUpperCase()}</span></div>
      <div class="plwin">
        <div class="big">✓</div>
        <div class="lab">${x.stops.length} STOPS COMPLETE</div>
+       <p class="gain">+60 XP${streakMsg(E.sr)}</p>
        <p>${x.end}</p>
      </div>
      <div class="plnav">
@@ -1271,7 +1380,7 @@ function paintPuzzle(el){
     Z.saved=true;
     const prev=P.puz[key];
     if(!prev||moves<prev)P.puz[key]=moves;
-    pSave();
+    Z.gain=40+(moves<=Z.par?20:0);Z.sr=award(Z.gain);
   }
   const head=
   `<div class="plbar">
@@ -1287,6 +1396,7 @@ function paintPuzzle(el){
     `<div class="plwin">
        <div class="big">${moves}</div>
        <div class="lab">HOPS · PAR ${Z.par}${Z.hints?" · "+Z.hints+" hint"+(Z.hints>1?"s":""):""}</div>
+       <p class="gain">+${Z.gain} XP${streakMsg(Z.sr)}</p>
        <p>${verdict}</p>
      </div>
      <div class="plcard">
@@ -1338,6 +1448,7 @@ function paintPlay(){
   const el=document.getElementById("playScroll");
   const keep=keepScroll?el.scrollTop:0;
   (MODES[S.mode]?MODES[S.mode].paint:paintPlayHub)(el);
+  el.insertAdjacentHTML("afterbegin",spineHtml());
   el.scrollTop=keep;
   keepScroll=false;
 }

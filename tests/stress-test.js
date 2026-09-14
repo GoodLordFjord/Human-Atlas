@@ -242,6 +242,21 @@ console.log('        plain register '+plains.length+'/'+NODES.length+
   ' ('+Math.round(plains.length/NODES.length*100)+'%) · provenance '+
   NODES.filter(n=>n.provenance&&n.provenance.origin).length+'/'+NODES.length);
 
+console.log('\n=== 8e. STREAK / XP SPINE ===');
+ok('streak and award logic present',/function touchStreak\(\)/.test(src)&&/function award\(xp\)/.test(src));
+ok('streak keys on the local calendar day',/const s=P\.streak,today=dayKey\(\)/.test(src));
+ok('freezes are earned every 7 days and capped at 2',/FREEZE_EVERY=7,FREEZE_CAP=2/.test(src));
+ok('energy state is reserved without being read',
+   /P\.energy=P\.energy\|\|\{cur:5,max:5,last:null\}/.test(src)&&(src.match(/P\.energy/g)||[]).length===2);
+ok('every completion awards exactly once',
+   /if\(!Q\.done\)\{Q\.done=true/.test(src)&&/if\(!E\.done\)\{E\.done=true/.test(src)&&/if\(won&&!Z\.saved\)/.test(src));
+ok('spine renders on every Play screen',/insertAdjacentHTML\("afterbegin",spineHtml\(\)\)/.test(src));
+['ember','bronze','silver','gold'].forEach(t=>ok('streak tier colour: '+t,new RegExp('\\.spine\\.tier-'+t+'\\b').test(css)));
+ok('reminder is labelled as what it is, not as push',/Real push would need a server/.test(html));
+ok('the freeze rule is stated where a streak starts',/Seven days running earns a freeze/.test(html));
+ok('privacy line still true: nothing leaves the device',
+   /Progress is saved on this device only/.test(html)&&!/fetch\(|XMLHttpRequest|navigator\.sendBeacon/.test(src));
+
 console.log('\n=== 9. CONTENT SANITY ===');
 const ev={},ver={};N.forEach(n=>{ev[n.ev]=(ev[n.ev]||0)+1;ver[n.ver]=(ver[n.ver]||0)+1;});
 console.log('        grades',JSON.stringify(ev));

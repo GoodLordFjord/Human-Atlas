@@ -83,6 +83,36 @@ test. Where a plain version has not been written, the app says so and shows the 
 entry, rather than quietly leaving a gap — the same honesty the evidence grades apply
 to the psychology.
 
+## Streaks, XP and the progress spine
+
+Every completed round, route or puzzle awards XP (quiz: score × 10; expedition: 60;
+puzzle: 40, +20 at or under par) and counts toward a daily streak. The spine at the top
+of every Play screen shows the streak, its tier colour, the last seven days, XP, and any
+freezes held.
+
+- **Streak** keys on the local calendar day, not UTC, and extends at most once a day.
+- **Freezes** — one is earned every seven consecutive days, capped at two. A single
+  missed day is covered by a held freeze; a second missed day resets the streak.
+  Forgiveness is what makes streaks work; punishment is what makes people quit.
+- **Tiers** — Ember (1+), Bronze (7+), Silver (30+), Gold (100+).
+- **Reminder** — optional, fires at 8pm *only while the tab is open or the site is
+  installed to the home screen*, and the UI says so. Real push notifications need a
+  server to send them; this is a static site, so it doesn't pretend otherwise.
+- **Energy** — state is reserved (`P.energy`) so a rate-limited competitive mode can be
+  added without a migration. Nothing reads it yet.
+
+Nothing leaves the device. The privacy line on the hub stays true and the static suite
+checks that no network call has crept into the page.
+
+```
+node tests/streak-test.js
+```
+
+Seeds the browser into each streak state — fresh, active yesterday, missed a day with
+and without a freeze, already counted today, at the freeze cap — completes a real quiz
+round in each, and checks what was persisted. Needs the same two dev dependencies as
+the browser suite.
+
 ## Adding a construct
 
 1. Add an object to `data/nodes.json` following the schema.
