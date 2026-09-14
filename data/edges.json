@@ -1,0 +1,1994 @@
+[
+ {
+  "from": "big_two",
+  "to": "axes_curvilinear",
+  "rel": "relates",
+  "note": "corrected by"
+ },
+ {
+  "from": "big_two",
+  "to": "abc_model",
+  "rel": "relates",
+  "note": "challenged by"
+ },
+ {
+  "from": "big_two",
+  "to": "circumplex",
+  "rel": "relates",
+  "note": "same two axes found independently in clinical psychology"
+ },
+ {
+  "from": "big_two",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "Extraversion and Agreeableness are the interpersonal traits"
+ },
+ {
+  "from": "big_two",
+  "to": "thin_slicing",
+  "rel": "relates",
+  "note": "the speed at which the placement happens"
+ },
+ {
+  "from": "big_two",
+  "to": "disc",
+  "rel": "relates",
+  "note": "a coarse four-quadrant crop of this space"
+ },
+ {
+  "from": "big_two",
+  "to": "sdt",
+  "rel": "relates",
+  "note": "competence and relatedness needs correspond; autonomy does not"
+ },
+ {
+  "from": "big_two",
+  "to": "abc_model",
+  "rel": "tension",
+  "note": "data-driven methods find beliefs as a second dimension and do not recover communion as independent"
+ },
+ {
+  "from": "big_two",
+  "to": "axes_curvilinear",
+  "rel": "tension",
+  "note": "the two dimensions are not independent, so 'raise both' is not available"
+ },
+ {
+  "from": "axes_curvilinear",
+  "to": "challenger",
+  "rel": "relates",
+  "note": "undercuts"
+ },
+ {
+  "from": "axes_curvilinear",
+  "to": "greene",
+  "rel": "relates",
+  "note": "Siren and Star archetypes sit at the high-agency end where communion falls"
+ },
+ {
+  "from": "axes_curvilinear",
+  "to": "challenger",
+  "rel": "tension",
+  "note": "teach-and-take-control maximises agency signalling, which this predicts costs warmth"
+ },
+ {
+  "from": "abc_model",
+  "to": "social_identity",
+  "rel": "relates",
+  "note": "beliefs dimension overlaps group identity"
+ },
+ {
+  "from": "heritability",
+  "to": "twin_method",
+  "rel": "relates",
+  "note": "how it is measured"
+ },
+ {
+  "from": "heritability",
+  "to": "turkheimer_laws",
+  "rel": "relates",
+  "note": "the regularities it produces"
+ },
+ {
+  "from": "heritability",
+  "to": "wilson_effect",
+  "rel": "relates",
+  "note": "it changes with age"
+ },
+ {
+  "from": "heritability",
+  "to": "gene_env_interaction",
+  "rel": "relates",
+  "note": "it changes with environment"
+ },
+ {
+  "from": "heritability",
+  "to": "missing_heritability",
+  "rel": "relates",
+  "note": "the gap with molecular estimates"
+ },
+ {
+  "from": "heritability",
+  "to": "personality_heritability",
+  "rel": "relates",
+  "note": "applied to traits"
+ },
+ {
+  "from": "heritability",
+  "to": "sackett_correction",
+  "rel": "relates",
+  "note": "same family of problem: a statistic routinely over-read"
+ },
+ {
+  "from": "heritability",
+  "to": "twin_method",
+  "rel": "tension",
+  "note": "the estimate depends on assumptions the twin design cannot fully test"
+ },
+ {
+  "from": "heritability",
+  "to": "gene_env_interaction",
+  "rel": "tension",
+  "note": "h² is not a constant — it changes with the population's environment"
+ },
+ {
+  "from": "heritability",
+  "to": "gene_env_correlation",
+  "rel": "tension",
+  "note": "the A term absorbs effects that actually run through the environment"
+ },
+ {
+  "from": "twin_method",
+  "to": "personality_heritability",
+  "rel": "relates",
+  "note": "design type changes the answer substantially"
+ },
+ {
+  "from": "twin_method",
+  "to": "turkheimer_laws",
+  "rel": "relates",
+  "note": "the laws are derived from this design"
+ },
+ {
+  "from": "turkheimer_laws",
+  "to": "nonshared_env",
+  "rel": "relates",
+  "note": "law three"
+ },
+ {
+  "from": "turkheimer_laws",
+  "to": "candidate_gene_failure",
+  "rel": "relates",
+  "note": "explained by law four"
+ },
+ {
+  "from": "turkheimer_laws",
+  "to": "polygenic_scores",
+  "rel": "relates",
+  "note": "law four in practice"
+ },
+ {
+  "from": "turkheimer_laws",
+  "to": "gene_env_correlation",
+  "rel": "tension",
+  "note": "the clean partition into genetic and environmental variance breaks down when genes shape the environment"
+ },
+ {
+  "from": "turkheimer_laws",
+  "to": "twin_method",
+  "rel": "tension",
+  "note": "the laws are derived from a design with contested assumptions"
+ },
+ {
+  "from": "nonshared_env",
+  "to": "heritability",
+  "rel": "relates",
+  "note": "the E component"
+ },
+ {
+  "from": "nonshared_env",
+  "to": "turkheimer_laws",
+  "rel": "tension",
+  "note": "law three names the gap but the field cannot fill it"
+ },
+ {
+  "from": "wilson_effect",
+  "to": "gene_env_correlation",
+  "rel": "relates",
+  "note": "the proposed mechanism"
+ },
+ {
+  "from": "wilson_effect",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "personality shows related developmental patterns"
+ },
+ {
+  "from": "wilson_effect",
+  "to": "heritability",
+  "rel": "tension",
+  "note": "if h² changes with age it cannot be a fixed property of a trait"
+ },
+ {
+  "from": "gene_env_correlation",
+  "to": "heritability",
+  "rel": "relates",
+  "note": "confounds the partition"
+ },
+ {
+  "from": "gene_env_correlation",
+  "to": "polygenic_scores",
+  "rel": "relates",
+  "note": "why within-family estimates are smaller"
+ },
+ {
+  "from": "gene_env_correlation",
+  "to": "attachment",
+  "rel": "relates",
+  "note": "confounds parenting-effect inferences"
+ },
+ {
+  "from": "gene_env_correlation",
+  "to": "marshmallow",
+  "rel": "relates",
+  "note": "family-background explanation"
+ },
+ {
+  "from": "gene_env_correlation",
+  "to": "turkheimer_laws",
+  "rel": "relates",
+  "note": "complicates the laws"
+ },
+ {
+  "from": "gene_env_correlation",
+  "to": "attachment",
+  "rel": "tension",
+  "note": "parent–child concordance cannot be read as pure environmental transmission"
+ },
+ {
+  "from": "gene_env_interaction",
+  "to": "twin_method",
+  "rel": "relates",
+  "note": "measured with the same design"
+ },
+ {
+  "from": "gene_env_interaction",
+  "to": "wilson_effect",
+  "rel": "relates",
+  "note": "the other major moderator"
+ },
+ {
+  "from": "gene_env_interaction",
+  "to": "wilson_effect",
+  "rel": "tension",
+  "note": "both show h² is context-dependent, which the popular use of heritability ignores"
+ },
+ {
+  "from": "candidate_gene_failure",
+  "to": "polygenic_scores",
+  "rel": "relates",
+  "note": "the approach that replaced it"
+ },
+ {
+  "from": "candidate_gene_failure",
+  "to": "fabrication_risk",
+  "rel": "relates",
+  "note": "same epistemic family"
+ },
+ {
+  "from": "candidate_gene_failure",
+  "to": "sackett_correction",
+  "rel": "relates",
+  "note": "same epistemic family: published confidence outrunning the data"
+ },
+ {
+  "from": "candidate_gene_failure",
+  "to": "fabrication_risk",
+  "rel": "tension",
+  "note": "both are cases of confident literature built on unverified foundations"
+ },
+ {
+  "from": "polygenic_scores",
+  "to": "missing_heritability",
+  "rel": "relates",
+  "note": "the gap it leaves"
+ },
+ {
+  "from": "polygenic_scores",
+  "to": "heritability",
+  "rel": "relates",
+  "note": "compared against twin estimates"
+ },
+ {
+  "from": "polygenic_scores",
+  "to": "heritability",
+  "rel": "tension",
+  "note": "molecular estimates fall far short of twin estimates"
+ },
+ {
+  "from": "polygenic_scores",
+  "to": "gene_env_correlation",
+  "rel": "tension",
+  "note": "half the between-family signal is not direct genetic effect"
+ },
+ {
+  "from": "missing_heritability",
+  "to": "twin_method",
+  "rel": "relates",
+  "note": "a candidate explanation for the gap"
+ },
+ {
+  "from": "missing_heritability",
+  "to": "personality_heritability",
+  "rel": "relates",
+  "note": "where the gap is widest"
+ },
+ {
+  "from": "missing_heritability",
+  "to": "heritability",
+  "rel": "tension",
+  "note": "two methods that should converge do not"
+ },
+ {
+  "from": "missing_heritability",
+  "to": "twin_method",
+  "rel": "tension",
+  "note": "one live explanation for the gap is that this design overestimates"
+ },
+ {
+  "from": "personality_heritability",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "the traits being estimated"
+ },
+ {
+  "from": "personality_heritability",
+  "to": "twin_method",
+  "rel": "tension",
+  "note": "twin and adoption designs disagree by more than a factor of two on the same trait"
+ },
+ {
+  "from": "personality_heritability",
+  "to": "big_five",
+  "rel": "tension",
+  "note": "trait stability claims sit awkwardly with a heritability that depends on measurement design"
+ },
+ {
+  "from": "wanting_liking",
+  "to": "dopamine_myth",
+  "rel": "relates",
+  "note": "corrects the popular account"
+ },
+ {
+  "from": "wanting_liking",
+  "to": "incentive_sensitization",
+  "rel": "relates",
+  "note": "the addiction application"
+ },
+ {
+  "from": "wanting_liking",
+  "to": "rpe",
+  "rel": "relates",
+  "note": "the competing account of what dopamine does"
+ },
+ {
+  "from": "wanting_liking",
+  "to": "sdt",
+  "rel": "relates",
+  "note": "intrinsic motivation is not the same construct as wanting"
+ },
+ {
+  "from": "wanting_liking",
+  "to": "loss_aversion",
+  "rel": "relates",
+  "note": "both concern how value is represented"
+ },
+ {
+  "from": "wanting_liking",
+  "to": "dual_process",
+  "rel": "tension",
+  "note": "the wanting/liking split is a genuine neural dissociation, unlike the Type 1 / Type 2 typology, which is the contrast worth noticing"
+ },
+ {
+  "from": "rpe",
+  "to": "dopamine_myth",
+  "rel": "relates",
+  "note": "what gets misreported"
+ },
+ {
+  "from": "rpe",
+  "to": "dual_process",
+  "rel": "relates",
+  "note": "both are models under pressure from data that does not partition cleanly"
+ },
+ {
+  "from": "rpe",
+  "to": "wanting_liking",
+  "rel": "tension",
+  "note": "incentive salience and prediction error are competing accounts of the same dopamine signal, and both cannot be the whole story"
+ },
+ {
+  "from": "rpe",
+  "to": "dopamine_myth",
+  "rel": "tension",
+  "note": "its popular rendering has become its own folklore"
+ },
+ {
+  "from": "dopamine_myth",
+  "to": "oxytocin",
+  "rel": "relates",
+  "note": "the same failure mode with a different molecule"
+ },
+ {
+  "from": "dopamine_myth",
+  "to": "mehrabian",
+  "rel": "relates",
+  "note": "the same failure mode in a different domain"
+ },
+ {
+  "from": "dopamine_myth",
+  "to": "incentive_sensitization",
+  "rel": "relates",
+  "note": "why the distinction matters clinically"
+ },
+ {
+  "from": "incentive_sensitization",
+  "to": "addiction_models",
+  "rel": "relates",
+  "note": "the dispute it sits inside"
+ },
+ {
+  "from": "incentive_sensitization",
+  "to": "habit_formation",
+  "rel": "relates",
+  "note": "competing account via habit rather than incentive"
+ },
+ {
+  "from": "incentive_sensitization",
+  "to": "addiction_models",
+  "rel": "tension",
+  "note": "whether sensitization amounts to a disease or an entrenched learning process is exactly what is disputed"
+ },
+ {
+  "from": "addiction_models",
+  "to": "heritability",
+  "rel": "relates",
+  "note": "addiction is heritable, which neither settles nor supports the disease framing"
+ },
+ {
+  "from": "addiction_models",
+  "to": "candidate_gene_failure",
+  "rel": "relates",
+  "note": "the depression parallel: heritable, but not reducible to identifiable pathology"
+ },
+ {
+  "from": "addiction_models",
+  "to": "sdt",
+  "rel": "relates",
+  "note": "autonomy and agency are the contested stakes"
+ },
+ {
+  "from": "addiction_models",
+  "to": "heritability",
+  "rel": "tension",
+  "note": "'chronic disease' framing sits awkwardly with a condition whose course is strongly context-sensitive"
+ },
+ {
+  "from": "habit_formation",
+  "to": "dual_process",
+  "rel": "relates",
+  "note": "automaticity is the construct dual-process theory partitions badly"
+ },
+ {
+  "from": "habit_formation",
+  "to": "self_efficacy",
+  "rel": "relates",
+  "note": "what actually sustains repetition"
+ },
+ {
+  "from": "habit_formation",
+  "to": "wanting_liking",
+  "rel": "relates",
+  "note": "motivation to repeat is not the same as automaticity"
+ },
+ {
+  "from": "habit_formation",
+  "to": "incentive_sensitization",
+  "rel": "tension",
+  "note": "habit and incentive accounts of compulsive behaviour compete: one says automaticity, the other says escalating wanting"
+ },
+ {
+  "from": "emotion_theories",
+  "to": "facial_universality",
+  "rel": "relates",
+  "note": "the main test case"
+ },
+ {
+  "from": "emotion_theories",
+  "to": "valence_arousal",
+  "rel": "relates",
+  "note": "what both sides agree on"
+ },
+ {
+  "from": "emotion_theories",
+  "to": "interoception",
+  "rel": "relates",
+  "note": "the bodily ingredient constructionism relies on"
+ },
+ {
+  "from": "emotion_theories",
+  "to": "affect_labeling",
+  "rel": "relates",
+  "note": "what the technique means depends on which account holds"
+ },
+ {
+  "from": "emotion_theories",
+  "to": "emotion_regulation",
+  "rel": "relates",
+  "note": "regulation assumes a state to regulate"
+ },
+ {
+  "from": "emotion_theories",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "valence and arousal parallel the perception dimensions"
+ },
+ {
+  "from": "emotion_theories",
+  "to": "facial_universality",
+  "rel": "tension",
+  "note": "whether expressions are universal is the dispute's main battleground and neither side has won it"
+ },
+ {
+  "from": "emotion_theories",
+  "to": "affect_labeling",
+  "rel": "tension",
+  "note": "if emotions are constructed, labelling is not merely regulating a pre-existing state — it is partly constituting it, which changes what the technique is doing"
+ },
+ {
+  "from": "facial_universality",
+  "to": "valence_arousal",
+  "rel": "relates",
+  "note": "what does travel across cultures"
+ },
+ {
+  "from": "facial_universality",
+  "to": "thin_slicing",
+  "rel": "relates",
+  "note": "related but distinct claim"
+ },
+ {
+  "from": "facial_universality",
+  "to": "mehrabian",
+  "rel": "relates",
+  "note": "the popular overreach"
+ },
+ {
+  "from": "facial_universality",
+  "to": "thin_slicing",
+  "rel": "tension",
+  "note": "rapid face-based judgement is reliable between perceivers without being accurate about the target's state"
+ },
+ {
+  "from": "facial_universality",
+  "to": "mehrabian",
+  "rel": "tension",
+  "note": "the folk version assumes exactly the readability this literature questions"
+ },
+ {
+  "from": "valence_arousal",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "valence and arousal parallel warmth and agency as low-dimensional perception axes"
+ },
+ {
+  "from": "valence_arousal",
+  "to": "affect_labeling",
+  "rel": "relates",
+  "note": "the safe labelling move works at this level"
+ },
+ {
+  "from": "interoception",
+  "to": "emotion_regulation",
+  "rel": "relates",
+  "note": "proposed route for regulation"
+ },
+ {
+  "from": "interoception",
+  "to": "valence_arousal",
+  "rel": "relates",
+  "note": "arousal has an interoceptive component"
+ },
+ {
+  "from": "interoception",
+  "to": "dunning_kruger",
+  "rel": "relates",
+  "note": "another case where confidence and accuracy come apart"
+ },
+ {
+  "from": "interoception",
+  "to": "emotion_theories",
+  "rel": "tension",
+  "note": "if bodily signal were the substrate of emotion, self-reported bodily attunement should track measured accuracy — and it does not"
+ },
+ {
+  "from": "affective_forecasting",
+  "to": "emotion_theories",
+  "rel": "relates",
+  "note": "assumes a particular view of what is being forecast"
+ },
+ {
+  "from": "affective_forecasting",
+  "to": "availability",
+  "rel": "relates",
+  "note": "extreme instances are more memorable and get overweighted"
+ },
+ {
+  "from": "affective_forecasting",
+  "to": "loss_aversion",
+  "rel": "relates",
+  "note": "both concern misprediction of future value"
+ },
+ {
+  "from": "affective_forecasting",
+  "to": "jolt",
+  "rel": "relates",
+  "note": "buyers forecasting regret are doing exactly this"
+ },
+ {
+  "from": "affective_forecasting",
+  "to": "emotion_theories",
+  "rel": "tension",
+  "note": "forecasting research assumes stable measurable emotional states of the kind constructionism disputes"
+ },
+ {
+  "from": "affective_forecasting",
+  "to": "dual_process",
+  "rel": "tension",
+  "note": "the construct has been explained via dual-process moderators, which inherits that framework's problems"
+ },
+ {
+  "from": "big_five_universality",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "tests its universality claim"
+ },
+ {
+  "from": "big_five_universality",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "the two Tsimane factors invite comparison with the two social-evaluation axes, though the authors do not make that claim [synthesis]"
+ },
+ {
+  "from": "big_five_universality",
+  "to": "hexaco",
+  "rel": "relates",
+  "note": "the rival structural model"
+ },
+ {
+  "from": "big_five_universality",
+  "to": "personality_heritability",
+  "rel": "relates",
+  "note": "what heritability of a non-replicating structure would mean"
+ },
+ {
+  "from": "big_five_universality",
+  "to": "big_five",
+  "rel": "tension",
+  "note": "the five-factor structure is graded solid on evidence drawn almost entirely from literate urban populations"
+ },
+ {
+  "from": "big_five_universality",
+  "to": "personality_heritability",
+  "rel": "tension",
+  "note": "heritability estimates presuppose the trait structure being measured is real in that population"
+ },
+ {
+  "from": "hexaco",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "the model it revises"
+ },
+ {
+  "from": "hexaco",
+  "to": "circumplex",
+  "rel": "relates",
+  "note": "Agreeableness and Emotionality are rotational variants here"
+ },
+ {
+  "from": "hexaco",
+  "to": "big_five",
+  "rel": "tension",
+  "note": "if six factors recover more robustly across languages than five, the reference standard may be the wrong model"
+ },
+ {
+  "from": "hexaco",
+  "to": "disc",
+  "rel": "tension",
+  "note": "a four-quadrant model is even further from a six-factor structure than the five it approximates"
+ },
+ {
+  "from": "trait_change",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "the traits being moved"
+ },
+ {
+  "from": "trait_change",
+  "to": "personality_heritability",
+  "rel": "relates",
+  "note": "heritable does not mean unchangeable"
+ },
+ {
+  "from": "trait_change",
+  "to": "self_efficacy",
+  "rel": "relates",
+  "note": "mastery experience as a change mechanism"
+ },
+ {
+  "from": "trait_change",
+  "to": "heritability",
+  "rel": "relates",
+  "note": "the clearest illustration that high heritability permits change"
+ },
+ {
+  "from": "trait_change",
+  "to": "personality_heritability",
+  "rel": "tension",
+  "note": "substantial heritability and substantial intervention-driven change are both true, which shows heritability does not mean fixity"
+ },
+ {
+  "from": "trait_change",
+  "to": "growth_mindset",
+  "rel": "tension",
+  "note": "a general belief-change intervention shows small effects while structured clinical intervention shows d≈.37 — the difference is dose and specificity"
+ },
+ {
+  "from": "person_situation",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "what the debate was about"
+ },
+ {
+  "from": "person_situation",
+  "to": "fae",
+  "rel": "relates",
+  "note": "the everyday version of the same error"
+ },
+ {
+  "from": "person_situation",
+  "to": "trait_change",
+  "rel": "relates",
+  "note": "distributions can shift"
+ },
+ {
+  "from": "person_situation",
+  "to": "big_five_universality",
+  "rel": "relates",
+  "note": "both question what trait models actually capture"
+ },
+ {
+  "from": "person_situation",
+  "to": "big_five",
+  "rel": "tension",
+  "note": "trait models describe the distribution's centre and have historically said little about the mechanisms generating the variation"
+ },
+ {
+  "from": "person_situation",
+  "to": "fae",
+  "rel": "tension",
+  "note": "the debate is the formal version of the attribution error — over-reading disposition from single observations"
+ },
+ {
+  "from": "dark_triad",
+  "to": "hexaco",
+  "rel": "relates",
+  "note": "the factor it may be redundant with"
+ },
+ {
+  "from": "dark_triad",
+  "to": "narcissism",
+  "rel": "relates",
+  "note": "one of the three"
+ },
+ {
+  "from": "dark_triad",
+  "to": "psychopathy_measurement",
+  "rel": "relates",
+  "note": "one of the three, and the hardest to measure"
+ },
+ {
+  "from": "dark_triad",
+  "to": "dark_outcomes",
+  "rel": "relates",
+  "note": "what it predicts"
+ },
+ {
+  "from": "dark_triad",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "what it is not captured by"
+ },
+ {
+  "from": "dark_triad",
+  "to": "hexaco",
+  "rel": "tension",
+  "note": "if the dark triad is low Honesty-Humility, the dark-triad literature is measuring a personality factor under a different name"
+ },
+ {
+  "from": "dark_triad",
+  "to": "big_five",
+  "rel": "tension",
+  "note": "the five-factor model has no factor that captures this, which is the strongest single argument for the sixth"
+ },
+ {
+  "from": "narcissism",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "decomposes into agreeableness, extraversion and neuroticism"
+ },
+ {
+  "from": "narcissism",
+  "to": "dark_outcomes",
+  "rel": "relates",
+  "note": "the strongest workplace predictor of the three"
+ },
+ {
+  "from": "narcissism",
+  "to": "attachment",
+  "rel": "relates",
+  "note": "developmental correlates differ between the two forms"
+ },
+ {
+  "from": "narcissism",
+  "to": "dark_triad",
+  "rel": "tension",
+  "note": "if antagonism is narcissism's core and antagonism is near-identical to low Honesty-Humility, the separate label earns little"
+ },
+ {
+  "from": "narcissism",
+  "to": "attachment",
+  "rel": "tension",
+  "note": "childhood adversity relates to vulnerable but not grandiose narcissism, so a single developmental story does not cover both"
+ },
+ {
+  "from": "psychopathy_measurement",
+  "to": "dark_outcomes",
+  "rel": "relates",
+  "note": "what it predicts at work"
+ },
+ {
+  "from": "psychopathy_measurement",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "its facets map onto standard dimensions"
+ },
+ {
+  "from": "psychopathy_measurement",
+  "to": "hexaco",
+  "rel": "relates",
+  "note": "low Honesty-Humility as the common core"
+ },
+ {
+  "from": "psychopathy_measurement",
+  "to": "dark_triad",
+  "rel": "tension",
+  "note": "if psychopathy's measurement is this unsettled, its contribution to a latent dark factor is partly a measurement artefact"
+ },
+ {
+  "from": "psychopathy_measurement",
+  "to": "dunning_kruger",
+  "rel": "tension",
+  "note": "self-report of a trait defined partly by deceitfulness has an obvious validity problem, and the field uses it anyway"
+ },
+ {
+  "from": "dark_outcomes",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "the controls applied"
+ },
+ {
+  "from": "dark_outcomes",
+  "to": "sackett_correction",
+  "rel": "relates",
+  "note": "the same caution applies to all selection-literature effect sizes"
+ },
+ {
+  "from": "dark_outcomes",
+  "to": "dark_triad",
+  "rel": "tension",
+  "note": "this meta-analysis treats the three as sufficiently distinct to partition, while the latent-overlap literature finds them nearly redundant"
+ },
+ {
+  "from": "deprivation",
+  "to": "beip",
+  "rel": "relates",
+  "note": "the randomised counterpart"
+ },
+ {
+  "from": "deprivation",
+  "to": "sensitive_periods",
+  "rel": "relates",
+  "note": "the duration threshold is its central evidence"
+ },
+ {
+  "from": "deprivation",
+  "to": "attachment",
+  "rel": "relates",
+  "note": "caregiving quality as mediator"
+ },
+ {
+  "from": "deprivation",
+  "to": "gene_env_correlation",
+  "rel": "relates",
+  "note": "a design that escapes the genetic confound"
+ },
+ {
+  "from": "deprivation",
+  "to": "heritability",
+  "rel": "relates",
+  "note": "environment doing heavy lifting in a high-heritability domain"
+ },
+ {
+  "from": "deprivation",
+  "to": "gene_env_correlation",
+  "rel": "tension",
+  "note": "this is one of the few designs where environmental effects are not confounded with shared genotype, which is why it carries unusual weight"
+ },
+ {
+  "from": "deprivation",
+  "to": "attachment",
+  "rel": "tension",
+  "note": "early caregiving effects here are larger and more durable than the correlational attachment-continuity literature implies"
+ },
+ {
+  "from": "beip",
+  "to": "sensitive_periods",
+  "rel": "relates",
+  "note": "the 24-month placement threshold"
+ },
+ {
+  "from": "beip",
+  "to": "attachment",
+  "rel": "relates",
+  "note": "the proposed mediator"
+ },
+ {
+  "from": "beip",
+  "to": "heritability",
+  "rel": "relates",
+  "note": "the tension it creates"
+ },
+ {
+  "from": "beip",
+  "to": "turkheimer_laws",
+  "rel": "relates",
+  "note": "a challenge to the shared-environment law at the extreme"
+ },
+ {
+  "from": "beip",
+  "to": "gene_env_interaction",
+  "rel": "relates",
+  "note": "environmental effects are largest where deprivation is greatest"
+ },
+ {
+  "from": "beip",
+  "to": "heritability",
+  "rel": "tension",
+  "note": "a 9-point causal IQ gain from changed caregiving sits awkwardly beside heritability estimates near .80 for the same trait — both are real, which is the point"
+ },
+ {
+  "from": "beip",
+  "to": "turkheimer_laws",
+  "rel": "tension",
+  "note": "the second law says shared environment matters little; this trial moved outcomes by changing exactly that"
+ },
+ {
+  "from": "sensitive_periods",
+  "to": "trait_change",
+  "rel": "relates",
+  "note": "the counterweight from adulthood"
+ },
+ {
+  "from": "sensitive_periods",
+  "to": "attachment",
+  "rel": "relates",
+  "note": "the domain the claim is usually applied to"
+ },
+ {
+  "from": "sensitive_periods",
+  "to": "trait_change",
+  "rel": "tension",
+  "note": "if personality moves at d≈.37 in 24 weeks of adult intervention, windows are not closing as firmly as the popular version claims"
+ },
+ {
+  "from": "sensitive_periods",
+  "to": "wilson_effect",
+  "rel": "tension",
+  "note": "heritability rising into adulthood implies development stays open to influence, not that it locks early"
+ },
+ {
+  "from": "adolescent_risk",
+  "to": "dual_process",
+  "rel": "relates",
+  "note": "the same structural weakness"
+ },
+ {
+  "from": "adolescent_risk",
+  "to": "rpe",
+  "rel": "relates",
+  "note": "the reward mechanism it assumes"
+ },
+ {
+  "from": "adolescent_risk",
+  "to": "wanting_liking",
+  "rel": "relates",
+  "note": "adolescent reward sensitivity is a wanting claim"
+ },
+ {
+  "from": "adolescent_risk",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "sensation-seeking and self-regulation as trait dimensions"
+ },
+ {
+  "from": "adolescent_risk",
+  "to": "dual_process",
+  "rel": "tension",
+  "note": "it inherits the same problem as the general two-system framing: features assumed to cluster, and resistance to disconfirmation"
+ },
+ {
+  "from": "adolescent_risk",
+  "to": "rpe",
+  "rel": "tension",
+  "note": "reward-sensitivity claims rest on a dopamine account that is itself under strain"
+ },
+ {
+  "from": "g_factor",
+  "to": "sackett_correction",
+  "rel": "relates",
+  "note": "governs how to read its validity claims"
+ },
+ {
+  "from": "g_factor",
+  "to": "heritability",
+  "rel": "relates",
+  "note": "g is one of the most heritable psychological traits"
+ },
+ {
+  "from": "g_factor",
+  "to": "wilson_effect",
+  "rel": "relates",
+  "note": "its heritability rises with age"
+ },
+ {
+  "from": "g_factor",
+  "to": "flynn_effect",
+  "rel": "relates",
+  "note": "population-level change in the same scores"
+ },
+ {
+  "from": "g_factor",
+  "to": "wm_training",
+  "rel": "relates",
+  "note": "the thing training was supposed to raise"
+ },
+ {
+  "from": "g_factor",
+  "to": "deliberate_practice",
+  "rel": "relates",
+  "note": "the rival explanation for expertise"
+ },
+ {
+  "from": "g_factor",
+  "to": "sackett_correction",
+  "rel": "tension",
+  "note": "the classic .51 cognitive-ability validity was revised to .31, and to .16 observed in twenty-first-century studies"
+ },
+ {
+  "from": "g_factor",
+  "to": "big_five_universality",
+  "rel": "tension",
+  "note": "both concern whether a factor structure found in WEIRD samples describes a property of people or of the measurement tradition"
+ },
+ {
+  "from": "wm_training",
+  "to": "growth_mindset",
+  "rel": "relates",
+  "note": "another intervention whose effect shrank under scrutiny"
+ },
+ {
+  "from": "wm_training",
+  "to": "ego_depletion",
+  "rel": "relates",
+  "note": "same pattern: large claims, active-control null"
+ },
+ {
+  "from": "wm_training",
+  "to": "trait_change",
+  "rel": "relates",
+  "note": "contrast — an intervention literature where change IS found"
+ },
+ {
+  "from": "wm_training",
+  "to": "g_factor",
+  "rel": "tension",
+  "note": "if working memory and fluid intelligence share a substrate, training one should move the other, and it does not — which is evidence against the simple shared-capacity reading"
+ },
+ {
+  "from": "deliberate_practice",
+  "to": "self_efficacy",
+  "rel": "relates",
+  "note": "mastery experience as the mechanism"
+ },
+ {
+  "from": "deliberate_practice",
+  "to": "habit_formation",
+  "rel": "relates",
+  "note": "repetition and automaticity"
+ },
+ {
+  "from": "deliberate_practice",
+  "to": "wm_training",
+  "rel": "relates",
+  "note": "adjacent failed claim about trainability"
+ },
+ {
+  "from": "deliberate_practice",
+  "to": "trait_change",
+  "rel": "relates",
+  "note": "where structured effort does show effects"
+ },
+ {
+  "from": "deliberate_practice",
+  "to": "g_factor",
+  "rel": "tension",
+  "note": "ability and practice are rival explanations for the same variance, and the meta-analysis leaves most of it unexplained by either"
+ },
+ {
+  "from": "deliberate_practice",
+  "to": "trait_change",
+  "rel": "tension",
+  "note": "structured intervention does move traits at d≈.37 — so effortful practice works on some outcomes far better than on expert performance"
+ },
+ {
+  "from": "flynn_effect",
+  "to": "heritability",
+  "rel": "relates",
+  "note": "the usual tension between heritability and population change"
+ },
+ {
+  "from": "flynn_effect",
+  "to": "beip",
+  "rel": "relates",
+  "note": "another case of environment moving a heritable cognitive measure"
+ },
+ {
+  "from": "flynn_effect",
+  "to": "g_factor",
+  "rel": "tension",
+  "note": "if the positive manifold's strength varies across cohorts, a single fixed general capacity is harder to sustain"
+ },
+ {
+  "from": "flynn_effect",
+  "to": "heritability",
+  "rel": "tension",
+  "note": "population-level score change on a highly heritable trait, again"
+ },
+ {
+  "from": "kenrick",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "proposed functional origin of the two dimensions"
+ },
+ {
+  "from": "kenrick",
+  "to": "need_belong",
+  "rel": "relates",
+  "note": "affiliation motive"
+ },
+ {
+  "from": "kenrick",
+  "to": "jolt",
+  "rel": "relates",
+  "note": "self-protection and blame-avoidance"
+ },
+ {
+  "from": "kenrick",
+  "to": "mate_prefs",
+  "rel": "relates",
+  "note": "mate acquisition"
+ },
+ {
+  "from": "kenrick",
+  "to": "turkheimer_laws",
+  "rel": "relates",
+  "note": "a different level of explanation"
+ },
+ {
+  "from": "kenrick",
+  "to": "turkheimer_laws",
+  "rel": "tension",
+  "note": "evolved-universal accounts explain species-typical design, not the individual variation behaviour genetics measures — the two layers answer different questions and are often conflated"
+ },
+ {
+  "from": "need_belong",
+  "to": "sociometer",
+  "rel": "relates",
+  "note": "self-esteem as a gauge of it"
+ },
+ {
+  "from": "need_belong",
+  "to": "sdt",
+  "rel": "relates",
+  "note": "relatedness need"
+ },
+ {
+  "from": "need_belong",
+  "to": "attachment",
+  "rel": "relates",
+  "note": "the bonding system that serves it"
+ },
+ {
+  "from": "need_belong",
+  "to": "social_identity",
+  "rel": "relates",
+  "note": "group-level belonging"
+ },
+ {
+  "from": "sociometer",
+  "to": "jolt",
+  "rel": "relates",
+  "note": "blame risk"
+ },
+ {
+  "from": "sociometer",
+  "to": "attachment",
+  "rel": "relates",
+  "note": "rejection sensitivity"
+ },
+ {
+  "from": "big_five",
+  "to": "circumplex",
+  "rel": "relates",
+  "note": "elaborates Extraversion and Agreeableness"
+ },
+ {
+  "from": "big_five",
+  "to": "disc",
+  "rel": "relates",
+  "note": "what DISC is a crude proxy for"
+ },
+ {
+  "from": "big_five",
+  "to": "sackett_correction",
+  "rel": "relates",
+  "note": "governs how to read these numbers"
+ },
+ {
+  "from": "big_five",
+  "to": "disc",
+  "rel": "tension",
+  "note": "DISC's four types are not recoverable as independent factors in this framework"
+ },
+ {
+  "from": "big_five",
+  "to": "sackett_correction",
+  "rel": "tension",
+  "note": "the corrected validities this node quotes are exactly what that correction targets"
+ },
+ {
+  "from": "disc",
+  "to": "circumplex",
+  "rel": "relates",
+  "note": "the two-axis structure underneath"
+ },
+ {
+  "from": "disc",
+  "to": "circumplex",
+  "rel": "tension",
+  "note": "the underlying structure appears to be two axes, not four categories"
+ },
+ {
+  "from": "sdt",
+  "to": "change_talk",
+  "rel": "relates",
+  "note": "MI is built on autonomy support"
+ },
+ {
+  "from": "sdt",
+  "to": "jolt",
+  "rel": "relates",
+  "note": "the one-path close must preserve autonomy"
+ },
+ {
+  "from": "sdt",
+  "to": "greene",
+  "rel": "relates",
+  "note": "the Anti-Seducer pattern is an autonomy violation"
+ },
+ {
+  "from": "need_closure",
+  "to": "anchoring",
+  "rel": "relates",
+  "note": "seize and freeze"
+ },
+ {
+  "from": "need_closure",
+  "to": "social_proof",
+  "rel": "relates",
+  "note": "copying under uncertainty"
+ },
+ {
+  "from": "need_closure",
+  "to": "jolt",
+  "rel": "relates",
+  "note": "indecision under ambiguity"
+ },
+ {
+  "from": "need_closure",
+  "to": "greene",
+  "rel": "relates",
+  "note": "Coquette and Dandy trade on unresolved ambiguity [synthesis]"
+ },
+ {
+  "from": "dual_process",
+  "to": "anchoring",
+  "rel": "relates",
+  "note": "heuristic"
+ },
+ {
+  "from": "dual_process",
+  "to": "availability",
+  "rel": "relates",
+  "note": "heuristic"
+ },
+ {
+  "from": "dual_process",
+  "to": "loss_aversion",
+  "rel": "relates",
+  "note": "prospect theory"
+ },
+ {
+  "from": "dual_process",
+  "to": "elm",
+  "rel": "relates",
+  "note": "inherits the same problem"
+ },
+ {
+  "from": "dual_process",
+  "to": "thin_slicing",
+  "rel": "relates",
+  "note": "automatic social judgement"
+ },
+ {
+  "from": "dual_process",
+  "to": "elm",
+  "rel": "tension",
+  "note": "the central/peripheral route distinction inherits the same partitioning problem"
+ },
+ {
+  "from": "loss_aversion",
+  "to": "spin",
+  "rel": "relates",
+  "note": "the assumed mechanism behind implication questions"
+ },
+ {
+  "from": "loss_aversion",
+  "to": "jolt",
+  "rel": "relates",
+  "note": "fear of a wrong decision"
+ },
+ {
+  "from": "loss_aversion",
+  "to": "scarcity",
+  "rel": "relates",
+  "note": "loss of access"
+ },
+ {
+  "from": "loss_aversion",
+  "to": "investment_model",
+  "rel": "relates",
+  "note": "sunk investment"
+ },
+ {
+  "from": "loss_aversion",
+  "to": "spin",
+  "rel": "tension",
+  "note": "implication questions assume loss framing reliably outperforms gain framing, which is the disputed claim"
+ },
+ {
+  "from": "loss_aversion",
+  "to": "jolt",
+  "rel": "tension",
+  "note": "its 'fear of wrong choice' mechanism inherits this dispute"
+ },
+ {
+  "from": "anchoring",
+  "to": "voss",
+  "rel": "relates",
+  "note": "negotiation practice built on it"
+ },
+ {
+  "from": "availability",
+  "to": "social_proof",
+  "rel": "relates",
+  "note": "visible examples"
+ },
+ {
+  "from": "dissonance",
+  "to": "self_perception",
+  "rel": "relates",
+  "note": "rival account of the same data"
+ },
+ {
+  "from": "dissonance",
+  "to": "commitment",
+  "rel": "relates",
+  "note": "consistency pressure"
+ },
+ {
+  "from": "dissonance",
+  "to": "change_talk",
+  "rel": "relates",
+  "note": "own words favouring change"
+ },
+ {
+  "from": "dissonance",
+  "to": "self_perception",
+  "rel": "tension",
+  "note": "a rival explanation for the same findings that requires no discomfort"
+ },
+ {
+  "from": "self_perception",
+  "to": "commitment",
+  "rel": "relates",
+  "note": "foot-in-the-door"
+ },
+ {
+  "from": "self_perception",
+  "to": "change_talk",
+  "rel": "relates",
+  "note": "proposed mechanism"
+ },
+ {
+  "from": "fae",
+  "to": "dual_process",
+  "rel": "relates",
+  "note": "automatic attribution"
+ },
+ {
+  "from": "fae",
+  "to": "halo",
+  "rel": "relates",
+  "note": "trait over-generalisation"
+ },
+ {
+  "from": "dunning_kruger",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "self-assessment accuracy as an individual difference"
+ },
+ {
+  "from": "dunning_kruger",
+  "to": "self_efficacy",
+  "rel": "relates",
+  "note": "calibration of ability beliefs"
+ },
+ {
+  "from": "dunning_kruger",
+  "to": "big_two",
+  "rel": "tension",
+  "note": "competence signalling is read by others regardless of whether self-assessment is miscalibrated"
+ },
+ {
+  "from": "halo",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "cross-contamination between the two dimensions"
+ },
+ {
+  "from": "halo",
+  "to": "thin_slicing",
+  "rel": "relates",
+  "note": "one cue spreading"
+ },
+ {
+  "from": "halo",
+  "to": "liking",
+  "rel": "relates",
+  "note": "attractiveness spillover"
+ },
+ {
+  "from": "thin_slicing",
+  "to": "mehrabian",
+  "rel": "relates",
+  "note": "the folk-myth version of the same territory"
+ },
+ {
+  "from": "thin_slicing",
+  "to": "mere_exposure",
+  "rel": "relates",
+  "note": "familiarity effects on faces"
+ },
+ {
+  "from": "mere_exposure",
+  "to": "liking",
+  "rel": "relates",
+  "note": "familiarity as a driver"
+ },
+ {
+  "from": "mere_exposure",
+  "to": "similarity",
+  "rel": "relates",
+  "note": "perceived familiarity"
+ },
+ {
+  "from": "mere_exposure",
+  "to": "greene",
+  "rel": "relates",
+  "note": "the Natural archetype's ease trades on low-friction repeated contact [synthesis]"
+ },
+ {
+  "from": "similarity",
+  "to": "liking",
+  "rel": "relates",
+  "note": "driver"
+ },
+ {
+  "from": "similarity",
+  "to": "chameleon",
+  "rel": "relates",
+  "note": "behavioural version"
+ },
+ {
+  "from": "chameleon",
+  "to": "liking",
+  "rel": "relates",
+  "note": "affiliation signal"
+ },
+ {
+  "from": "chameleon",
+  "to": "voss",
+  "rel": "relates",
+  "note": "the basis of 'mirroring'"
+ },
+ {
+  "from": "chameleon",
+  "to": "fabrication_risk",
+  "rel": "relates",
+  "note": "a case where I stopped short of a claim I could not source"
+ },
+ {
+  "from": "chameleon",
+  "to": "voss",
+  "rel": "tension",
+  "note": "the mirroring technique is sold with the confidence of the labeling technique, but rests on far weaker evidence"
+ },
+ {
+  "from": "self_disclosure",
+  "to": "reciprocity",
+  "rel": "relates",
+  "note": "disclosure is returned"
+ },
+ {
+  "from": "self_disclosure",
+  "to": "huang",
+  "rel": "relates",
+  "note": "questions elicit it"
+ },
+ {
+  "from": "self_disclosure",
+  "to": "liking",
+  "rel": "relates",
+  "note": "raises it"
+ },
+ {
+  "from": "self_disclosure",
+  "to": "trusted_advisor",
+  "rel": "relates",
+  "note": "the intimacy term"
+ },
+ {
+  "from": "huang",
+  "to": "liking",
+  "rel": "relates",
+  "note": "raises it"
+ },
+ {
+  "from": "huang",
+  "to": "spin",
+  "rel": "relates",
+  "note": "question-led discovery uses the same move"
+ },
+ {
+  "from": "affect_labeling",
+  "to": "voss",
+  "rel": "relates",
+  "note": "supplies the mechanism for labeling"
+ },
+ {
+  "from": "affect_labeling",
+  "to": "change_talk",
+  "rel": "relates",
+  "note": "reflective listening"
+ },
+ {
+  "from": "affect_labeling",
+  "to": "emotion_regulation",
+  "rel": "relates",
+  "note": "a form of it"
+ },
+ {
+  "from": "change_talk",
+  "to": "voss",
+  "rel": "relates",
+  "note": "calibrated questions resemble MI's open questions"
+ },
+ {
+  "from": "elm",
+  "to": "authority",
+  "rel": "relates",
+  "note": "cue in the peripheral account"
+ },
+ {
+  "from": "elm",
+  "to": "social_proof",
+  "rel": "relates",
+  "note": "cue in the peripheral account"
+ },
+ {
+  "from": "elm",
+  "to": "liking",
+  "rel": "relates",
+  "note": "cue in the peripheral account"
+ },
+ {
+  "from": "elm",
+  "to": "need_closure",
+  "rel": "relates",
+  "note": "the same researcher's alternative framework"
+ },
+ {
+  "from": "elm",
+  "to": "big_two",
+  "rel": "tension",
+  "note": "both frameworks divide a continuum into two types, and in both cases the division is contested"
+ },
+ {
+  "from": "reciprocity",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "a warmth-dimension lever"
+ },
+ {
+  "from": "reciprocity",
+  "to": "trusted_advisor",
+  "rel": "relates",
+  "note": "the mechanism it runs on"
+ },
+ {
+  "from": "reciprocity",
+  "to": "liking",
+  "rel": "relates",
+  "note": "gifts raise it"
+ },
+ {
+  "from": "reciprocity",
+  "to": "social_proof",
+  "rel": "relates",
+  "note": "the principle that did not survive its re-audit"
+ },
+ {
+  "from": "reciprocity",
+  "to": "social_proof",
+  "rel": "tension",
+  "note": "two Cialdini principles audited, one held and one required downgrading — which is a caution against treating the set as uniformly evidenced"
+ },
+ {
+  "from": "commitment",
+  "to": "change_talk",
+  "rel": "relates",
+  "note": "own-words commitment"
+ },
+ {
+  "from": "commitment",
+  "to": "jolt",
+  "rel": "relates",
+  "note": "small yes before the close"
+ },
+ {
+  "from": "commitment",
+  "to": "scarcity",
+  "rel": "relates",
+  "note": "reactance is among the processes it triggers"
+ },
+ {
+  "from": "commitment",
+  "to": "dissonance",
+  "rel": "tension",
+  "note": "the effect is attributed to at least six competing processes, so citing it as evidence for any one of them is circular"
+ },
+ {
+  "from": "commitment",
+  "to": "self_perception",
+  "rel": "tension",
+  "note": "same problem from the other side"
+ },
+ {
+  "from": "social_proof",
+  "to": "conformity",
+  "rel": "relates",
+  "note": "the laboratory demonstration"
+ },
+ {
+  "from": "social_proof",
+  "to": "social_identity",
+  "rel": "relates",
+  "note": "reference-group effects"
+ },
+ {
+  "from": "social_proof",
+  "to": "conformity",
+  "rel": "tension",
+  "note": "laboratory conformity is robust while applied descriptive-norm interventions replicate inconsistently, which suggests the lab effect and the field technique are not the same thing"
+ },
+ {
+  "from": "social_proof",
+  "to": "elm",
+  "rel": "tension",
+  "note": "the European authors explain their null by involvement-driven content processing, which is an ELM-style account inside a contested framework"
+ },
+ {
+  "from": "authority",
+  "to": "obedience",
+  "rel": "relates",
+  "note": "contested demonstration"
+ },
+ {
+  "from": "authority",
+  "to": "axes_curvilinear",
+  "rel": "relates",
+  "note": "authority signalling has a warmth cost past a point"
+ },
+ {
+  "from": "obedience",
+  "to": "commitment",
+  "rel": "relates",
+  "note": "incremental escalation"
+ },
+ {
+  "from": "liking",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "warmth dimension"
+ },
+ {
+  "from": "scarcity",
+  "to": "need_closure",
+  "rel": "relates",
+  "note": "urgency"
+ },
+ {
+  "from": "scarcity",
+  "to": "sdt",
+  "rel": "relates",
+  "note": "reactance is an autonomy-threat response"
+ },
+ {
+  "from": "scarcity",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "the sincerity cost"
+ },
+ {
+  "from": "scarcity",
+  "to": "big_two",
+  "rel": "tension",
+  "note": "a tactic that raises urgency while damaging perceived sincerity is trading the warmth dimension for the agency one"
+ },
+ {
+  "from": "scarcity",
+  "to": "commitment",
+  "rel": "tension",
+  "note": "both are Cialdini principles that turn out to be condition-dependent rather than general levers"
+ },
+ {
+  "from": "conformity",
+  "to": "social_identity",
+  "rel": "relates",
+  "note": "normative influence"
+ },
+ {
+  "from": "self_efficacy",
+  "to": "sdt",
+  "rel": "relates",
+  "note": "competence need"
+ },
+ {
+  "from": "self_efficacy",
+  "to": "growth_mindset",
+  "rel": "relates",
+  "note": "the weaker adjacent construct"
+ },
+ {
+  "from": "emotion_regulation",
+  "to": "voss",
+  "rel": "relates",
+  "note": "'tactical empathy' borrows from this territory"
+ },
+ {
+  "from": "ego_depletion",
+  "to": "emotion_regulation",
+  "rel": "relates",
+  "note": "what to use instead"
+ },
+ {
+  "from": "ego_depletion",
+  "to": "sackett_correction",
+  "rel": "relates",
+  "note": "same family of problem: corrected estimates outrunning the data"
+ },
+ {
+  "from": "power_posing",
+  "to": "thin_slicing",
+  "rel": "relates",
+  "note": "posture is read by others"
+ },
+ {
+  "from": "power_posing",
+  "to": "self_efficacy",
+  "rel": "relates",
+  "note": "felt confidence, self-reported only"
+ },
+ {
+  "from": "marshmallow",
+  "to": "big_five",
+  "rel": "relates",
+  "note": "overlaps conscientiousness"
+ },
+ {
+  "from": "marshmallow",
+  "to": "gene_env_correlation",
+  "rel": "tension",
+  "note": "'explained by family background' is exactly the confound genetic-nurture research formalises"
+ },
+ {
+  "from": "oxytocin",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "the folklore version of the warmth dimension"
+ },
+ {
+  "from": "attachment",
+  "to": "investment_model",
+  "rel": "relates",
+  "note": "why people stay"
+ },
+ {
+  "from": "attachment",
+  "to": "gottman",
+  "rel": "relates",
+  "note": "conflict behaviour"
+ },
+ {
+  "from": "attachment",
+  "to": "greene",
+  "rel": "relates",
+  "note": "which archetypes hook which attachment pattern [synthesis]"
+ },
+ {
+  "from": "attachment",
+  "to": "greene",
+  "rel": "tension",
+  "note": "push-pull tactics are predicted to select for anxious attachment rather than produce secure bonds [synthesis]"
+ },
+ {
+  "from": "triangular_love",
+  "to": "attachment",
+  "rel": "relates",
+  "note": "intimacy"
+ },
+ {
+  "from": "triangular_love",
+  "to": "investment_model",
+  "rel": "relates",
+  "note": "commitment"
+ },
+ {
+  "from": "investment_model",
+  "to": "trusted_advisor",
+  "rel": "relates",
+  "note": "reliability as accumulated investment"
+ },
+ {
+  "from": "gottman",
+  "to": "affect_labeling",
+  "rel": "relates",
+  "note": "the mechanism behind repair attempts"
+ },
+ {
+  "from": "gottman",
+  "to": "sackett_correction",
+  "rel": "relates",
+  "note": "the same statistical failure mode"
+ },
+ {
+  "from": "gottman",
+  "to": "investment_model",
+  "rel": "relates",
+  "note": "a better-validated account of who stays"
+ },
+ {
+  "from": "gottman",
+  "to": "sackett_correction",
+  "rel": "tension",
+  "note": "same family of error: an impressive number produced by fitting rather than predicting"
+ },
+ {
+  "from": "gottman",
+  "to": "attachment",
+  "rel": "tension",
+  "note": "both fields make strong claims about relationship trajectories from small, selected samples"
+ },
+ {
+  "from": "mate_prefs",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "kindness and competence map onto the axes"
+ },
+ {
+  "from": "spin",
+  "to": "change_talk",
+  "rel": "relates",
+  "note": "need-payoff resembles change talk"
+ },
+ {
+  "from": "spin",
+  "to": "gap_selling",
+  "rel": "relates",
+  "note": "same diagnostic logic"
+ },
+ {
+  "from": "challenger",
+  "to": "authority",
+  "rel": "relates",
+  "note": "insight as authority"
+ },
+ {
+  "from": "challenger",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "an agency-axis play"
+ },
+ {
+  "from": "trusted_advisor",
+  "to": "big_two",
+  "rel": "relates",
+  "note": "a communion-axis play"
+ },
+ {
+  "from": "greene",
+  "to": "disc",
+  "rel": "relates",
+  "note": "the colour crossover, which is a mapping of two weak frameworks onto each other"
+ },
+ {
+  "from": "greene",
+  "to": "axes_curvilinear",
+  "rel": "tension",
+  "note": "the high-agency archetypes trade warmth for status without saying so"
+ },
+ {
+  "from": "fabrication_risk",
+  "to": "disc",
+  "rel": "relates",
+  "note": "where the fabricated citation appeared"
+ },
+ {
+  "from": "fabrication_risk",
+  "to": "sackett_correction",
+  "rel": "relates",
+  "note": "both nodes exist to impose automatic discounts"
+ }
+]

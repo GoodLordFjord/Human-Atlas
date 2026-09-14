@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Human Atlas v6 — Cycle 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root{
+  --ink:#16233f; --ink-2:#2c3d63; --paper:#f5f6f3; --card:#fff;
+  --line:#d5dae3; --line-2:#e8ecf1;
+  --tx:#1f2a3f; --tx-2:#56637a;
+  --solid:#256b42; --moderate:#96631d; --contested:#a8391f; --failed:#7d2413; --literary:#5c6a7d; --emerging:#2f5c96;
+  --focus:#0b6b74;
+  --tap:44px;
+  --sp:16px;
+  --r:12px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;}
+html,body{height:100%;overscroll-behavior:none;}
+body{
+  background:var(--paper);color:var(--tx);
+  font-family:Inter,system-ui,-apple-system,sans-serif;
+  font-size:16px;line-height:1.5;
+}
+button,input,select{font:inherit;color:inherit;}
+button{background:none;border:none;cursor:pointer;}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px;}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+.skip{position:absolute;top:-100px;left:8px;z-index:100;background:var(--ink);color:#fff;padding:12px 16px;border-radius:8px;font-weight:600;}
+.skip:focus{top:8px;}
+
+/* ================= SHELL ================= */
+/* .app has five children (top, searchrow, drawer, main, nav). The rows are named
+   explicitly because an under-specified template let .searchrow absorb the 1fr and
+   collapsed the map to the SVG default height of 150px. */
+.app{display:grid;grid-template-rows:auto auto auto 1fr auto;height:100dvh;height:100vh;}
+.app>.top{grid-row:1;}
+.app>.searchrow{grid-row:2;}
+.app>.drawer{grid-row:3;}
+.app>.main{grid-row:4;}
+.app>.nav{grid-row:5;}
+
+.top{
+  background:var(--ink);color:#fff;
+  padding:10px var(--sp);
+  display:flex;align-items:center;gap:12px;
+}
+.wordmark{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;letter-spacing:-.2px;white-space:nowrap;
+  min-width:0;overflow:hidden;text-overflow:ellipsis;}
+.ver{font-family:'JetBrains Mono',monospace;font-size:11px;opacity:.62;white-space:nowrap;}
+/* the header must not force the page wider than the viewport while the webfont
+   is still loading, or on a narrow phone — the version tag is the first to go */
+@media (max-width:430px){.top{gap:8px;}.ver{display:none;}}
+.top .spacer{flex:1;}
+.iconbtn{
+  min-width:var(--tap);min-height:var(--tap);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;border-radius:9px;font-size:13px;font-weight:600;
+  padding:0 12px;border:1px solid rgba(255,255,255,.3);
+}
+.iconbtn:hover{background:rgba(255,255,255,.12);}
+
+/* search row */
+.searchrow{background:var(--card);border-bottom:1px solid var(--line);padding:10px var(--sp);display:flex;gap:8px;align-items:center;}
+.searchwrap{position:relative;flex:1;min-width:0;}
+.search{
+  width:100%;min-height:var(--tap);
+  border:1.5px solid var(--line);border-radius:10px;
+  padding:0 40px 0 14px;font-size:16px;background:#fff;
+}
+.search::placeholder{color:#8b97a9;}
+.clearbtn{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;display:none;align-items:center;justify-content:center;color:var(--tx-2);font-size:18px;border-radius:8px;}
+.clearbtn.on{display:flex;}
+.filterbtn{
+  min-height:var(--tap);padding:0 14px;border:1.5px solid var(--line);border-radius:10px;
+  font-size:14px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:7px;background:#fff;
+}
+.filterbtn[aria-expanded="true"]{background:var(--ink);color:#fff;border-color:var(--ink);}
+.badge{background:var(--contested);color:#fff;border-radius:99px;font-size:11px;padding:1px 7px;font-weight:700;}
+
+/* filter drawer */
+.drawer{
+  background:var(--card);border-bottom:1px solid var(--line);
+  padding:0 var(--sp);max-height:0;overflow:hidden;
+}
+.drawer.on{max-height:60vh;overflow-y:auto;padding:14px var(--sp) 18px;}
+.fgroup{margin-bottom:16px;}
+.fgroup:last-child{margin-bottom:0;}
+.flabel{font-size:12px;font-weight:700;color:var(--tx-2);letter-spacing:.4px;margin-bottom:8px;}
+.opts{display:flex;flex-wrap:wrap;gap:8px;}
+.opt{
+  min-height:38px;padding:0 13px;border:1.5px solid var(--line);border-radius:99px;
+  font-size:14px;font-weight:500;display:flex;align-items:center;gap:7px;background:#fff;
+}
+.opt[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink);}
+.swatch{width:11px;height:11px;border-radius:50%;flex:0 0 auto;}
+
+/* main */
+.main{position:relative;min-height:0;display:grid;grid-template-columns:1fr;}
+.view{min-height:0;position:relative;}
+.view[hidden]{display:none;}
+
+/* graph */
+#graph{width:100%;height:100%;display:block;touch-action:none;background:radial-gradient(ellipse at 50% 42%,#fcfcfa 0%,var(--paper) 72%);}
+.gmeta{
+  position:absolute;left:var(--sp);right:var(--sp);top:10px;
+  display:flex;justify-content:space-between;gap:10px;pointer-events:none;font-size:12px;color:var(--tx-2);
+}
+.gmeta span{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:8px;padding:4px 9px;}
+.zoomer{position:absolute;right:var(--sp);bottom:12px;display:flex;flex-direction:column;gap:8px;z-index:6;}
+.zoomer button{
+  width:var(--tap);height:var(--tap);background:#fff;border:1.5px solid var(--line);border-radius:10px;
+  font-size:19px;font-weight:600;color:var(--ink);display:flex;align-items:center;justify-content:center;
+}
+.legend{
+  position:absolute;left:var(--sp);top:44px;
+  background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:10px;
+  padding:8px 10px;font-size:11.5px;color:var(--tx-2);max-width:210px;
+}
+.legend b{display:block;color:var(--ink);font-size:11px;margin-bottom:5px;}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:#fff;vertical-align:-2px;margin-right:5px;}
+.legend i.hollow{background:repeating-linear-gradient(45deg,#fff 0 3px,#e2e7ee 3px 6px);}
+.legend i.dash{border-style:dashed;border-color:var(--contested);}
+.legend .row{margin-bottom:3px;}
+.legend .row:last-child{margin-bottom:0;}
+
+/* lists */
+.scroll{height:100%;overflow-y:auto;padding:var(--sp);-webkit-overflow-scrolling:touch;}
+.hint{font-size:14px;color:var(--tx-2);margin-bottom:14px;line-height:1.55;}
+.grp{margin-bottom:22px;}
+.grp h2{font-family:'Bricolage Grotesque',sans-serif;font-size:17px;color:var(--ink);margin-bottom:9px;display:flex;align-items:center;gap:9px;}
+.card{
+  width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);
+  padding:13px 14px;margin-bottom:9px;display:block;
+}
+.card:hover,.card:focus-visible{border-color:var(--ink);}
+.card .hd{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:5px;}
+.card h3{font-size:16px;font-weight:700;color:var(--ink);line-height:1.3;}
+.card p{font-size:14px;color:var(--tx-2);line-height:1.5;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+
+.pill{display:inline-block;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;white-space:nowrap;border:1.5px solid;}
+.pill.solid{color:var(--solid);border-color:#b5d8c3;background:#eef7f1;}
+.pill.moderate{color:var(--moderate);border-color:#e6cf9e;background:#fcf6e8;}
+.pill.contested{color:var(--contested);border-color:#e7b6a9;background:#fbefeb;}
+.pill.failed{color:#fff;border-color:var(--failed);background:var(--failed);}
+.pill.literary{color:var(--literary);border-color:#c6cdd7;background:#f2f4f7;}
+.pill.emerging{color:var(--emerging);border-color:#adc4e0;background:#eef3fa;}
+.pill.audited{color:var(--solid);border-color:#b5d8c3;background:#fff;}
+.pill.inherited{color:var(--literary);border-color:#c6cdd7;background:#fff;}
+
+.tension{background:var(--card);border:1.5px solid var(--line);border-left:5px solid var(--contested);border-radius:var(--r);padding:13px 14px;margin-bottom:10px;}
+.tension .pair{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px;line-height:1.35;}
+.tension p{font-size:14px;color:var(--tx-2);line-height:1.5;}
+.tension .jump{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:7px 13px;font-size:13.5px;font-weight:600;color:var(--ink);min-height:38px;display:inline-flex;align-items:center;gap:7px;}
+.chip:hover,.chip:focus-visible{border-color:var(--ink);}
+.chip.warn{border-color:#e7b6a9;background:#fbefeb;}
+.chip small{font-weight:400;color:var(--tx-2);}
+
+.selrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.selwrap{flex:1;min-width:150px;}
+.selwrap label{display:block;font-size:12px;font-weight:700;color:var(--tx-2);margin-bottom:5px;}
+select{width:100%;min-height:var(--tap);border:1.5px solid var(--line);border-radius:10px;padding:0 12px;background:#fff;font-size:15px;}
+
+/* detail sheet */
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:var(--card);border-top:2px solid var(--ink);
+  border-radius:18px 18px 0 0;box-shadow:0 -8px 32px rgba(22,35,63,.18);
+  max-height:88dvh;display:flex;flex-direction:column;
+  transform:translateY(101%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+  padding-bottom:var(--safe-b);
+}
+.sheet.on{transform:translateY(0);}
+.grip{padding:9px 0 3px;display:flex;justify-content:center;flex:0 0 auto;}
+.grip span{width:40px;height:4px;border-radius:99px;background:var(--line);}
+.shd{padding:4px var(--sp) 12px;border-bottom:1px solid var(--line-2);display:flex;gap:12px;align-items:flex-start;flex:0 0 auto;}
+.shd .bar{width:5px;align-self:stretch;border-radius:99px;flex:0 0 auto;min-height:38px;}
+.shd h2{font-family:'Bricolage Grotesque',sans-serif;font-size:21px;line-height:1.2;color:var(--ink);}
+.shd .meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px;}
+.closebtn{width:var(--tap);height:var(--tap);border:1.5px solid var(--line);border-radius:10px;font-size:20px;color:var(--ink);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.sbd{overflow-y:auto;padding:16px var(--sp) 28px;-webkit-overflow-scrolling:touch;}
+.sec{margin-bottom:18px;}
+.sec:last-child{margin-bottom:0;}
+.sec h3{font-size:12.5px;font-weight:700;color:var(--tx-2);letter-spacing:.5px;margin-bottom:6px;}
+.sec p{font-size:15.5px;line-height:1.62;}
+.sec.flag{background:#fbefeb;border-left:4px solid var(--contested);border-radius:0 10px 10px 0;padding:12px 14px;}
+.sec.flag h3{color:var(--contested);}
+.sec.note{background:#f2f4f7;border-left:4px solid var(--literary);border-radius:0 10px 10px 0;padding:12px 14px;}
+.sec ul{list-style:none;}
+.sec li{font-size:15px;line-height:1.6;padding-left:16px;position:relative;margin-bottom:8px;}
+.sec li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--line);}
+.sec.src li{font-size:13.5px;color:var(--tx-2);line-height:1.5;}
+.links{display:flex;flex-wrap:wrap;gap:8px;}
+
+/* ---- reading register (plain / full) ---- */
+.register{display:flex;gap:0;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+.register button{
+  flex:1;min-height:var(--tap);font-size:14px;font-weight:600;color:var(--tx-2);
+  background:#fff;border-right:1.5px solid var(--line);padding:0 10px;
+}
+.register button:last-child{border-right:none;}
+.register button[aria-pressed="true"]{background:var(--ink);color:#fff;}
+.plainbox{background:#fff;border:1.5px solid var(--line);border-left:5px solid var(--focus);
+  border-radius:var(--r);padding:15px 16px;margin-bottom:16px;}
+.plainbox dl{margin:0;}
+.plainbox dt{font-size:11.5px;font-weight:700;color:var(--tx-2);letter-spacing:.5px;margin-bottom:5px;}
+.plainbox dd{margin:0 0 14px;font-size:16.5px;line-height:1.6;color:var(--tx);}
+.plainbox dd:last-child{margin-bottom:0;}
+.plainbox .catch{color:var(--ink);font-weight:500;}
+.noplain{background:#f2f4f7;border-left:4px solid var(--literary);border-radius:0 10px 10px 0;
+  padding:12px 14px;margin-bottom:16px;font-size:14px;color:var(--tx-2);line-height:1.5;}
+
+/* ================= PLAY ================= */
+.plintro{font-size:14px;color:var(--tx-2);line-height:1.55;margin-bottom:16px;}
+.plmodes{display:grid;gap:10px;margin-bottom:20px;}
+.plmode{
+  width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:14px;
+  padding:14px 15px;display:flex;gap:13px;align-items:flex-start;min-height:var(--tap);
+}
+.plmode:hover,.plmode:focus-visible{border-color:var(--ink);}
+.plmode .tic{font-size:22px;line-height:1.1;flex:0 0 auto;width:27px;text-align:center;}
+.plmode b{display:block;font-size:16px;color:var(--ink);margin-bottom:3px;}
+.plmode span{font-size:13.5px;color:var(--tx-2);line-height:1.45;display:block;}
+.plmode .best{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--focus);margin-top:7px;display:block;}
+
+/* running-mode bar */
+.plbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.plback{min-height:var(--tap);min-width:var(--tap);border:1.5px solid var(--line);background:#fff;border-radius:10px;
+  padding:0 13px;font-size:13.5px;font-weight:600;color:var(--ink);display:inline-flex;align-items:center;gap:7px;}
+.plback:hover,.plback:focus-visible{border-color:var(--ink);}
+.plbar .grow{flex:1;min-width:0;}
+.plcount{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--tx-2);white-space:nowrap;}
+.pltrack{height:5px;background:var(--line-2);border-radius:99px;overflow:hidden;margin-bottom:18px;}
+.pltrack i{display:block;height:100%;background:var(--focus);border-radius:99px;transition:width .3s ease;}
+
+/* question / stop card */
+.plcard{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;}
+.plkicker{font-size:12px;font-weight:700;color:var(--tx-2);letter-spacing:.5px;margin-bottom:8px;}
+.plask{font-size:17.5px;line-height:1.4;color:var(--ink);font-weight:700;}
+.plask em{font-style:normal;color:var(--focus);}
+.plquote{font-size:15.5px;line-height:1.6;color:var(--tx);background:#f2f4f7;border-left:4px solid var(--literary);
+  border-radius:0 10px 10px 0;padding:12px 14px;margin-top:11px;}
+.plopts{display:grid;gap:8px;margin-bottom:14px;}
+.plopt{
+  width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:11px;
+  padding:12px 14px;min-height:var(--tap);font-size:15px;line-height:1.4;color:var(--tx);
+  display:flex;align-items:center;gap:11px;
+}
+.plopt:hover:not(:disabled),.plopt:focus-visible{border-color:var(--ink);}
+.plopt .mk{flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--tx-2);}
+.plopt.right{border-color:var(--solid);background:#eef7f1;}
+.plopt.right .mk{background:var(--solid);border-color:var(--solid);color:#fff;}
+.plopt.wrong{border-color:var(--contested);background:#fbefeb;}
+.plopt.wrong .mk{background:var(--contested);border-color:var(--contested);color:#fff;}
+.plopt:disabled{cursor:default;opacity:1;}
+.plopt.muted{opacity:.55;}
+
+.plwhy{background:var(--card);border:1.5px solid var(--line);border-left:5px solid var(--focus);
+  border-radius:var(--r);padding:13px 14px;margin-bottom:14px;}
+.plwhy h4{font-size:12.5px;font-weight:700;color:var(--tx-2);letter-spacing:.5px;margin-bottom:6px;}
+.plwhy p{font-size:14.5px;line-height:1.55;color:var(--tx-2);}
+.plwhy .jump{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;}
+.plwhy.bad{border-left-color:var(--contested);}
+.plwhy.good{border-left-color:var(--solid);}
+
+/* next / back row */
+.plnav{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:8px;}
+.plbtn{
+  min-height:var(--tap);padding:0 18px;border-radius:11px;font-size:15px;font-weight:600;
+  border:1.5px solid var(--line);background:#fff;color:var(--ink);display:inline-flex;align-items:center;gap:8px;
+}
+.plbtn:hover,.plbtn:focus-visible{border-color:var(--ink);}
+.plbtn.go{background:var(--ink);color:#fff;border-color:var(--ink);flex:1;justify-content:center;}
+.plbtn.go:hover{background:var(--ink-2);}
+.plbtn:disabled{opacity:.4;cursor:default;}
+
+/* expedition */
+.plstops{display:grid;gap:9px;}
+.plframe{font-size:15.5px;line-height:1.6;color:var(--tx);margin-bottom:12px;}
+.plframe b{color:var(--ink);}
+.pldots{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px;}
+.pldots i{width:9px;height:9px;border-radius:50%;background:var(--line);flex:0 0 auto;}
+.pldots i.on{background:var(--focus);}
+.pldots i.past{background:var(--ink);}
+
+/* puzzle */
+.pltarget{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--line);
+  border-radius:var(--r);padding:12px 14px;margin-bottom:14px;}
+.pltarget .lab{font-size:12px;font-weight:700;color:var(--tx-2);letter-spacing:.4px;}
+.pltarget b{display:block;font-size:15.5px;color:var(--ink);line-height:1.3;margin-top:2px;}
+.plchain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:16px;}
+.plchain .hop{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;
+  font-size:13px;font-weight:600;color:var(--ink);display:inline-flex;align-items:center;gap:6px;}
+.plchain .hop.now{border-color:var(--focus);background:#e9f4f5;}
+.plchain .arr{color:var(--tx-2);font-size:13px;}
+.plnb{display:grid;gap:8px;max-height:46vh;overflow-y:auto;margin-bottom:14px;-webkit-overflow-scrolling:touch;}
+.plnb .plopt.hint{border-color:var(--focus);background:#e9f4f5;}
+.plscore{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+
+/* result */
+.plwin{background:var(--card);border:2px solid var(--ink);border-radius:16px;padding:20px 17px;margin-bottom:14px;text-align:center;}
+.plwin .big{font-family:'Bricolage Grotesque',sans-serif;font-size:40px;line-height:1;color:var(--ink);margin-bottom:6px;}
+.plwin .lab{font-size:13.5px;color:var(--tx-2);margin-bottom:12px;}
+.plwin p{font-size:15px;line-height:1.55;color:var(--tx);margin-bottom:4px;}
+.plwin p b{color:var(--ink);}
+
+/* bottom nav */
+.nav{
+  background:var(--card);border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(6,1fr);
+  padding-bottom:var(--safe-b);z-index:30;
+}
+@media (max-width:359px){.nav button{font-size:10px;}.nav button .ic{font-size:15px;}}
+.nav button{
+  min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-size:11.5px;font-weight:600;color:var(--tx-2);border-top:3px solid transparent;
+}
+.nav button .ic{font-size:17px;line-height:1;}
+.nav button[aria-selected="true"]{color:var(--ink);border-top-color:var(--ink);}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(22,35,63,.6);display:none;align-items:flex-end;justify-content:center;z-index:60;}
+.modal.on{display:flex;}
+.mbox{background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:760px;max-height:92dvh;overflow-y:auto;padding:18px var(--sp) calc(34px + var(--safe-b));}
+.mbox h2{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;color:var(--ink);margin:22px 0 10px;}
+.mbox h2:first-of-type{margin-top:0;}
+.mbox h3{font-size:16px;color:var(--ink);margin:18px 0 7px;font-weight:700;}
+.mbox p,.mbox li{font-size:15.5px;line-height:1.62;margin-bottom:9px;}
+.mbox ul{padding-left:20px;}
+.mbox pre{background:#f2f4f7;border-radius:10px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;overflow-x:auto;white-space:pre-wrap;color:var(--ink);}
+.mtop{display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;top:-18px;background:#fff;padding:4px 0 12px;margin-top:-4px;border-bottom:1px solid var(--line-2);margin-bottom:16px;}
+.mtop strong{font-family:'Bricolage Grotesque',sans-serif;font-size:17px;color:var(--ink);}
+
+/* start here */
+.lede{font-size:17px;line-height:1.5;color:var(--tx);margin-bottom:6px;}
+.lede b{color:var(--ink);}
+.sub2{font-size:14px;color:var(--tx-2);margin-bottom:18px;line-height:1.5;}
+.tasks{display:grid;gap:10px;margin-bottom:22px;}
+.task{
+  width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:14px;
+  padding:15px 16px;display:flex;gap:13px;align-items:flex-start;min-height:var(--tap);
+}
+.task:hover,.task:focus-visible{border-color:var(--ink);}
+.task .tic{font-size:21px;line-height:1.1;flex:0 0 auto;width:26px;text-align:center;}
+.task b{display:block;font-size:16px;color:var(--ink);margin-bottom:3px;}
+.task span{font-size:13.5px;color:var(--tx-2);line-height:1.45;}
+.keyrow{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:16px;}
+.keyrow h3{font-size:12.5px;font-weight:700;color:var(--tx-2);letter-spacing:.5px;margin-bottom:10px;}
+.keyitem{display:flex;gap:11px;align-items:center;margin-bottom:9px;font-size:14px;}
+.keyitem:last-child{margin-bottom:0;}
+.keyitem .kd{width:26px;flex:0 0 auto;display:flex;justify-content:center;}
+.keyitem span{color:var(--tx-2);}
+.keyitem b{color:var(--ink);font-weight:600;}
+.statline{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.stat{flex:1;min-width:76px;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px;text-align:center;}
+.stat b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:22px;color:var(--ink);line-height:1.1;}
+.stat span{font-size:11.5px;color:var(--tx-2);}
+
+/* first-run card over the map */
+.onboard{
+  position:absolute;left:var(--sp);right:var(--sp);top:44px;z-index:7;
+  background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:14px 15px;
+  box-shadow:0 8px 26px rgba(22,35,63,.16);
+}
+.onboard[hidden]{display:none;}
+.onboard b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:16px;color:var(--ink);margin-bottom:8px;}
+.onboard p{font-size:14px;color:var(--tx-2);line-height:1.5;margin-bottom:5px;}
+.onboard .ok{margin-top:11px;width:100%;min-height:var(--tap);background:var(--ink);color:#fff;border-radius:10px;font-size:15px;font-weight:600;}
+
+/* focus mode — map takes the whole screen */
+.app.focus .top,.app.focus .searchrow,.app.focus .drawer,.app.focus .nav{display:none;}
+.app.focus{grid-template-rows:1fr;}
+.app.focus .sheet{max-height:52dvh;}
+.focusbar{
+  position:absolute;left:var(--sp);top:10px;display:none;gap:8px;align-items:center;z-index:6;
+  background:rgba(255,255,255,.95);border:1.5px solid var(--line);border-radius:12px;padding:6px 8px;
+}
+.app.focus .focusbar{display:flex;}
+.app.focus .legend{display:none;}
+.focusbar .fb{min-height:36px;padding:0 11px;border-radius:9px;border:1.5px solid var(--line);font-size:13px;font-weight:600;background:#fff;display:flex;align-items:center;gap:6px;}
+.focusbar .fb:hover{border-color:var(--ink);}
+.focusbar .title{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:var(--ink);padding:0 6px;}
+
+/* reach depth control */
+.depth{
+  position:absolute;left:var(--sp);bottom:12px;display:flex;gap:0;z-index:5;
+  border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;
+}
+.depth button{min-height:38px;padding:0 12px;font-size:13px;font-weight:600;border-right:1px solid var(--line);}
+.depth button:last-child{border-right:none;}
+.depth button[aria-pressed="true"]{background:var(--ink);color:#fff;}
+.depth .lbl{font-size:11px;color:var(--tx-2);display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--line);font-weight:600;}
+
+/* reach readout in the sheet */
+.reach{background:#f7f9fb;border:1.5px solid var(--line);border-radius:12px;padding:12px 13px;margin-bottom:16px;}
+.reach h3{font-size:12.5px;font-weight:700;color:var(--tx-2);letter-spacing:.5px;margin-bottom:9px;}
+.rings{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap;}
+.ring{flex:1;min-width:64px;background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:7px 8px;text-align:center;}
+.ring b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:19px;color:var(--ink);line-height:1.1;}
+.ring span{font-size:10.5px;color:var(--tx-2);}
+.ring.r1{border-color:#8fa8c4;} .ring.r2{border-color:#c3cedd;} .ring.r3{border-color:#dfe5ec;}
+.bar2{height:7px;border-radius:99px;background:#e4e9ef;overflow:hidden;margin-bottom:5px;}
+.bar2 i{display:block;height:100%;background:var(--ink);}
+.reach .cap{font-size:12.5px;color:var(--tx-2);line-height:1.5;}
+.fits{margin-top:11px;}
+.fits h4{font-size:12px;font-weight:700;margin-bottom:5px;}
+.fits.good h4{color:var(--solid);} .fits.bad h4{color:var(--contested);}
+
+@media (min-width:900px){
+  .app{grid-template-rows:auto auto auto auto 1fr;grid-template-columns:1fr;}
+  .app>.top{grid-row:1;}
+  .app>.nav{grid-row:2;}
+  .app>.searchrow{grid-row:3;}
+  .app>.drawer{grid-row:4;}
+  .app>.main{grid-row:5;}
+  .main{grid-template-columns:1fr 440px;}
+  .nav{
+    grid-column:1;order:-1;
+    grid-template-columns:repeat(6,max-content);
+    border-top:none;border-bottom:1px solid var(--line);padding:0 var(--sp);
+  }
+  .nav button{min-height:48px;flex-direction:row;gap:8px;padding:0 18px;font-size:14px;border-top:none;border-bottom:3px solid transparent;}
+  .nav button[aria-selected="true"]{border-bottom-color:var(--ink);}
+  .sheet{
+    position:static;transform:none;border-top:none;border-left:2px solid var(--ink);border-radius:0;
+    box-shadow:none;max-height:none;height:100%;padding-bottom:0;
+  }
+  .sheet .grip,.sheet .closebtn{display:none;}
+  .view{grid-column:1;}
+  .modal{align-items:center;padding:24px;}
+  .mbox{border-radius:16px;max-height:86vh;}
+}
+@media (prefers-reduced-motion:reduce){
+  .sheet{transition:none;}
+  *{animation:none !important;}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#mainview">Skip to content</a>
+<div class="app">
+
+  <header class="top">
+    <span class="wordmark">Human Atlas</span>
+    <span class="ver">v6 · cycle 4</span>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="bAudit">Audit log</button>
+    <button class="iconbtn" id="bMethod">Method</button>
+  </header>
+
+  <div class="searchrow">
+    <div class="searchwrap">
+      <label class="sr" for="q">Search constructs, authors or ideas</label>
+      <input class="search" id="q" type="search" placeholder="Search constructs, authors, ideas…" autocomplete="off">
+      <button class="clearbtn" id="qClear" aria-label="Clear search">✕</button>
+    </div>
+    <button class="filterbtn" id="bFilter" aria-expanded="false" aria-controls="drawer">
+      Filters <span class="badge" id="fBadge" hidden>1</span>
+    </button>
+  </div>
+
+  <div class="drawer" id="drawer" role="region" aria-label="Filters">
+    <div class="fgroup">
+      <div class="flabel" id="lblEv">EVIDENCE GRADE</div>
+      <div class="opts" id="optEv" role="group" aria-labelledby="lblEv"></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel" id="lblVer">VERIFICATION</div>
+      <div class="opts" id="optVer" role="group" aria-labelledby="lblVer"></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel" id="lblLayer">LAYER</div>
+      <div class="opts" id="optLayer" role="group" aria-labelledby="lblLayer"></div>
+    </div>
+  </div>
+
+  <nav class="nav" role="tablist" aria-label="Views">
+    <button role="tab" aria-selected="true" data-v="start" aria-label="Start here"><span class="ic" aria-hidden="true">◆</span>Start</button>
+    <button role="tab" aria-selected="false" data-v="map" aria-label="Network map"><span class="ic" aria-hidden="true">◉</span>Map</button>
+    <button role="tab" aria-selected="false" data-v="browse" aria-label="Browse all constructs"><span class="ic" aria-hidden="true">☰</span>Browse</button>
+    <button role="tab" aria-selected="false" data-v="tensions" aria-label="Live disputes"><span class="ic" aria-hidden="true">⚡</span>Tensions</button>
+    <button role="tab" aria-selected="false" data-v="trace" aria-label="Trace a route"><span class="ic" aria-hidden="true">⇄</span>Trace</button>
+    <button role="tab" aria-selected="false" data-v="play" aria-label="Play — quizzes, expeditions and puzzles"><span class="ic" aria-hidden="true">◈</span>Play</button>
+  </nav>
+
+  <main class="main" id="mainview">
+    <section class="view" id="vStart" role="tabpanel" aria-label="Start here"><div class="scroll" id="startScroll"></div></section>
+    <section class="view" id="vMap" role="tabpanel" aria-label="Network map" hidden>
+      <svg id="graph" role="application" aria-label="Network of psychological constructs. Use Tab to move between constructs, arrow keys to move to a connected construct, Enter to open."></svg>
+      <div class="legend" aria-hidden="true">
+        <b>Reading the bubbles</b>
+        <div class="row"><i></i>solid evidence</div>
+        <div class="row"><i class="dash"></i>contested</div>
+        <div class="row"><i class="hollow"></i>not yet source-verified</div>
+        <div class="row">red dashed line = live dispute</div>
+      </div>
+      <div class="zoomer">
+        <button id="zIn" aria-label="Zoom in">+</button>
+        <button id="zOut" aria-label="Zoom out">−</button>
+        <button id="zFit" aria-label="Fit whole map to screen" style="font-size:14px">⤢</button>
+        <button id="zGroup" aria-label="Group bubbles by layer" aria-pressed="true" style="font-size:13px">⦿</button>
+        <button id="zFull" aria-label="Full screen map" style="font-size:15px">⛶</button>
+        <button id="zUnpin" aria-label="Release pinned bubbles" style="font-size:13px;display:none">⇱</button>
+      </div>
+      <div class="onboard" id="empty" hidden style="border-color:var(--contested)">
+        <b>Nothing matches those filters</b>
+        <p id="emptyWhy"></p>
+        <button class="ok" id="emptyClear" style="background:var(--contested)">Clear filters</button>
+      </div>
+      <div class="onboard" id="onboard" hidden>
+        <b>Three things the bubbles tell you</b>
+        <p><strong>Colour</strong> = which layer of psychology it belongs to.</p>
+        <p><strong>Filled</strong> = I checked the sources myself. <strong>Hollow</strong> = carried over, unverified.</p>
+        <p><strong>Size</strong> = how connected it is. <strong>Red dashed lines</strong> = two things that disagree.</p>
+        <button class="ok" id="onboardOk">Got it</button>
+      </div>
+      <div class="focusbar">
+        <span class="title">Human Atlas</span>
+        <button class="fb" id="fSearch">Search</button>
+        <button class="fb" id="fExit">Exit full screen ✕</button>
+      </div>
+      <div class="depth" role="group" aria-label="How many connection steps to show">
+        <span class="lbl">REACH</span>
+        <button data-d="1" aria-pressed="false">1</button>
+        <button data-d="2" aria-pressed="true">2</button>
+        <button data-d="3" aria-pressed="false">3</button>
+        <button data-d="9" aria-pressed="false">All</button>
+      </div>
+      <div class="gmeta"><span id="gCount"></span><span>⛶ full screen · ⤢ fit · ⦿ group</span></div>
+    </section>
+
+    <section class="view" id="vBrowse" role="tabpanel" aria-label="Browse constructs" hidden><div class="scroll" id="browseScroll"></div></section>
+    <section class="view" id="vTensions" role="tabpanel" aria-label="Live disputes" hidden><div class="scroll" id="tensionScroll"></div></section>
+    <section class="view" id="vTrace" role="tabpanel" aria-label="Trace a route" hidden><div class="scroll" id="traceScroll"></div></section>
+    <section class="view" id="vPlay" role="tabpanel" aria-label="Play" hidden><div class="scroll" id="playScroll"></div></section>
+
+    <aside class="sheet" id="sheet" role="complementary" aria-label="Construct detail">
+      <div class="grip" aria-hidden="true"><span></span></div>
+      <div class="shd">
+        <span class="bar" id="dBar"></span>
+        <div style="flex:1;min-width:0">
+          <h2 id="dTitle">Human Atlas</h2>
+          <div class="meta" id="dMeta"></div>
+        </div>
+        <button class="closebtn" id="dClose" aria-label="Close detail">✕</button>
+      </div>
+      <div class="sbd" id="dBody" aria-live="polite"></div>
+    </aside>
+  </main>
+</div>
+
+<div class="modal" id="mAudit" role="dialog" aria-modal="true" aria-label="Audit log"><div class="mbox">
+  <div class="mtop"><strong>Audit log</strong><button class="closebtn" data-close aria-label="Close">✕</button></div>
+  <div id="auditBody"></div>
+</div></div>
+
+<div class="modal" id="mMethod" role="dialog" aria-modal="true" aria-label="Method"><div class="mbox">
+  <div class="mtop"><strong>Method</strong><button class="closebtn" data-close aria-label="Close">✕</button></div>
+  <div id="methodBody"></div>
+</div></div>
+
+<script>
+/*__ATLAS_DATA__*/
+const EVN={solid:"Solid",moderate:"Moderate",contested:"Contested",failed:"Failed replication",literary:"Literary / practitioner",emerging:"Emerging"};
+const AUDIT="<h2>Cycle 0 \u2014 demolition and audit</h2>\n  <p>v1 was built in a single pass without retrieval discipline. Cycle 0 re-derived a sample of its load-bearing claims from retrieved sources. The results justify the rebuild.</p>\n\n  <h3>1. A fabricated citation (the serious one)</h3>\n  <p>v1's DISC node cited \"Scandinavian Journal of Psychology psychometric study \u2014 DISC structure explained by Big Five.\" Repeated searching could not locate this paper. It does not appear to exist. I wrote it from pattern, not from a source \u2014 exactly the failure mode the standing orders name as worst, and undetectable to a reader. It has been stripped. The DISC node now cites only what could be verified: Marston (1928) as the origin, the DiSC publisher's own account, and the fact that independent peer-reviewed factor-analytic validation is thin rather than negative.</p>\n\n  <h3>2. The spine was overstated</h3>\n  <p>The biggest substantive finding. v1 treated agency and communion as two clean orthogonal axes with everything hanging off them. Three retrieved results damage that:</p>\n  <ul>\n    <li><b>They are not orthogonal.</b> Imhoff &amp; Koch (2017) show a curvilinear relation across 36 samples from 20+ countries: perceived communion peaks at <i>average</i> agency and falls at both extremes. Maximising status signalling actively costs you warmth past a point \u2014 v1 implied you could raise both independently.</li>\n    <li><b>A third dimension appears when you stop constraining the answer.</b> Koch et al. (2016, JPSP, N=4,451) used a data-driven method and found people spontaneously organise groups by agency first and conservative\u2013progressive <i>beliefs</i> second; communion did not emerge as an independent dimension in that analysis.</li>\n    <li><b>Warmth is less consensual than competence.</b> An adversarial collaboration including Fiske (N=2,356, four continents) found lower agreement between perceivers on warmth than on agency or beliefs.</li>\n  </ul>\n  <p>The spine survives as a framework but is downgraded from \"the architecture everything hangs off\" to \"a well-supported two-dimensional summary that is non-orthogonal, facet-structured, and contested as exhaustive.\"</p>\n\n  <h3>3. Corrections made</h3>\n  <ul>\n    <li><b>Mere exposure:</b> v1's \"effect saturates around 10\u201320 exposures\" is not in the source and has been removed. Added the real boundary from Montoya et al. (2017): the inverted-U held for visual stimuli but the meta-analysis found no evidence of the effect for auditory stimuli.</li>\n    <li><b>Conscientiousness:</b> v1 gave r \u2248 .20\u2013.30 as settled. Observed validities run ~.13\u2013.20; corrected estimates ~.22 (Barrick &amp; Mount) to ~.27; Kepes &amp; McDaniel (2015) argue publication bias inflates them and Sackett et al. (2022) argue range-restriction corrections systematically overcorrect across the whole selection literature. Downgraded and qualified.</li>\n    <li><b>Attachment:</b> v1 said \"around 60% secure\" without noting the original was a self-selected newspaper sample (N=620). Most sources report 56%. More damaging to v1's framing: Fraley's review of longitudinal samples found infant-to-adult attachment correlations ranging from about .1 to .5 \u2014 the continuity claim is much weaker than v1 implied.</li>\n    <li><b>Loss aversion:</b> v1 cited Gal &amp; Rucker's critique without the defence. Mrkva, Johnson, G\u00e4chter &amp; Herrmann replied that loss aversion has moderators but reports of its death are exaggerated. It is a live dispute, now represented as one.</li>\n    <li><b>Dunning\u2013Kruger:</b> upgraded in detail \u2014 Gignac &amp; Zajenkowski (2020, N=929) found no heteroscedasticity and an essentially linear relation, but Hiller (2023) contested their scale transformation, Gignac replied, and Dunkel et al. (2023) ran a response replication. Now shown as an active dispute rather than a settled debunking.</li>\n  </ul>\n\n  <h3>4. Structural deletions</h3>\n  <ul>\n    <li><b>The romance / business / self triplet is gone.</b> It was a habit imported from the sales documents and it forced an application onto constructs that don't have one, generating filler. Replaced with intrapersonal / interpersonal / application, all optional.</li>\n    <li><b>Applied frameworks demoted.</b> SPIN, Challenger, JOLT, Trusted Advisor, Gap Selling, Voss and Greene were sitting in the same visual tier as peer-reviewed constructs. They are now a clearly separated derivative tier \u2014 they cite the science, the science does not cite them.</li>\n    <li><b>Link pruning.</b> The Greene node had 14 links, most decorative. Cut to the defensible ones. A link now has to state a relationship that survives being questioned.</li>\n  </ul>\n\n  <h3>5. What I did not do</h3>\n  <p>Most nodes are still marked <b>inherited</b>: carried over from v1 with citations I have not re-verified. Given that one fabricated citation was found in the sample I did check, assume others exist. Their panels deliberately show less detail than audited nodes \u2014 thinner evidence, thinner display. Every cycle audits its own domain's inherited nodes as well as adding new ones.</p>\n\n  <h2 style=\"margin-top:22px\">Cycle 1 \u2014 heredity and genomics</h2>\n  <p>Eleven new audited nodes answering a question the rest of the atlas kept assuming: where do individual differences come from, and how much does that constrain everything else.</p>\n\n  <h3>The through-line</h3>\n  <p>Heritability is the most over-read statistic in psychology. Across 2,748 publications, 17,804 traits and 14.5 million twin pairs, average reported heritability is 49% \u2014 and that number says nothing about any individual, nothing about malleability, and nothing that stays fixed when the environment changes. Two findings here prove the last point directly: heritability of cognitive ability rises from ~41% at age 9 to ~66% at 17 and asymptotes near .80 in adulthood; and Gene \u00d7 socioeconomic status interaction appears clearly in US samples but is absent in Western Europe and Australia. A statistic that moves with a country's social policy is not a property of the trait.</p>\n\n  <h3>The finding that breaks the nature/nurture frame</h3>\n  <p>Genetic nurture. Parental alleles that were <i>never transmitted</i> to the child still predict the child's educational attainment at 29.9% of the strength of the transmitted ones (N=21,637). In the 3-million-person GWAS, controlling for parental scores halves the polygenic index's association. Roughly half of what looks like inherited academic advantage is the environment that advantage built. It cuts against both camps at once \u2014 and it does <i>not</i> appear for height or BMI, so it is a real feature of socially mediated traits rather than a statistical artefact.</p>\n\n  <h3>A literature that evaporated</h3>\n  <p>Twenty years of findings about 'the depression gene' and similar were tested pre-registered across roughly 620,000 people: the 18 most-studied candidate genes were no more associated with depression than randomly chosen genes, and the gene-by-environment versions fared no better. Depression is still heritable at around 37% \u2014 it is spread across enormous numbers of variants with individually minuscule effects.</p>\n\n  <h3>Downgrades and corrections</h3>\n  <ul>\n    <li><b>Fundamental social motives downgraded</b> from solid to moderate. v1 quoted a country count and sample size for its cross-cultural validation that I could not re-verify; the figures are removed rather than repeated. It is a functional hypothesis about evolved design, not a finding established by the measurement traditions in this atlas.</li>\n    <li><b>Delay of gratification's mechanism replaced.</b> v1 gave 'trust in the reliability of the environment' as the explanation for the replication shrinkage \u2014 one hypothesis presented as the answer. The replication's actual finding was family background, specified here as passive gene\u2013environment correlation plus genetic nurture.</li>\n    <li><b>Attachment gains a fourth boundary:</b> parent\u2013child concordance cannot be read as environmental transmission, because similarity in socially mediated outcomes is substantially genetically confounded.</li>\n    <li><b>Big Five revised:</b> genome-wide analysis finds detectable common-variant heritability only for neuroticism (15%) and openness (21%) \u2014 none for extraversion, agreeableness or conscientiousness.</li>\n  </ul>\n\n  <h3>The figure that should accompany every heritability number</h3>\n  <p>Personality heritability meta-analysis, 62 effect sizes, over 100,000 participants: average .40. But study design was a significant moderator \u2014 twin studies gave .47, family and adoption studies gave .22. Less than half. The familiar '40\u201360% heritable' comes from the design that gives the higher answer.</p>\n\n  <h3>Adversarial pass \u2014 what is weakest here</h3>\n  <ul>\n    <li>One source in the twin-method node is a bioRxiv preprint, not peer-reviewed at time of retrieval. It is labelled as such and should not carry the weight of the published work beside it.</li>\n    <li>I retrieved genetic nurture's finding and its accompanying perspective, not its critics. Assume there are objections I have not represented.</li>\n    <li>The Gene \u00d7 SES cross-national explanation (inequality compresses environmental variance) is an inference the authors offer, not a tested mechanism. Flagged as such in the node.</li>\n    <li>Nearly all of this literature is WEIRD-sampled, and polygenic scores explicitly do not port across ancestries. The culture cycle will have to revisit this whole layer.</li>\n  </ul>\n\n  <h2 style=\"margin-top:22px\">Cycle 2 \u2014 reward and motivation neuroscience</h2>\n  <p>Six new audited nodes, plus two overdue re-audits of inherited nodes. One of those forces a downgrade on a hub the entire cognition layer hangs from.</p>\n\n  <h3>The correction that matters most</h3>\n  <p><b>Dopamine is not the pleasure chemical.</b> It is central to wanting, prediction and movement, and it does not mediate how good a reward feels. What makes this unusually secure is that the field's two rival theories \u2014 incentive salience and reward prediction error \u2014 disagree about almost everything else and agree on this. Dopamine depletion abolishes pursuit of a reward without abolishing the pleasure reaction to it. Every 'dopamine hit', 'dopamine detox' and 'dopamine fasting' product is built on the wrong premise: if a behaviour has you, the system involved is wanting, and turning down pleasure will not reach it.</p>\n\n  <h3>Wanting and liking come apart</h3>\n  <p>Wanting is generated by large, robust mesolimbic systems; liking by much smaller, fragile opioid hotspots. They are normally coherent but separable \u2014 most visibly in drug tolerance, where motivation escalates while reported pleasure falls. The boundary the popular version drops: subjective wanting and liking are very hard to separate by self-report, partly because people lack access to the underlying processes and partly because they keep their answers internally consistent \u2014 having said they want something, they infer they must like it.</p>\n\n  <h3>Two live disputes, represented as disputes</h3>\n  <ul>\n    <li><b>Reward prediction error</b> is under real strain. It did not predict dopamine firing during delay under uncertainty, dopamine ramps, dopamine waves, or the heterogeneity of responses across neurons and projection targets \u2014 and there is a persistent movement problem. A 2024 Nature Neuroscience perspective concludes a complete account will need to move beyond RPE while keeping its core explanatory power. Graded contested, not solid.</li>\n    <li><b>Is addiction a brain disease?</b> Both sides accept the brain changes; they disagree whether that is disease or entrenched, reversible learning. The critics' strongest card is natural remission \u2014 over half of people with alcohol or other drug addiction recover, and around half of one Canadian survey reported stable recovery at first attempt, which sits awkwardly with 'chronic and relapsing'. A 2014 Nature editorial calling the disease view uncontroversial drew a protest letter signed by 94 addiction researchers. Berridge, cited by both camps, takes a middle position.</li>\n  </ul>\n\n  <h3>The 66-day habit figure, read properly</h3>\n  <p>96 volunteers, median 66 days to 95% of asymptotic automaticity, range 18 to 254. But 82 gave analysable data, the model fitted for 62, and only 39 showed a good fit \u2014 so the median comes from under half the sample. For many, the asymptote was a projection beyond the 84-day window. Exercise ran around 91 days. The outcome was self-reported automaticity, not habit as behavioural scientists define it. The genuinely useful finding, which nobody quotes: missing a single opportunity did not materially affect the process.</p>\n\n  <h3>Re-audit: dual-process cognition downgraded, solid \u2192 contested</h3>\n  <p>This is the consequential change. The framework's power comes from assuming four features cluster \u2014 fast also meaning unconscious, automatic and uncontrollable. Melnikoff &amp; Bargh argue very few processes fit either category cleanly, and that the typology resists disconfirmation because a failed prediction can always be blamed on cross-system contamination. They report emerging consensus among critics <i>and</i> leading proponents that the classic distinction is flawed; published replies argue they overstate it. Either way, v1 and v2 graded it solid and wrote it as established architecture. It is a hub \u2014 heuristics, biases, persuasion routes and automaticity all link through it \u2014 so the downgrade propagates to everything leaning on a clean fast/slow partition.</p>\n\n  <h3>Re-audit: mimicry \u2014 and a claim I declined to make</h3>\n  <p>Verified the original (JPSP 76(6):893\u2013910) and found a genuine 2024 downgrade signal: two field experiments (N=460) where mimicry raised the likelihood of donating but not the amount, with the authors' own Bayesian analysis indicating a weaker effect than prior theory assumed. Also added a moderator: the mimicry\u2013liking link held for prosocially oriented participants but not proself-oriented ones. What I did <b>not</b> do: several non-academic sources claim a 2020 meta-analysis downgraded mimicry-causes-liking. I could not locate it. That claim is absent from the node and sits in the unverified queue \u2014 a blog asserting a meta-analysis exists is not a meta-analysis, and writing it in would have been the exact failure Cycle 0 found.</p>\n\n  <h3>Adversarial pass \u2014 what is weakest here</h3>\n  <ul>\n    <li>The wanting/liking dissociation is strongest in rodents. Human evidence relies on implicit measures precisely because self-report conflates the two, so the translation is assumed more than demonstrated. The node says so; the popular literature never does.</li>\n    <li>I did not retrieve the primary critique literature on incentive sensitization itself, only the disputes downstream of it in addiction theory. That node is one-sided in the same way genetic nurture was last cycle.</li>\n    <li>The addiction-models node relies partly on review and commentary sources rather than the primary remission studies. The remission figures should be treated as reported-by-reviewers until traced to source.</li>\n    <li>Three cycles in, 45 nodes remain inherited and unverified. Two re-audits this cycle is better than zero, but at this rate the backlog outlasts the queue.</li>\n  </ul>\n\n  <h2 style=\"margin-top:22px\">Cycle 3 \u2014 emotion</h2>\n  <p>Five new audited nodes and two more re-audits, both of which force downgrades. This is the layer where the atlas has to hold two incompatible research programmes at once without pretending one has won.</p>\n\n  <h3>The dispute, stated fairly</h3>\n  <p>Basic emotion theory holds there are discrete evolved emotion kinds with characteristic expressions. Constructionist accounts hold emotions are assembled in the moment from core affect plus concepts plus context, so 'anger' is a category applied rather than a natural kind. A third position \u2014 semantic space theory \u2014 argues emotion is high-dimensional, made of blends of upward of 20 kinds with fuzzy boundaries, contradicting <i>both</i> the discrete categories of basic emotion theory and constructionism's reduction to valence and arousal. The field's own literature describes itself as enduringly fragmented. Any source presenting one account as settled is misrepresenting it.</p>\n\n  <h3>Facial universality: both sides, both kinds of evidence</h3>\n  <p>The critical original universality tests were run between 1969 and 1975 using methods that supplied emotion words or forced choice from a short list. Loosen the task and support weakens sharply: Himba participants without concept cues did not produce the presumed universal sorting pattern; Himba, Hadza and Trobriand participants rarely offered the predicted labels spontaneously, using action identifications like 'crying' and 'looking' instead; a wide-eyed gasping face read as fear in the West was identified by most Trobrianders as a <i>threat display</i>. But the counter-evidence is serious: deep neural networks applied to 6 million videos from 144 countries found 16 expression types occurring systematically in specific contexts, about 70% preserved across 12 world regions. Both are in the node. They may not be measuring the same thing.</p>\n\n  <h3>The agreed floor</h3>\n  <p>Valence and arousal <i>are</i> consistently perceived across industrialised and small-scale societies \u2014 'minimal universality'. Both camps accept it, which makes it the most secure claim in the layer. The practical version: trust your read of whether someone feels good or bad and how activated they are; treat the specific emotion as a hypothesis to check rather than a perception.</p>\n\n  <h3>The interoception finding that undercuts 'listen to your body'</h3>\n  <p>Interoception splits into accuracy (can you actually detect your heartbeat), sensibility (do you report attending to bodily signals) and metacognitive awareness. The association between these dimensions is weak or non-existent. People who believe they are attuned to their bodies are not reliably the people who can detect their own heartbeats \u2014 the same confidence/accuracy gap that appears in the Dunning\u2013Kruger node.</p>\n\n  <h3>Re-audit: Elaboration Likelihood Model downgraded, solid \u2192 contested</h3>\n  <p>The Cycle 2 dual-process downgrade applies here directly. Kruglanski's unimodel argues the two-route distinction is an artifact of how studies operationalised 'arguments' versus 'cues' \u2014 that both are just evidence bearing on a conclusion. There is also a measurement problem: elaboration is rarely measured directly, usually inferred from the manipulation, which makes the model hard to falsify. And most classic support comes from undergraduates, invented topics and single brief exposures. A 2022 head-to-head concluded the unimodel hasn't won either \u2014 so this is an unresolved dispute, not a debunking. But grading it solid and stating two routes as fact was not defensible.</p>\n\n  <h3>Re-audit: Gottman's divorce prediction, with the actual numbers</h3>\n  <p>Heyman and Smith Slep demonstrated the problem rather than arguing it. They took 528 people from the 1985 National Family Violence Survey, split them randomly in half, built a divorce-prediction equation on one half the standard way, and tested it on the other. On its training half: 90% accuracy, 92% sensitivity, 89% specificity. On fresh data, sensitivity fell by 45%. An independent generalizability test on 85 at-risk couples found several specific Gottman mechanisms did not predict relationship status at all. The Gottman Institute's own FAQ now reframes the claim as identifying that a couple <i>behaves like</i> couples who later divorced \u2014 materially weaker than predicting divorce \u2014 and Gottman and Levenson's own 2002 discussion calls their analyses post hoc and exploratory. The descriptive content survives; the prediction figure should not be quoted.</p>\n\n  <h3>Adversarial pass \u2014 what is weakest here</h3>\n  <ul>\n    <li>The emotion layer leans more heavily on the constructionist critique than on basic emotion theory's primary literature, because the critique is where the systematic reviews are. I retrieved Cowen and Keltner's strongest single study and their response to Barrett, but not Ekman's own detailed replies. That is an imbalance in sourcing, not a judgement about who is right.</li>\n    <li>The 144-country machine-learning study is recent and I found no independent replication of it. It is presented as counter-evidence, which it is, and not as settled.</li>\n    <li>The affective forecasting dispute turns partly on how two teams coded effect sizes from the same studies. I have both sides' positions but have not examined the coding disagreement itself, so I cannot say who is right about it.</li>\n    <li>The Gottman cross-validation figures come partly from a secondary summary of Heyman and Smith Slep alongside the primary abstract. The headline numbers are consistent across sources but the specific 29% positive predictive value on fresh data should be traced to the paper before being repeated.</li>\n  </ul>\n\n  <h2 style=\"margin-top:22px\">Cycle 4 \u2014 personality in depth</h2>\n  <p>Four new audited nodes and a re-audit of the most-cited applied study in the influence layer. Two findings here damage nodes that had been graded solid.</p>\n\n  <h3>The Big Five may not be universal</h3>\n  <p>The five-factor structure has been recovered across many societies &mdash; nearly all of them literate and urban. The first test in a largely illiterate indigenous society failed comprehensively. Tsimane forager&ndash;horticulturalists in Bolivia (n=632) completed a translated Big Five Inventory administered verbally by a trained bilingual interviewer. Support failed on every criterion attempted: internal consistency, response stability, external validity against observed behaviour, exploratory and confirmatory factor structure, and Procrustes rotation against a US target. No Big Five scale reached the conventional .70 reliability threshold, and congruence with the US structure averaged .62 against a .90 benchmark. A separate sample of 430 people rating their spouses did not improve it. The authors tried hard to break their own result &mdash; stratifying by education, Spanish fluency, sex and age, removing extreme-response items, correcting for acquiescence &mdash; and none of it helped. Two well-defined factors emerged instead of five.</p>\n\n  <h3>A sixth factor that recovers more consistently than five</h3>\n  <p>HEXACO's Honesty-Humility was not invented from theory. A Korean lexical study turned it up, and a reanalysis of eight lexical studies across seven languages found six factors emerging consistently rather than five. It matters because it is the trait that predicts exploitation: none of the lexical Big Five factors correlated significantly with Machiavellianism, primary psychopathy or social adroitness, while Honesty-Humility did, strongly and negatively. The obvious objection &mdash; that it is just high Agreeableness &mdash; was answered empirically rather than rhetorically.</p>\n\n  <h3>Personality changes more than the stability framing implies</h3>\n  <p>207 intervention studies: traits moved at around d = .37 over an average of 24 weeks, replicating across experimental and non-experimental designs and persisting past the intervention window. But the honest version is narrower than &ldquo;you can change&rdquo; &mdash; emotional stability was the primary domain that moved, followed by extraversion. Anxiety patients changed most, substance-use patients least, and the type of therapy barely mattered. High heritability and real intervention-driven change are both true, which is the clearest demonstration in this atlas that heritability does not mean fixity.</p>\n\n  <h3>The person&ndash;situation debate, resolved properly</h3>\n  <p>Mischel's charge was that behaviour is too inconsistent for traits to be tenable, and that r &asymp; .30 was useless for individual prediction. The resolution was not a winner. Fleeson's density-distribution finding reframed it: behaviour varies enormously moment to moment around a person-specific mean, and those distributions are themselves stable and person-distinguishing. Both observations were right. The practical consequence is that a trait score predicts your distribution, not your next act &mdash; a weaker and more honest claim than most applied profiling makes.</p>\n\n  <h3>Re-audit: social proof downgraded, solid &rarr; contested</h3>\n  <p>I went after the flagship applied demonstration &mdash; the hotel towel study &mdash; and read the replication in full. The original found descriptive norms beat a standard environmental appeal (44.1% vs 35.1%), with a &ldquo;provincial&rdquo; same-room norm best of all (49.3%). Direct replication in two German hotels: in Study 1 (N=724) descriptive norms combined (81.9%) did <em>not</em> beat the standard message (83.7%), and the same-room norm produced a significantly <em>lower</em> rate (78.0%) than the general norm (85.6%) &mdash; a reversal. In Study 2 (N=204) any message beat none, but the standard environmental message (93.3%) outperformed the descriptive norms combined (76.5%). A separate US study with roughly 400 observations per condition found a purely descriptive norm failed against control; only descriptive plus injunctive worked. The replication authors note European baselines were far higher (70&ndash;90% vs 35&ndash;50%) and argue identical wording carries different meaning across cultures &mdash; a fair defence, and also an admission that the effect is context-dependent in ways the principle as sold is not.</p>\n\n  <h3>Adversarial pass &mdash; what is weakest here</h3>\n  <ul>\n    <li>The Tsimane result is one study in one society. It should be read as &ldquo;the universality claim rests on a sample that excludes most of human history&rdquo;, not as &ldquo;the Big Five is false&rdquo;.</li>\n    <li>I did not retrieve critiques of the Tsimane study itself beyond a summary of one critical review, so that node carries the finding without its strongest opposition.</li>\n    <li>Only one Cialdini-tier node was re-audited. Reciprocity, commitment, authority, liking and scarcity remain inherited and unchecked &mdash; and the one I did check required a downgrade. That is not a reassuring base rate.</li>\n    <li>HEXACO's evidence here comes substantially from its own developers' publications. Normal for a structural model, but a sourcing imbalance, and I did not retrieve the strongest independent critique.</li>\n  </ul>\n\n  <h2 style=\"margin-top:22px\">Cycle 5 \u2014 the dark layer</h2>\n  <p>Four new audited nodes, one re-audit that <em>confirmed</em> rather than downgraded, and an interface fix.</p>\n\n  <h3>The dark triad may be one thing, and that thing may already have a name</h3>\n  <p>Using meta-analytic self-report estimates (N=1,402), the latent dark triad factor and low HEXACO Honesty-Humility correlate at &minus;0.95 &mdash; near-complete overlap. Low Honesty-Humility is repeatedly the strongest basic-personality predictor of the dark traits, with up to 90% shared variance, and beats five-factor Agreeableness at it. That has driven the conclusion in parts of the literature that the dark triad is largely redundant. It is not unopposed: a 2021 paper argues for dissociations between the dark factor and low Honesty-Humility, and a 2022 paper argues the two are nearly perfectly correlated <em>and</em> distinct. Both camps agree on the number and disagree on what it implies, which is why this is graded contested.</p>\n\n  <h3>Two narcissisms that barely correlate</h3>\n  <p>Grandiose and vulnerable narcissism are weakly related or uncorrelated in the general population depending on measure &mdash; remarkable for two things sharing a construct name. The trifurcated model resolves it: antagonism is the shared core, grandiosity adds agentic extraversion, vulnerability adds neuroticism. The relationship is non-linear &mdash; distinct at lower levels of grandiosity, blending into an antagonistic core at higher levels. Childhood abuse relates to vulnerable but not grandiose narcissism. The everyday use of the word almost always means the grandiose form, which is the one <em>least</em> associated with distress.</p>\n\n  <h3>Psychopathy's measurement problem is the construct's problem</h3>\n  <p>The dominant forensic checklist covers disinhibition and meanness directly but boldness only modestly, and its reliance on antisocially deviant indicators makes it ill-suited to community samples. Whether boldness &mdash; social dominance, stress resilience, calm under threat &mdash; belongs in psychopathy at all is the field's central open dispute, because it includes seemingly adaptive traits. In 1,565 adult offenders boldness added incremental validity, especially for interpersonal traits like superficial charm; the same analysis found boldness mattered less for psychopathy in women. And self-report measurement of a construct defined partly by deceitfulness has a problem the field acknowledges and uses anyway.</p>\n\n  <h3>What dark traits actually predict</h3>\n  <p>245 samples, N=43,907: job performance quality fell with Machiavellianism and psychopathy, and counterproductive work behaviour rose with all three. But multivariate analysis showed the dark triad explains moderate variance in counterproductivity and <em>not</em> in job performance. The folk claim is that dark traits help you get ahead; what replicates is that they predict harm done, not success achieved. One nice methodological detail: an update found the original meta-analysis's cross-cultural moderation claim hinged on a single dataset from Bangladesh.</p>\n\n  <h3>Re-audit: reciprocity holds</h3>\n  <p>Worth reporting as clearly as the downgrades. The classic soft-drink-then-raffle-tickets demonstration has been replicated, and the reciprocity-norm interpretation survived against rival accounts. One study specifically tested whether the norm is internalised by ensuring the original giver would never learn of the return behaviour &mdash; participants still reciprocated, and the tendency did not depend on the giver finding out, which rules out a purely reputational explanation. It stays solid, with three documented moderators added. Two Cialdini principles audited now: one held, one required downgrading. That is a caution against treating the set as uniformly evidenced.</p>\n\n  <h3>Interface: the map now opens on the whole map</h3>\n  <p>It previously loaded zoomed in on a single node with no way to fit the full network &mdash; the &ldquo;fit&rdquo; control reset zoom to 1&times; rather than fitting to content, which on 90 nodes showed a fraction of the graph. Now: it computes the actual bounding box and fits it on load and on demand, zoom-out range extended from 0.35&times; to 0.08&times;, labels thin out progressively as you zoom out so the overview is readable instead of overlapping mush, and bubbles are grouped by layer by default (&#9678; toggles it) so the whole-map view has visible structure rather than being a hairball. On mobile the detail sheet no longer auto-opens on arrival, because it was covering the map you had just been shown.</p>\n\n  <h3>Adversarial pass &mdash; what is weakest here</h3>\n  <ul>\n    <li>Five retrievals this cycle rather than the eight the standing orders set, because substantial effort went into the interface rebuild. The dark layer is thinner than it should be: I did not cover sadism, the proposed fourth trait, and did not retrieve the primary critique of the dark-triad-as-redundant position beyond its abstract.</li>\n    <li>The dark_outcomes meta-analysis covers reports to 2011. I did not find a more recent comprehensive replacement, so those effect sizes are over a decade old and predate most of the field's methodological reform.</li>\n    <li>Sources for the narcissism node lean on the trifurcated model's own proponents, as HEXACO did last cycle. The convergence with an independently proposed spectrum model is reassuring but not independent verification.</li>\n    <li>Three Cialdini-tier nodes remain unchecked: commitment, authority, liking, scarcity. Running score on that tier is one confirmed, one downgraded.</li>\n  </ul>\n\n  <h2 style=\"margin-top:22px\">Cycle 6 \u2014 development</h2>\n  <p>Four new audited nodes, a re-audit of attachment stability with actual numbers, and a rebuilt map experience.</p>\n\n  <h3>The closest thing to an experiment on early experience</h3>\n  <p>Children who spent up to 43 months in severely depriving Romanian institutions were adopted into stable, advantaged UK families and followed to adulthood. The duration threshold is the headline: under six months of deprivation and by age 6 they were largely indistinguishable from non-deprived adoptees; over six months and significant social and cognitive impairment persisted into young adulthood for many &mdash; not all. Two boundaries cut opposite ways. Cognitive impairment showed adult remission. But the authors' own summary is blunt: extended deprivation had long-term effects on wellbeing that appeared <em>insusceptible to years of nurturance and support in adoptive families</em>. Neither strong determinism nor blank-slate recovery survives this.</p>\n\n  <h3>A randomised trial with a causal 9-point IQ effect</h3>\n  <p>136 institutionalised children randomly assigned to high-quality foster care or continued institutional care. Sixteen years after randomisation, at age 18, the fostered group had IQ scores 9 points higher &mdash; about 0.6 SD &mdash; with mediation analysis indicating the effect ran partly through caregiving quality and attachment security. Placement after 24 months was associated with lower expressive language. This is one of the largest environmental effects in the atlas, and it sits in the same domain where twin studies report heritability near .80. Both are true, which is exactly the point Cycle 1 was making about what heritability does and does not mean.</p>\n\n  <h3>Sensitive periods, correctly scoped</h3>\n  <p>Two timing thresholds emerged from independent designs &mdash; six months in the observational cohort, 24 months in the randomised trial. That convergence is the strength of the claim. What it does <em>not</em> establish: that the first three years determine everything. These are thresholds for recovery from severe deprivation, and the same studies show adult remission of cognitive impairment, which a strict critical period would not permit.</p>\n\n  <h3>Adolescent risk-taking &mdash; trajectories yes, mechanism no</h3>\n  <p>The dual systems model's predicted trajectories hold: sensation-seeking follows an inverted U, self-regulation increases monotonically, across cultures. The imbalance <em>mechanism</em> is much weaker. Critics note lack of specificity and questionable falsifiability &mdash; it is unclear how one would show the imbalance is <em>not</em> implicated &mdash; leading to the argument that these are informative heuristics rather than testable theories. The mid-adolescent peak is not unequivocal: peak age varies by behaviour and it is often late adolescents who are most reckless. Its proponents concede the model is insufficiently nuanced while defending it as a heuristic. It inherits the Cycle 2 dual-process problem directly.</p>\n\n  <h3>Re-audit: attachment stability, with figures</h3>\n  <p>The node was graded solid on a continuity claim I had only characterised loosely. Now measured: security is moderately stable across the first 19 years, best described by prototype dynamics. A meta-analysis restricted to strange-situation methods found &kappa; = 0.23 four-way and r = 0.28 secure/insecure across early childhood. A 20-year longitudinal study found 72% kept the same classification (&kappa; = .44) &mdash; but 44% of those whose mothers reported negative life events changed, against 22% without. Adult self-report stability runs .50&ndash;.60 over spans from two weeks to two decades. Within-person work found about a quarter of life events produced enduring change, averaging under 0.10 SD but with enormous individual variation &mdash; the chance of shifting more than a third of an SD ranged from 5% to 86% depending on the event. \"Moderate\" is the honest word throughout.</p>\n\n  <h3>Interface: full screen and connection analysis</h3>\n  <p>Two changes in response to direct feedback that the map was too cramped and that clicking a node did not say enough.</p>\n  <ul>\n    <li><strong>Full-screen mode</strong> (&#9970;) hides all chrome and gives the map the entire viewport, and requests browser fullscreen where permitted. Escape or the exit button returns.</li>\n    <li><strong>Connection analysis on click.</strong> Selecting a node runs a breadth-first search across the whole graph and shows: how many constructs it touches directly, at two steps, at three steps, what share of the atlas it reaches at all, how many of its direct links are live disputes, and two explicit lists &mdash; what it <em>plays well with</em> (supporting links, with the stated relationship) and what it <em>does not play well with</em> (recorded tensions).</li>\n    <li><strong>A reach dial</strong> (1 / 2 / 3 / All) controls how far the ripple extends on the map, so you can see a construct's immediate neighbourhood or its full sphere of influence, with links and nodes shaded by distance.</li>\n  </ul>\n\n  <h3>Adversarial pass &mdash; what is weakest here</h3>\n  <ul>\n    <li>Four retrievals this cycle rather than eight, with the difference going into the interface work at the user's explicit request. No Cialdini-tier re-audit happened as planned, so commitment, authority, liking and scarcity remain unchecked for a third cycle.</li>\n    <li>The attachment stability figures come partly from secondary summaries rather than the primary papers. The numbers are consistent across sources but should be traced before being quoted.</li>\n    <li>The deprivation nodes describe extreme conditions. Nothing in them licenses inferences about ordinary variation in parenting quality, and the popular literature makes that leap constantly. The nodes say so; readers may not.</li>\n    <li>I did not retrieve the primary critique of the Romanian adoptee work &mdash; selective placement, pre-adoption differences between children adopted earlier and later &mdash; which is the obvious objection to a natural experiment.</li>\n  </ul>\n\n  <h2 style=\"margin-top:22px\">Cycle 7 \u2014 interface and ergonomics</h2>\n  <p>A content cycle was scheduled. It was postponed, because the map was reported as something its owner would not show to another person &mdash; and an atlas nobody can navigate is worth nothing regardless of how good the nodes are. This cycle researched information-visualisation and human-factors literature and rebuilt the interface against it.</p>\n\n  <h3>The finding that indicts this design</h3>\n  <p>Ghoniem, Fekete and Castagliola ran a controlled experiment comparing node-link diagrams against matrix representations across seven generic graph tasks. Their result: <strong>once a graph exceeds about twenty vertices, matrix representations outperform node-link diagrams on most tasks.</strong> Only path-finding is consistently in favour of node-link throughout the evaluation. This atlas has 94 nodes &mdash; nearly five times that threshold. The honest reading is that the bubble map is the wrong default for most questions someone would bring to it, and is right for exactly one: tracing a route between two ideas.</p>\n  <p>The response is not to abandon it. It is to stop making it the front door. The map is now one of five ways in, and the one task it demonstrably wins &mdash; path-finding &mdash; has its own dedicated view.</p>\n\n  <h3>Overview first, zoom and filter, then details on demand</h3>\n  <p>Shneiderman's visual information-seeking mantra, and its accompanying task taxonomy of overview, zoom, filter, details-on-demand, relate, history and extract. The atlas previously dropped you into a zoomed-in fragment of a 94-node graph with no overview and no stated task. It now opens on a <strong>Start</strong> screen with five task-shaped entry points, each mapping to a real question: what is actually solid, what is folklore, where do experts disagree, how does X connect to Y, and show me everything. Each one pre-sets the filters and lands you in the right view.</p>\n\n  <h3>Cognitive load: fewer simultaneous encodings</h3>\n  <p>Cognitive load theory distinguishes intrinsic load (inherent to the material), extraneous load (caused by how it is presented) and germane load (productive effort that builds understanding). The design goal is to minimise the extraneous kind, and the standard advice is to limit the number of prominent chunks and keep encoding consistent. The map was carrying six simultaneous visual encodings &mdash; layer colour, verification fill, evidence stroke colour, evidence dash pattern, size by degree, and label size by degree. Dash patterns below about three pixels read as noise rather than signal, so that channel is gone except for one case. A <strong>first-run card</strong> now states the three encodings that remain, in three lines, before you touch anything, and the Start screen carries a visual key with rendered examples rather than described ones.</p>\n\n  <h3>Fitts's law: the controls were in the wrong place</h3>\n  <p>Time to acquire a target is a function of its size and its distance. The practical consequences for a one-handed phone: minimum 44&times;44 CSS pixels per WCAG 2.5.5, bottom placement for anything used often because it reduces thumb travel, and screen edges behave as effectively infinite targets. The zoom, fit, group and full-screen controls were pinned to the <em>top right</em> &mdash; the furthest point from a right thumb on a large phone. They have moved to the bottom right. The reach dial moved to the bottom left. The read-only counter moved up, since nobody taps it.</p>\n\n  <h3>Bubbles now stay where you put them</h3>\n  <p>Requested directly, and correct: a force simulation that springs nodes back after you drag them destroys the one thing manual arrangement is for &mdash; building a spatial layout that matches your own mental model. Dragged bubbles are now <strong>pinned</strong> where you drop them, marked with a small dot, and a release control appears to un-pin them all at once.</p>\n\n  <h3>Adversarial pass &mdash; what is weakest here</h3>\n  <ul>\n    <li>I have not built the matrix view that the evidence actually points to. The Ghoniem result says that for 94 nodes a matrix would beat this on most tasks, and the honest position is that the map remains the wrong tool for several of the questions people will ask it. Queued, and it should not be queued indefinitely.</li>\n    <li>No user testing has happened. Every change here is derived from published principles applied to this artefact by its own author, which is the weakest form of usability evidence there is. One person attempting a task while someone watches would find more than this cycle did.</li>\n    <li>The Start screen's five tasks are my guess at what someone would want. They are not derived from observing anyone.</li>\n    <li>Nothing was learned about human psychology this cycle. The node count is unchanged. That is the cost of the postponement and it was worth paying once.</li>\n  </ul>\n\n  <h2 style=\"margin-top:22px\">Cycle 8 \u2014 cognition, ability, and the Cialdini debt</h2>\n  <p>Four new audited nodes on ability and expertise, plus the two Cialdini re-audits deferred across four cycles. Both downgraded.</p>\n\n  <h3>Brain training: the clearest commercial failure in the atlas</h3>\n  <p>87 publications, 145 experimental comparisons, all with control groups. Immediately after training there were reliable improvements on <em>intermediate</em> transfer \u2014 verbal and visuospatial working memory. For far transfer \u2014 nonverbal ability, verbal ability, word decoding, reading comprehension, arithmetic \u2014 there was <strong>no convincing evidence of any reliable improvement</strong> against a treated control. Four comprehensive meta-analyses converge. A re-analysis of the most favourable n-back dataset found the effect falls to around zero once you compare against active controls rather than passive ones. The choice of control group is the entire difference between the positive literature and the negative one.</p>\n\n  <h3>Deliberate practice explains less than the popular version claims</h3>\n  <p>Across all major domains studied: deliberate practice explained <strong>26% of variance in games, 21% in music, 18% in sports, 4% in education, and under 1% in professions</strong>. Roughly 19% of reliable variance overall, leaving about 81% to other factors. The domain gradient is the part people skip \u2014 a quarter of the variance in chess, almost none in professional work. The dispute is live and both sides agree practice matters; they disagree about whether it is dominant. \"10,000 hours\" is not supported as a general law by the research it came from.</p>\n\n  <h3>g: the statistic is settled, the interpretation is not</h3>\n  <p>The positive manifold \u2014 cognitive test scores all correlating positively \u2014 is among the most replicated findings in psychology, and none of g's critics dispute it. The extracted general factor accounts for 40\u201350% of variance across tasks. But the mutualism model reproduces the hierarchical factor structure, the low predictability from early childhood, the rising heritability of g and the Jensen effect <em>with no single underlying g factor playing any role</em> \u2014 purely from beneficial interactions between cognitive processes during development. A factor extracted from correlations does not identify its own cause.</p>\n\n  <h3>The Flynn effect, honestly hedged</h3>\n  <p>A cohort study (N=1,267, 2005\u20132024) found substantial declines in single-factor g assessments alongside meaningful score gains in every domain, suggesting the positive manifold itself is weakening. But an earlier Austrian study found the same trend <em>not statistically significant</em>, and a 2025 armed-forces study found substantial Flynn effects with <em>no evidence of any meaningful manifold change</em>. Three studies from overlapping groups, two directions. Graded moderate.</p>\n\n  <h3>The Cialdini debt, paid</h3>\n  <ul>\n    <li><strong>Commitment / foot-in-the-door: solid \u2192 moderate.</strong> A major review identifies at least six processes a foot-in-the-door manipulation can trigger \u2014 self-perception, reactance, conformity, consistency, attributions, commitment \u2014 and argues their combined effects explain both the successes and the failures. The finding that forces the downgrade: the technique can be ineffective and in some conditions <em>decreases</em> compliance. It is moderated by disposition, working for people high in preference for consistency and not for those low on it. Also worth knowing: one comparison found door-in-the-face produced 75.8% compliance against foot-in-the-door's 48.5% on the same request.</li>\n    <li><strong>Scarcity: solid \u2192 moderate.</strong> Meta-analytic work supports demand-based and time-based scarcity. Supply-based scarcity has a documented reversal: four experiments and a field study found limited quantities <em>lower than consumers expected</em> undermine perceived retailer sincerity and reduce purchase likelihood. Earlier work found quantity scarcity raises subjective value but not assessed market value, so the assumed \"it must be expensive\" inference may not be the mechanism.</li>\n  </ul>\n  <p><strong>Running score on the Cialdini tier: four audited, one confirmed (reciprocity), three downgraded (social proof, commitment, scarcity). Authority and liking remain unchecked.</strong> A 3-in-4 downgrade rate is the most useful single number this project has produced about the applied persuasion literature.</p>\n\n  <h3>Adversarial pass &mdash; what is weakest here</h3>\n  <ul>\n    <li>Authority and liking were in this cycle's plan and did not get done. Given three of the four checked so far required downgrading, leaving two solid-graded nodes unverified is the atlas's largest remaining known risk.</li>\n    <li>The g node relies on one alternative model (mutualism) as the counterweight. I did not retrieve the responses to it, so the strength of the critique may be overstated here.</li>\n    <li>The scarcity meta-analyses are cited from secondary references to Barton, Zlatevska &amp; Oppewal rather than the paper itself. The categorisation into demand/supply/time-based is well attested across sources; specific effect sizes are not quoted because I do not have them.</li>\n    <li>Deliberate practice's corrigendum adjusted several models and I have not seen the corrected figures \u2014 the percentages quoted are from the original abstract, which the correction did not retract but did amend elsewhere.</li>\n  </ul>\n";
+const METHOD="\n  <h3>Two independent gradings</h3>\n  <p><b>Evidence grade</b> is about the world: how strong is the finding. <b>Verification status</b> is about this document: did I actually retrieve the source. They are separate on purpose, because v1 confused confidence in a claim with confidence in my own memory of it.</p>\n  <ul>\n    <li><b>solid</b> \u2014 replicated across labs, methods or cultures, or meta-analysed with an effect size</li>\n    <li><b>moderate</b> \u2014 real signal, single program, modest effect, or proprietary data</li>\n    <li><b>contested</b> \u2014 the field is actively split, or the popular version overstates it</li>\n    <li><b>failed</b> \u2014 large replications found \u2248 nothing. Kept, because folklore is part of the map</li>\n    <li><b>literary</b> \u2014 practitioner or historical framework, no controlled evidence as a package</li>\n    <li><b>emerging</b> \u2014 recent, promising, under-replicated</li>\n  </ul>\n  <p><b>audited</b> = sources retrieved and checked this cycle. <b>inherited</b> = carried from v1, unverified, treat with suspicion.</p>\n  <h3>Architecture</h3>\n  <p>Twelve layers, ordered from substrate outward: evolved substrate \u2192 heredity &amp; genomics \u2192 reward neuroscience \u2192 individual differences \u2192 motivation \u2192 cognition \u2192 self-regulation \u2192 social perception \u2192 influence \u2192 bonding \u2192 applied (derivative) \u2192 epistemics. The spine is now its own layer holding the organising claims and their challengers, rather than being invisibly assumed.</p>\n  <h3>Not yet mapped</h3>\n  <p>Personality facets and HEXACO; the dark triad; development; working memory and expertise; self and narrative identity; pathology; culture and the WEIRD critique; groups, status and power; moral psychology; language and framing; mating strategies; behaviour change; outliers. These are the queued cycles.</p>\n  <h3>Handoff</h3>\n  <pre id=\"statebox\">CYCLE:     8 \u2014 cognition & ability\nNODES:     98 (57 audited, 41 inherited)\nLAYERS:    16\nNEXT:      cycle 9 \u2014 self & identity</pre>\n";
+
+/* ---------- derive graph ---------- */
+const byId=Object.fromEntries(N.map(n=>[n.id,n]));
+const lmap=new Map();
+N.forEach(n=>(n.links||[]).forEach(([t,rel])=>{
+  if(!byId[t])return;const k=[n.id,t].sort().join("|");
+  if(!lmap.has(k))lmap.set(k,{source:n.id,target:t,rel,tension:false});
+}));
+N.forEach(n=>(n.contra||[]).forEach(([t,r])=>{
+  if(!byId[t])return;const k=[n.id,t].sort().join("|");
+  if(lmap.has(k))lmap.get(k).tension=true;else lmap.set(k,{source:n.id,target:t,rel:r,tension:true});
+}));
+const L=[...lmap.values()];
+const deg={};L.forEach(l=>{deg[l.source]=(deg[l.source]||0)+1;deg[l.target]=(deg[l.target]||0)+1;});
+N.forEach(n=>n.deg=deg[n.id]||0);
+const nb={};N.forEach(n=>nb[n.id]=new Set());
+L.forEach(l=>{nb[l.source].add(l.target);nb[l.target].add(l.source);});
+const relOf=(a,b)=>lmap.get([a,b].sort().join("|"))||{rel:"connected",tension:false};
+
+/* ---------- state ---------- */
+const S={q:"",ev:"all",ver:"all",layer:"all",view:"start",sel:null,from:"greene",to:"heritability",depth:2};
+/* Reading register. Plain language measurably helps experts too, so this is a
+   second register rather than a simplified mode — and the default for a first
+   visit, because someone who wants the full entry will find the switch. */
+let REG=(()=>{try{return localStorage.getItem("ha_register")||"plain";}catch(e){return "plain";}})();
+function setRegister(r){
+  REG=r;try{localStorage.setItem("ha_register",r);}catch(e){}
+  if(S.sel)open(S.sel);
+}
+/* distance from a node to every other node it can reach */
+function reachFrom(id,cap){
+  const d={[id]:0};let f=[id],step=0;
+  while(f.length&&step<(cap||99)){
+    const nx=[];step++;
+    for(const u of f)for(const v of nb[u])if(d[v]===undefined){d[v]=step;nx.push(v);}
+    f=nx;
+  }
+  return d;
+}
+const visible=n=>{
+  const s=S.q.trim().toLowerCase();
+  const okQ=!s||n.label.toLowerCase().includes(s)||(n.def||"").toLowerCase().includes(s)||
+            (n.src||[]).join(" ").toLowerCase().includes(s)||LAYERS[n.layer].n.toLowerCase().includes(s);
+  const okE=S.ev==="all"||(S.ev==="disputed"?(n.contra||[]).length>0:n.ev===S.ev);
+  const okV=S.ver==="all"||(S.ver==="audited"?n.ver==="audited":n.ver!=="audited");
+  const okL=S.layer==="all"||n.layer===S.layer;
+  return okQ&&okE&&okV&&okL;
+};
+const filterCount=()=>["ev","ver","layer"].filter(k=>S[k]!=="all").length;
+
+/* ---------- graph ---------- */
+const svg=d3.select("#graph"),wrap=document.getElementById("vMap");
+let W=wrap.clientWidth||360,H=wrap.clientHeight||480;
+const g=svg.append("g");
+const zoom=d3.zoom().scaleExtent([.08,4]).on("zoom",e=>{
+  g.attr("transform",e.transform);
+  const k=e.transform.k;
+  g.selectAll("g.nd text").attr("display",d=>{
+    if(k>=.72)return null;
+    if(k>=.45)return d.deg>=6?null:"none";
+    return d.deg>=10?null:"none";
+  }).attr("font-size",d=>{
+    const base=d.deg>=7?11.5:10.5;
+    return k<.6?Math.min(base/k*.62,22):base;
+  });
+});
+svg.call(zoom).on("dblclick.zoom",null);
+const mob=()=>window.innerWidth<900;
+const rad=n=>Math.max(10,Math.min(26,9+n.deg*1.25))*(mob()?.88:1);
+const evColor=n=>({solid:"var(--ink)",moderate:"#96631d",contested:"#a8391f",failed:"#7d2413",literary:"#5c6a7d",emerging:"#2f5c96"})[n.ev]||"var(--ink)";
+const evDash=n=>n.ev==="literary"?"2 4":null;  /* one dash channel only — dashes below ~3px read as noise */
+
+const sim=d3.forceSimulation(N)
+ .force("link",d3.forceLink(L).id(d=>d.id).distance(mob()?54:82).strength(.33))
+ .force("charge",d3.forceManyBody().strength(mob()?-175:-300))
+ .force("center",d3.forceCenter(W/2,H/2))
+ .force("collide",d3.forceCollide(d=>rad(d)+(mob()?12:18)))
+ .force("x",d3.forceX(W/2).strength(.05)).force("y",d3.forceY(H/2).strength(.06));
+
+const link=g.append("g").attr("fill","none").selectAll("line").data(L).join("line")
+ .attr("stroke",d=>d.tension?"#a8391f":"#aab5c6")
+ .attr("stroke-width",d=>d.tension?2:1.4)
+ .attr("stroke-dasharray",d=>d.tension?"5 4":null);
+
+const node=g.append("g").selectAll("g").data(N).join("g")
+ .attr("class","nd")
+ .attr("tabindex",0).attr("role","button")
+ .attr("aria-label",d=>`${d.label}. ${EVN[d.ev]}. ${d.ver==="audited"?"Sources checked":"Not yet verified"}. ${d.deg} connections.`)
+ .style("cursor","pointer")
+ .call(d3.drag()
+   .on("start",(e,d)=>{if(!e.active)sim.alphaTarget(.24).restart();d.fx=d.x;d.fy=d.y;})
+   .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y;})
+   .on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.pinned=true;d.fx=e.x;d.fy=e.y;markPins();}))
+ .on("click",(e,d)=>{e.stopPropagation();open(d.id);})
+ .on("keydown",(e,d)=>{
+   if(e.key==="Enter"||e.key===" "){e.preventDefault();open(d.id);return;}
+   if(e.key.startsWith("Arrow")){
+     e.preventDefault();
+     const ring=[...nb[d.id]].filter(id=>visible(byId[id]));
+     if(!ring.length)return;
+     const cur=ring.indexOf(S.sel);
+     const step=(e.key==="ArrowRight"||e.key==="ArrowDown")?1:-1;
+     const nx=ring[((cur<0?0:cur+step)+ring.length)%ring.length];
+     focusNode(nx);
+   }
+ });
+
+node.append("circle").attr("r",d=>rad(d))
+ .attr("fill",d=>d.ver==="audited"?LAYERS[d.layer].c:"#fff")
+ .attr("fill-opacity",d=>d.ver==="audited"?.93:1)
+ .attr("stroke",evColor).attr("stroke-width",2.4).attr("stroke-dasharray",evDash);
+node.filter(d=>d.ver!=="audited").append("circle").attr("r",d=>rad(d)*.4)
+ .attr("fill",d=>LAYERS[d.layer].c).attr("fill-opacity",.3);
+node.append("circle").attr("class","pin").attr("r",4.2).attr("cx",d=>rad(d)*.72).attr("cy",d=>-rad(d)*.72)
+ .attr("fill","#16233f").attr("stroke","#fff").attr("stroke-width",1.6).attr("display","none");
+node.append("text").text(d=>d.label)
+ .attr("font-family","Inter,sans-serif").attr("font-size",d=>d.deg>=7?11.5:10.5)
+ .attr("font-weight",d=>d.deg>=7?700:600).attr("fill","#16233f").attr("text-anchor","middle")
+ .attr("dy",d=>rad(d)+13).attr("paint-order","stroke").attr("stroke","#f5f6f3").attr("stroke-width",3.5);
+
+sim.on("tick",()=>{
+  link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  node.attr("transform",d=>`translate(${d.x},${d.y})`);
+});
+svg.on("click",()=>closeSheet());
+
+function focusNode(id){
+  const el=node.filter(d=>d.id===id).node();
+  if(el)el.focus();
+  open(id);centre(id);
+}
+function centre(id){
+  const n=byId[id];if(n.x==null||n.y==null)return;
+  const cbox=svg.node().getBoundingClientRect();
+  if(!cbox.width||!cbox.height)return;
+  const t=d3.zoomTransform(svg.node());
+  const tx=W/2-n.x*t.k,ty=(mob()?H*.3:H/2)-n.y*t.k;
+  if(!isFinite(tx)||!isFinite(ty)||!isFinite(t.k))return;
+  svg.transition().duration(400).call(zoom.transform,
+    d3.zoomIdentity.translate(tx,ty).scale(t.k));
+}
+function markPins(){
+  node.select("circle.pin").attr("display",d=>d.pinned?null:"none");
+  const n=N.filter(d=>d.pinned).length;
+  const b=document.getElementById("zUnpin");
+  b.style.display=n?"flex":"none";b.setAttribute("aria-label",`Release ${n} pinned bubble${n===1?"":"s"}`);
+}
+function releasePins(){N.forEach(d=>{d.pinned=false;d.fx=null;d.fy=null;});markPins();sim.alpha(.4).restart();}
+function fitAll(dur=450){
+  /* d3.zoom constrains against the canvas extent, so calling this while the map
+     view is still hidden (zero-size) produces a NaN transform that then poisons
+     every later transition. Fit once the map is actually on screen instead. */
+  const box=svg.node().getBoundingClientRect();
+  if(!box.width||!box.height)return;
+  const vis=N.filter(n=>n.x!=null&&visible(n));
+  const set=vis.length?vis:N.filter(n=>n.x!=null);
+  if(!set.length)return;
+  const pad=mob()?34:56;
+  const xs=set.map(n=>n.x),ys=set.map(n=>n.y);
+  const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const bw=Math.max(x1-x0,1),bh=Math.max(y1-y0,1);
+  const k=Math.max(.08,Math.min(2,Math.min((W-pad*2)/bw,(H-pad*2)/bh)));
+  const cx=(x0+x1)/2,cy=(y0+y1)/2;
+  const tx=W/2-cx*k,ty=H/2-cy*k;
+  /* the first fit runs before the map view has ever been shown, so it can be
+     handed a zero-size canvas; applying a non-finite transform poisons the
+     zoom state for every later transition */
+  if(!isFinite(tx)||!isFinite(ty)||!isFinite(k))return;
+  svg.transition().duration(dur).call(zoom.transform,
+    d3.zoomIdentity.translate(tx,ty).scale(k));
+}
+document.getElementById("zIn").onclick=()=>svg.transition().duration(200).call(zoom.scaleBy,1.45);
+document.getElementById("zOut").onclick=()=>svg.transition().duration(200).call(zoom.scaleBy,1/1.45);
+document.getElementById("zFit").onclick=()=>{S.sel=null;paintGraph();if(mob())document.getElementById("sheet").classList.remove("on");fitAll();};
+
+/* layer clustering — gives the whole-map view visible structure instead of a hairball */
+const LKEYS=Object.keys(LAYERS);
+function anchors(){
+  const R=Math.min(W,H)*(mob()?.42:.38);
+  const a={};LKEYS.forEach((k,i)=>{
+    const t=(i/LKEYS.length)*Math.PI*2-Math.PI/2;
+    a[k]=[W/2+Math.cos(t)*R,H/2+Math.sin(t)*R];});
+  return a;
+}
+let grouped=true;
+function applyGrouping(){
+  const a=anchors();
+  if(grouped){
+    sim.force("x",d3.forceX(d=>a[d.layer][0]).strength(.13))
+       .force("y",d3.forceY(d=>a[d.layer][1]).strength(.13));
+  }else{
+    sim.force("x",d3.forceX(W/2).strength(.05)).force("y",d3.forceY(H/2).strength(.06));
+  }
+  sim.alpha(.55).restart();
+}
+document.getElementById("zGroup").onclick=e=>{
+  grouped=!grouped;
+  e.currentTarget.setAttribute("aria-pressed",grouped);
+  applyGrouping();
+  setTimeout(()=>fitAll(600),1100);
+};
+
+/* ---------- render ---------- */
+function paintGraph(){
+  const V=new Set(N.filter(visible).map(n=>n.id));
+  const D=S.sel?reachFrom(S.sel):null;
+  const lim=S.depth;
+  const shade=id=>{
+    if(!V.has(id))return .1;
+    if(!D)return 1;
+    const d=D[id];
+    if(d===undefined)return .07;          // unreachable
+    if(d===0)return 1;
+    if(d>lim)return .09;
+    return d===1?.96:d===2?.5:.28;
+  };
+  node.attr("opacity",d=>shade(d.id))
+      .attr("tabindex",d=>V.has(d.id)?0:-1);
+  node.select("circle")
+      .attr("stroke-width",d=>{
+        if(d.id===S.sel)return 5.5;
+        if(D&&D[d.id]===1)return 3.4;
+        return 2.4;});
+  link.attr("stroke-opacity",l=>{
+    if(!S.sel)return(V.has(l.source.id)&&V.has(l.target.id))?.5:.04;
+    const a=D[l.source.id],b=D[l.target.id];
+    if(a===undefined||b===undefined)return .03;
+    const m=Math.max(a,b);
+    if(m>lim)return .03;
+    return m===1?.95:m===2?.35:.16;})
+   .attr("stroke-width",l=>{
+    if(!S.sel)return l.tension?2:1.4;
+    const m=Math.max(D[l.source.id]??99,D[l.target.id]??99);
+    return m===1?(l.tension?2.8:2.2):(l.tension?2:1.4);});
+  const reached=D?Object.keys(D).filter(k=>D[k]<=lim).length:0;
+  document.getElementById("gCount").textContent=S.sel
+    ? `${byId[S.sel].label}: ${reached-1} of ${N.length-1} within ${lim===9?"any":lim} step${lim===1?"":"s"}`
+    : `${V.size} of ${N.length} · ${L.filter(l=>l.tension).length} disputes`;
+  const em=document.getElementById("empty");
+  if(em){
+    em.hidden=V.size>0;
+    if(V.size===0){
+      const bits=[];
+      if(S.q.trim())bits.push(`the search "${S.q.trim()}"`);
+      if(S.ev!=="all")bits.push(`evidence grade "${S.ev}"`);
+      if(S.ver!=="all")bits.push(S.ver==="audited"?"sources checked":"unverified only");
+      if(S.layer!=="all")bits.push(`the ${LAYERS[S.layer].n} layer`);
+      document.getElementById("emptyWhy").textContent=
+        `No construct matches ${bits.join(" plus ")}. That combination is genuinely empty — it is not an error.`;
+      document.getElementById("onboard").hidden=true;
+    }
+  }
+}
+function plainCoverage(){return N.filter(x=>x.plain).length;}
+function pills(n){
+  return `<span class="pill ${n.ev}">${EVN[n.ev]}</span>`+
+         `<span class="pill ${n.ver}">${n.ver==="audited"?"sources checked":"unverified"}</span>`;
+}
+function paintBrowse(){
+  const gr={};N.filter(visible).forEach(n=>(gr[n.layer]=gr[n.layer]||[]).push(n));
+  const html=Object.entries(LAYERS).filter(([k])=>gr[k]).map(([k,l])=>`
+    <div class="grp"><h2><span class="swatch" style="background:${l.c}"></span>${l.n}</h2>
+    ${gr[k].sort((a,b)=>b.deg-a.deg).map(n=>`
+      <button class="card" data-go="${n.id}">
+        <div class="hd"><h3>${n.label}</h3></div>
+        <p>${n.def.split(". ")[0]}.</p>
+        <div class="tags">${pills(n)}</div>
+      </button>`).join("")}</div>`).join("");
+  document.getElementById("browseScroll").innerHTML=
+    `<p class="hint">${N.filter(visible).length} constructs. Filled bubbles and “sources checked” tags mark nodes whose citations were retrieved and verified; “unverified” means carried over and not yet re-checked.</p>`+
+    (html||`<p class="hint"><strong>Nothing matches those filters.</strong> That combination is genuinely empty rather than broken — try clearing one of them.</p>`);
+  bindGo("browseScroll");
+}
+function paintTensions(){
+  const T=[];N.filter(visible).forEach(n=>(n.contra||[]).forEach(([t,r])=>{if(byId[t])T.push([n,byId[t],r]);}));
+  document.getElementById("tensionScroll").innerHTML=
+    `<p class="hint">${T.length} recorded disputes. A map where everything agrees has been smoothed rather than mapped — these are the places where two things here cannot both be fully right.</p>`+
+    (T.map(([a,b,r])=>`<div class="tension"><div class="pair">${a.label} &nbsp;↔&nbsp; ${b.label}</div><p>${r}</p>
+      <div class="jump"><button class="chip" data-go="${a.id}">${a.label}</button><button class="chip" data-go="${b.id}">${b.label}</button></div></div>`).join("")
+     ||`<p class="hint"><strong>No disputes match those filters.</strong> Either nothing here is contested, or the filter is too narrow.</p>`);
+  bindGo("tensionScroll");
+}
+function findPath(a,b){
+  if(a===b)return[a];
+  const prev={},seen=new Set([a]);let f=[a];
+  while(f.length){const nx=[];
+    for(const u of f)for(const v of nb[u]){
+      if(seen.has(v))continue;seen.add(v);prev[v]=u;
+      if(v===b){const p=[b];let c=b;while(c!==a){c=prev[c];p.unshift(c);}return p;}
+      nx.push(v);}
+    f=nx;}
+  return null;
+}
+function paintTrace(){
+  const opts=sel=>N.slice().sort((x,y)=>x.label.localeCompare(y.label))
+    .map(n=>`<option value="${n.id}"${n.id===sel?" selected":""}>${n.label}</option>`).join("");
+  const p=findPath(S.from,S.to);
+  let body;
+  if(!p)body=`<p class="hint">No route exists between these two yet. That is information: the atlas has not established a connection.</p>`;
+  else if(p.length===1)body=`<p class="hint">Same construct.</p>`;
+  else body=`<p class="hint">${p.length-1} step${p.length>2?"s":""}. Each states the relationship the atlas actually records, not just that a line exists.</p>`+
+    p.slice(0,-1).map((u,i)=>{const v=p[i+1],r=relOf(u,v);
+      return `<div class="tension" style="border-left-color:${r.tension?'var(--contested)':LAYERS[byId[u].layer].c}">
+        <div class="pair">${byId[u].label} → ${byId[v].label}</div>
+        <p>${r.tension?"<strong>In tension:</strong> ":""}${r.rel}</p>
+        <div class="jump"><button class="chip" data-go="${u}">${byId[u].label}</button><button class="chip" data-go="${v}">${byId[v].label}</button></div></div>`;}).join("");
+  document.getElementById("traceScroll").innerHTML=
+    `<div class="selrow">
+      <div class="selwrap"><label for="selFrom">From</label><select id="selFrom">${opts(S.from)}</select></div>
+      <div class="selwrap"><label for="selTo">To</label><select id="selTo">${opts(S.to)}</select></div>
+    </div>`+body;
+  document.getElementById("selFrom").onchange=e=>{S.from=e.target.value;paintTrace();};
+  document.getElementById("selTo").onchange=e=>{S.to=e.target.value;paintTrace();};
+  bindGo("traceScroll");
+}
+function bindGo(id){
+  document.getElementById(id).querySelectorAll("[data-go]").forEach(b=>
+    b.onclick=()=>{open(b.dataset.go);if(S.view!=="map")setView("map");centre(b.dataset.go);});
+}
+/* ================= PLAY — quiz, expeditions, connection puzzle =================
+   Every question and every route below is generated from, or points at, the node
+   data above. Nothing here asserts a fact the atlas does not already carry. */
+const PKEY="ha_play_v1";
+function pLoad(){try{const r=JSON.parse(localStorage.getItem(PKEY));return r&&typeof r==="object"?r:{};}catch(e){return{};}}
+function pSave(){try{localStorage.setItem(PKEY,JSON.stringify(P));}catch(e){}}
+const P=pLoad();
+P.quizBest=P.quizBest||0;P.quizRounds=P.quizRounds||0;P.exped=P.exped||{};P.puz=P.puz||{};
+
+function shuf(a,rnd){rnd=rnd||Math.random;const x=a.slice();
+  for(let i=x.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));const t=x[i];x[i]=x[j];x[j]=t;}return x;}
+function pick(a,rnd){return a[Math.floor((rnd||Math.random)()*a.length)];}
+function sample(a,k,rnd){return shuf(a,rnd).slice(0,k);}
+/* first k sentences — avoids lookbehind for older mobile Safari */
+function sent(t,k){
+  const s=String(t||"").trim();if(!s)return"";k=k||1;
+  let start=0,count=0,out="";
+  for(let i=0;i<s.length&&count<k;i++){
+    if(s[i]==="."&&(i+1>=s.length||s[i+1]===" ")){out+=s.slice(start,i+1);start=i+1;count++;}
+  }
+  return (out.trim()||s);
+}
+/* inherited nodes deliberately carry no rep/mag/bound text, so fall through to
+   mech, which every node has. Without this the quiz shows a blank explanation. */
+function whyOf(n,k){k=k||2;return sent(n.rep,k)||sent(n.mag,k)||sent(n.mech,k)||sent(n.def,k);}
+/* recorded link and tension reasons are sentence fragments ("corrected by",
+   "molecular estimates fall short"), so they need a capital when shown alone */
+const cap=t=>{t=String(t||"").trim();return t?t.charAt(0).toUpperCase()+t.slice(1):"";};
+function seeded(str){
+  let h=2166136261;
+  for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
+  return function(){h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};
+}
+const todayKey=()=>new Date().toISOString().slice(0,10);
+
+/* ---------- expeditions ---------- */
+const EXPED=[
+{id:"folklore",ic:"✕",name:"What didn't survive",
+ blurb:"Seven famous findings that broke — and one failure found inside this document. The most useful tour here, because most of these are still being taught.",
+ stops:[
+  ["power_posing","Start with the one that reached tens of millions of people. Read the replication record before the claim: that ordering is the whole method of this atlas."],
+  ["ego_depletion","A model that organised a decade of self-control research. Notice the pattern repeating — enormous citation count, then a multi-lab attempt that came back flat."],
+  ["wm_training","An entire consumer industry rests on this. Watch for the distinction between getting better at the task and getting better at anything else."],
+  ["mehrabian","The statistic every presentation-skills course quotes. Look at what the original study actually measured versus what the number is used to claim."],
+  ["candidate_gene_failure","The same collapse, in genetics rather than social psychology. Worth seeing that this is not one field's embarrassment."],
+  ["oxytocin","A molecule with a nickname that outran its evidence. The nickname is doing work the data cannot."],
+  ["fabrication_risk","The last stop is this atlas auditing itself — a fabricated citation found in its own earlier version. A map that grades everything else has to grade itself too."]],
+ end:"None of these were fringe. Each was published, cited, taught, and in several cases sold. The common thread is not stupidity — it is that a result which feels explanatory gets repeated long before anyone re-runs it. That is why every bubble here carries a replication record and a verification status."},
+
+{id:"inherit",ic:"❖",name:"How much of you is inherited?",
+ blurb:"Seven stops through behaviour genetics, ending somewhere more interesting — and much less deterministic — than the headline numbers suggest.",
+ stops:[
+  ["heritability","Everything downstream depends on getting this one right. Heritability is a property of a population, not of you — four boundaries are listed, and most popular uses of the word violate all four."],
+  ["twin_method","The machinery that produces the numbers, and the assumption it cannot fully test. Graded contested for exactly that reason."],
+  ["turkheimer_laws","The regularities that show up no matter which trait you pick. Treat these as the empirical floor of the field."],
+  ["wilson_effect","Now the first complication: the number is not fixed. It moves across the lifespan, in a direction most people find counterintuitive."],
+  ["gene_env_correlation","The second complication, and the sharpest. Some of what gets counted as genetic is running through the environment."],
+  ["nonshared_env","What is left over once genes and shared family environment are subtracted — and why its name is misleading."],
+  ["personality_heritability","With all the caveats loaded, here is what the estimates actually look like for traits."]],
+ end:"The headline number — around half — is real and about as replicated as anything in psychology. But it is a statement about variance in a population, it moves with age, it absorbs effects that travel through the environment, and it says nothing about whether a trait can be changed. Every one of those qualifications is load-bearing."},
+
+{id:"firstfive",ic:"◐",name:"The first five seconds",
+ blurb:"What happens when someone meets you, in the order it happens. Six stops from the instant judgement to the thing that actually makes people like you.",
+ stops:[
+  ["thin_slicing","Begin with the speed. Judgements form from very short exposures, and the interesting question is how accurate they are rather than whether they occur."],
+  ["big_two","What the judgement is made of. Two dimensions — roughly warmth and capability — carry most of it, and warmth is usually weighted first."],
+  ["axes_curvilinear","Immediately, the correction. The two dimensions are not independent, which quietly breaks the advice to maximise both."],
+  ["halo","How one judged dimension leaks into all the others. This is the mechanism that makes a first impression self-reinforcing."],
+  ["fae","And the systematic error in the inference: reading behaviour as character while discounting the situation. Note that its own grade is contested."],
+  ["huang","Finish with something small and actionable that survived testing — asking follow-up questions."]],
+ end:"The sequence is fast, partly accurate, and biased in a direction you can name. Notice the shape of the useful advice at the end: not a power move, just a question. The interventions with the best evidence in this atlas are almost all that unglamorous."},
+
+{id:"oversell",ic:"⚡",name:"Why influence frameworks oversell",
+ blurb:"Seven stops from the research base into the commercial tier built on top of it, watching what gets lost in the translation.",
+ stops:[
+  ["big_two","The research foundation most applied frameworks are implicitly built on, whether or not they cite it."],
+  ["reciprocity","The best-evidenced of the classic influence principles. Start here so the comparison later is fair."],
+  ["social_proof","Same family, weaker footing — graded contested. The gap between these two is the point of this expedition."],
+  ["obedience","The most famous influence study ever run, and a case study in how a result becomes a cultural fact faster than it becomes a settled one."],
+  ["elm","The model that specifies when persuasion routes through argument quality versus surface cues. Also contested — and notice how rarely applied frameworks mention the boundary conditions."],
+  ["challenger","Now the commercial tier. Read its claims against the curvilinearity finding from the atlas spine."],
+  ["gap_selling","Graded literary — a practitioner framework with no independent evidence base. That grade is not an insult, it is a category."]],
+ end:"The commercial tier is not worthless; it is compressed. Each framework takes findings with boundary conditions and sells them as rules without them. The tell is the absence of a failure mode: any system that never says 'this will not work here' has removed the part of the research that made it true."},
+
+{id:"dark",ic:"◭",name:"The dark layer",
+ blurb:"Six stops into the traits people most want to read about, and the measurement disputes that make the popular version unreliable.",
+ stops:[
+  ["big_five","Start on solid ground — the trait model with the strongest base, so the contrast is visible."],
+  ["hexaco","The sixth-factor challenge, and the one that matters most for what follows."],
+  ["dark_triad","The popular construct. The live question is whether it is three things or one, and the answer changes what any of it predicts."],
+  ["narcissism","Where the single label hides two quite different presentations."],
+  ["psychopathy_measurement","A measurement dispute with real consequences — what counts as part of the construct is itself contested."],
+  ["dark_outcomes","Finally, the payoff question: what do these traits actually predict? Graded moderate, which is lower than the internet version implies."]],
+ end:"This layer has the widest gap in the atlas between public confidence and measurement quality. Three of six stops are graded contested. That does not mean the traits are fictional — it means the popular version, where a label explains someone's entire behaviour, is running far ahead of what the instruments can support."},
+
+{id:"change",ic:"↻",name:"Can you actually change?",
+ blurb:"Seven stops on malleability — what moves, what doesn't, and which of the famous self-improvement findings survived scrutiny.",
+ stops:[
+  ["trait_change","The direct evidence on whether personality moves. Graded solid, and the answer is more encouraging than the heritability literature is usually taken to imply."],
+  ["person_situation","The old argument about whether traits or situations drive behaviour, and the synthesis that ended it."],
+  ["growth_mindset","The most commercially successful change claim of the last two decades. Graded contested — read the effect sizes, not the framing."],
+  ["self_efficacy","An older, quieter construct that has held up better. Notice it is graded solid while the more famous one above is not."],
+  ["habit_formation","The mechanism underneath durable change, rather than the motivation to want it."],
+  ["wanting_liking","The dissociation that explains why you can pursue something you no longer enjoy — essential for understanding why change attempts fail."],
+  ["sdt","Close with the framework on what sustains a change once it starts."]],
+ end:"Change is real, slower than the self-help tier promises, and better predicted by structure than by resolve. The pattern across these stops: the constructs about mechanism held up, and the constructs about mindset did less well. That is worth sitting with."}
+];
+
+/* ---------- quiz question generators ---------- */
+const QGEN=[
+function(){ /* spot the failed replication */
+  const f=N.filter(n=>n.ev==="failed");if(!f.length)return null;
+  const t=pick(f),o=sample(N.filter(n=>n.ev!=="failed"),3);
+  if(o.length<3)return null;
+  return{kicker:"REPLICATION",ask:"Which of these did <em>not</em> survive replication?",
+    opts:shuf([t].concat(o)).map(n=>({id:n.id,text:n.label,ok:n.id===t.id})),
+    lead:t.label+" is the one that broke.",why:whyOf(t),node:t.id};
+},
+function(){ /* evidence grade */
+  const n=pick(N.filter(x=>EVN[x.ev]));
+  const wrong=shuf(Object.keys(EVN).filter(g=>g!==n.ev)).slice(0,3);
+  return{kicker:"EVIDENCE GRADE",ask:"How strong is the evidence for <em>"+n.label+"</em>?",
+    opts:shuf([n.ev].concat(wrong)).map(g=>({text:EVN[g],ok:g===n.ev})),
+    lead:"Graded "+EVN[n.ev]+".",why:whyOf(n),node:n.id};
+},
+function(){ /* real tension partner */
+  const cands=N.filter(n=>(n.contra||[]).some(c=>byId[c[0]]));
+  if(!cands.length)return null;
+  const n=pick(cands),real=pick((n.contra||[]).filter(c=>byId[c[0]]));
+  const banned=new Set((n.contra||[]).map(c=>c[0]));banned.add(n.id);
+  const o=sample(N.filter(x=>!banned.has(x.id)),3);
+  if(o.length<3)return null;
+  return{kicker:"LIVE DISPUTE",ask:"Which of these is <em>"+n.label+"</em> recorded as being in tension with?",
+    opts:shuf([{id:real[0],text:byId[real[0]].label,ok:true}].concat(o.map(x=>({id:x.id,text:x.label,ok:false})))),
+    lead:byId[real[0]].label+".",why:real[1],node:real[0]};
+},
+function(){ /* which one is NOT connected */
+  const cands=N.filter(n=>nb[n.id].size>=3);
+  if(!cands.length)return null;
+  const n=pick(cands);
+  const ins=sample(Array.from(nb[n.id]),3).map(id=>({id:id,text:byId[id].label,ok:false}));
+  const outPool=N.filter(x=>x.id!==n.id&&!nb[n.id].has(x.id));
+  if(!outPool.length)return null;
+  const out=pick(outPool);
+  const p=findPath(n.id,out.id);
+  return{kicker:"THE NETWORK",ask:"Three of these link directly to <em>"+n.label+"</em>. Which one does not?",
+    opts:shuf(ins.concat([{id:out.id,text:out.label,ok:true}])),
+    lead:out.label+" has no direct link.",
+    why:"The atlas records no edge between "+n.label+" and "+out.label+
+      (p?". They are "+(p.length-1)+" hops apart — trace the route to see how they do connect.":". No route between them exists yet."),
+    node:n.id};
+},
+function(){ /* match the definition */
+  let n=null;
+  for(let i=0;i<12;i++){
+    const c=pick(N.filter(x=>x.def&&x.def.length>70));
+    if(sent(c.def,2).toLowerCase().indexOf(c.label.toLowerCase().split(" ")[0])===-1){n=c;break;}
+  }
+  if(!n)return null;
+  const same=N.filter(x=>x.layer===n.layer&&x.id!==n.id);
+  const o=sample(same.length>=3?same:N.filter(x=>x.id!==n.id),3);
+  if(o.length<3)return null;
+  return{kicker:"WHAT IS IT?",ask:"Which construct does this describe?",quote:sent(n.def,2),
+    opts:shuf([n].concat(o)).map(x=>({id:x.id,text:x.label,ok:x.id===n.id})),
+    lead:n.label+".",why:whyOf(n),node:n.id};
+}];
+
+const QLEN=10;
+function buildRound(){
+  const out=[],seen={};let guard=0;
+  while(out.length<QLEN&&guard++<500){
+    const q=QGEN[Math.floor(Math.random()*QGEN.length)]();
+    if(!q)continue;
+    const key=q.kicker+"|"+(q.node||"")+"|"+q.ask;
+    if(seen[key])continue;
+    seen[key]=1;out.push(q);
+  }
+  return out;
+}
+
+/* ---------- puzzle pairs ---------- */
+function puzzlePair(rnd){
+  rnd=rnd||Math.random;
+  for(let i=0;i<400;i++){
+    const a=pick(N,rnd),b=pick(N,rnd);
+    if(a.id===b.id)continue;
+    const p=findPath(a.id,b.id);
+    if(p&&p.length-1>=3&&p.length-1<=5)return{from:a.id,to:b.id,par:p.length-1};
+  }
+  const p=findPath(N[0].id,N[N.length-1].id);
+  return{from:N[0].id,to:N[N.length-1].id,par:p?p.length-1:3};
+}
+
+/* ---------- play state ---------- */
+S.mode="hub";
+const MODES={};
+let Q=null,E=null,Z=null,keepScroll=false;
+
+function playGo(mode){S.mode=mode;keepScroll=false;paintPlay();}
+function bindPeek(host){
+  host.querySelectorAll("[data-peek]").forEach(b=>b.onclick=()=>open(b.dataset.peek));
+}
+
+/* ---------- hub ---------- */
+/* Each mode registers itself in MODES with the card it wants on the hub, so the
+   hub has no knowledge of any particular mode. */
+function paintPlayHub(el){
+  const cards=Object.keys(MODES).map(k=>{
+    const m=MODES[k],best=m.best?m.best():"";
+    return `<button class="plmode" data-m="${k}"><span class="tic" aria-hidden="true">${m.ic}</span>
+       <span style="flex:1"><b>${m.name}</b><span>${m.blurb}</span>
+       ${best?`<span class="best">${best}</span>`:""}</span></button>`;
+  }).join("");
+  el.innerHTML=
+  `<p class="plintro">Ways to actually work the material rather than read past it. Progress is saved on this device only — no account, nothing sent anywhere.</p>
+   <div class="plmodes">${cards}</div>
+   <p class="hint">Every answer, route and hop links back to the full bubble — sources, boundary conditions, disputes and all.</p>`;
+  el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>playGo(b.dataset.m));
+}
+
+/* ---------- quiz ---------- */
+MODES.quiz={ic:"◆",name:"Quiz",paint:paintQuiz,
+  blurb:"Ten questions built from the map itself — spot the failed replication, grade the evidence, find the real dispute. Wrong answers explain themselves.",
+  best:()=>P.quizRounds?"BEST "+P.quizBest+"/"+QLEN+" · "+P.quizRounds+" round"+(P.quizRounds>1?"s":"")+" played":""};
+function paintQuiz(el){
+  if(!Q){Q={qs:buildRound(),i:0,score:0,chosen:null,streak:0,best:0};}
+  if(Q.i>=Q.qs.length){
+    const pc=Math.round(Q.score/Q.qs.length*100);
+    const rec=Q.score>P.quizBest;
+    if(rec)P.quizBest=Q.score;
+    P.quizRounds++;pSave();
+    el.innerHTML=
+    `<div class="plbar"><button class="plback" id="plHome">← All modes</button></div>
+     <div class="plwin">
+       <div class="big">${Q.score}/${Q.qs.length}</div>
+       <div class="lab">${pc}% · longest streak ${Q.best}</div>
+       <p>${rec?"<b>New best.</b> ":""}${pc===100?"Clean sweep — every grade and dispute called correctly.":pc>=70?"Solid. The misses are the useful part — they point at bubbles worth reading properly.":pc>=40?"Middling, which is the honest result for a first pass. The evidence grades are the hardest part and they are the point.":"Low, and not embarrassing: most of this contradicts what gets taught. Try an expedition first, then come back."}</p>
+     </div>
+     <div class="plnav">
+       <button class="plbtn go" id="plAgain">Play again</button>
+       <button class="plbtn" id="plToExp">Try an expedition</button>
+     </div>`;
+    document.getElementById("plHome").onclick=()=>{Q=null;playGo("hub");};
+    document.getElementById("plAgain").onclick=()=>{Q=null;paintPlay();};
+    document.getElementById("plToExp").onclick=()=>{Q=null;E=null;playGo("exped");};
+    return;
+  }
+  const q=Q.qs[Q.i],done=Q.chosen!==null;
+  const pct=Math.round(Q.i/Q.qs.length*100);
+  el.innerHTML=
+  `<div class="plbar">
+     <button class="plback" id="plHome">←</button>
+     <span class="grow plcount">QUESTION ${Q.i+1} OF ${Q.qs.length}</span>
+     <span class="plcount">SCORE ${Q.score}${Q.streak>1?" · 🔥"+Q.streak:""}</span>
+   </div>
+   <div class="pltrack"><i style="width:${pct}%"></i></div>
+   <div class="plcard">
+     <div class="plkicker">${q.kicker}</div>
+     <div class="plask">${q.ask}</div>
+     ${q.quote?`<div class="plquote">${q.quote}</div>`:""}
+   </div>
+   <div class="plopts">${q.opts.map((o,i)=>{
+      let cls="plopt";
+      if(done){
+        if(o.ok)cls+=" right";
+        else if(i===Q.chosen)cls+=" wrong";
+        else cls+=" muted";
+      }
+      const mk=done?(o.ok?"✓":(i===Q.chosen?"✕":String.fromCharCode(65+i))):String.fromCharCode(65+i);
+      return `<button class="${cls}" data-o="${i}"${done?" disabled":""}><span class="mk">${mk}</span><span>${o.text}</span></button>`;
+    }).join("")}</div>
+   ${done?`<div class="plwhy ${q.opts[Q.chosen].ok?"good":"bad"}">
+      <h4>${q.opts[Q.chosen].ok?"CORRECT":"NOT QUITE"} — ${q.lead}</h4>
+      <p>${cap(q.why)}</p>
+      ${q.node?`<div class="jump"><button class="chip" data-peek="${q.node}">Open ${byId[q.node].label}</button></div>`:""}
+     </div>
+     <div class="plnav"><button class="plbtn go" id="plNext">${Q.i+1>=Q.qs.length?"See result":"Next question"} →</button></div>`:""}`;
+  document.getElementById("plHome").onclick=()=>{Q=null;playGo("hub");};
+  el.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{
+    if(Q.chosen!==null)return;
+    Q.chosen=+b.dataset.o;
+    if(q.opts[Q.chosen].ok){Q.score++;Q.streak++;if(Q.streak>Q.best)Q.best=Q.streak;}
+    else Q.streak=0;
+    keepScroll=true;paintPlay();
+  });
+  const nx=document.getElementById("plNext");
+  if(nx)nx.onclick=()=>{Q.i++;Q.chosen=null;keepScroll=false;paintPlay();};
+  bindPeek(el);
+}
+
+/* ---------- expeditions ---------- */
+MODES.exped={ic:"❖",name:"Expeditions",paint:paintExped,
+  blurb:"Guided routes through the network, each a short walkthrough with a point to make. Best place to start if you don't know where to start.",
+  best:()=>{const d=EXPED.filter(x=>P.exped[x.id]).length;return d?d+"/"+EXPED.length+" COMPLETED":"";}};
+function paintExped(el){
+  if(!E){
+    el.innerHTML=
+    `<div class="plbar"><button class="plback" id="plHome">← All modes</button></div>
+     <p class="plintro">Each route is a short walkthrough with an argument to make. Roughly five minutes each.</p>
+     <div class="plmodes">${EXPED.map(x=>
+       `<button class="plmode" data-e="${x.id}"><span class="tic" aria-hidden="true">${x.ic}</span>
+         <span style="flex:1"><b>${x.name}</b><span>${x.blurb}</span>
+         <span class="best">${x.stops.length} STOPS${P.exped[x.id]?" · COMPLETED ✓":""}</span></span></button>`).join("")}</div>`;
+    document.getElementById("plHome").onclick=()=>playGo("hub");
+    el.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{
+      E={x:EXPED.filter(z=>z.id===b.dataset.e)[0],i:0};keepScroll=false;paintPlay();});
+    return;
+  }
+  const x=E.x,last=E.i>=x.stops.length;
+  if(last){
+    P.exped[x.id]=1;pSave();
+    const nextUp=EXPED.filter(z=>!P.exped[z.id]);
+    el.innerHTML=
+    `<div class="plbar"><button class="plback" id="plBack">← Routes</button><span class="grow plcount">${x.name.toUpperCase()}</span></div>
+     <div class="plwin">
+       <div class="big">✓</div>
+       <div class="lab">${x.stops.length} STOPS COMPLETE</div>
+       <p>${x.end}</p>
+     </div>
+     <div class="plnav">
+       ${nextUp.length?`<button class="plbtn go" id="plNextExp">Next: ${nextUp[0].name} →</button>`:`<button class="plbtn go" id="plQuiz">Test it with a quiz →</button>`}
+       <button class="plbtn" id="plRedo">Walk it again</button>
+     </div>`;
+    document.getElementById("plBack").onclick=()=>{E=null;keepScroll=false;paintPlay();};
+    document.getElementById("plRedo").onclick=()=>{E.i=0;keepScroll=false;paintPlay();};
+    const ne=document.getElementById("plNextExp");
+    if(ne)ne.onclick=()=>{E={x:nextUp[0],i:0};keepScroll=false;paintPlay();};
+    const qz=document.getElementById("plQuiz");
+    if(qz)qz.onclick=()=>{E=null;Q=null;playGo("quiz");};
+    return;
+  }
+  const st=x.stops[E.i],n=byId[st[0]];
+  el.innerHTML=
+  `<div class="plbar">
+     <button class="plback" id="plBack">←</button>
+     <span class="grow plcount">${x.name.toUpperCase()}</span>
+     <span class="plcount">${E.i+1}/${x.stops.length}</span>
+   </div>
+   <div class="pldots">${x.stops.map((s,i)=>`<i class="${i<E.i?"past":i===E.i?"on":""}"></i>`).join("")}</div>
+   <div class="plcard">
+     <div class="plkicker">STOP ${E.i+1} · ${LAYERS[n.layer].n.toUpperCase()}</div>
+     <div class="plask">${n.label}</div>
+     <div class="tags" style="margin-top:10px">${pills(n)}</div>
+   </div>
+   <p class="plframe">${st[1]}</p>
+   <div class="plwhy">
+     <h4>WHAT IT IS</h4>
+     <p>${sent(n.def,2)}</p>
+     <div class="jump"><button class="chip" data-peek="${n.id}">Open the full bubble</button></div>
+   </div>
+   <div class="plnav">
+     <button class="plbtn" id="plPrev"${E.i===0?" disabled":""}>← Back</button>
+     <button class="plbtn go" id="plNext">${E.i+1>=x.stops.length?"Finish":"Next stop"} →</button>
+   </div>`;
+  document.getElementById("plBack").onclick=()=>{E=null;keepScroll=false;paintPlay();};
+  document.getElementById("plPrev").onclick=()=>{if(E.i>0){E.i--;keepScroll=false;paintPlay();}};
+  document.getElementById("plNext").onclick=()=>{E.i++;keepScroll=false;paintPlay();};
+  bindPeek(el);
+}
+
+/* ---------- connection puzzle ---------- */
+function newPuzzle(daily){
+  const pr=daily?puzzlePair(seeded("ha-"+todayKey())):puzzlePair();
+  Z={from:pr.from,to:pr.to,par:pr.par,path:[pr.from],hints:0,daily:!!daily,peeked:null};
+}
+MODES.puzzle={ic:"⇄",name:"Connection puzzle",paint:paintPuzzle,
+  blurb:"Get from one construct to another by hopping through what links to what. A new challenge every day, plus unlimited random pairs.",
+  best:()=>{const d=Object.keys(P.puz).length;return d?d+" SOLVED":"";}};
+function paintPuzzle(el){
+  if(!Z)newPuzzle(true);
+  const cur=Z.path[Z.path.length-1],won=cur===Z.to;
+  const moves=Z.path.length-1;
+  const key=Z.from+">"+Z.to;
+  if(won&&!Z.saved){
+    Z.saved=true;
+    const prev=P.puz[key];
+    if(!prev||moves<prev)P.puz[key]=moves;
+    pSave();
+  }
+  const head=
+  `<div class="plbar">
+     <button class="plback" id="plHome">←</button>
+     <span class="grow plcount">${Z.daily?"DAILY · "+todayKey():"RANDOM PAIR"}</span>
+     <span class="plcount">PAR ${Z.par}</span>
+   </div>`;
+  if(won){
+    const verdict=moves<Z.par?"Under par — you found a shorter route than the atlas's own shortest path calculation was expecting.":
+      moves===Z.par?"Exactly par. That is the shortest route that exists.":
+      "Solved in "+moves+", par was "+Z.par+".";
+    el.innerHTML=head+
+    `<div class="plwin">
+       <div class="big">${moves}</div>
+       <div class="lab">HOPS · PAR ${Z.par}${Z.hints?" · "+Z.hints+" hint"+(Z.hints>1?"s":""):""}</div>
+       <p>${verdict}</p>
+     </div>
+     <div class="plcard">
+       <div class="plkicker">YOUR ROUTE</div>
+       <div class="plchain" style="margin:8px 0 0">${Z.path.map((id,i)=>
+         `${i?'<span class="arr">→</span>':""}<button class="hop" data-peek="${id}">${byId[id].label}</button>`).join("")}</div>
+     </div>
+     <div class="plnav">
+       <button class="plbtn go" id="plNew">New pair →</button>
+       ${Z.daily?"":`<button class="plbtn" id="plDaily">Today's challenge</button>`}
+     </div>`;
+    document.getElementById("plHome").onclick=()=>{Z=null;playGo("hub");};
+    document.getElementById("plNew").onclick=()=>{newPuzzle(false);keepScroll=false;paintPlay();};
+    const db=document.getElementById("plDaily");
+    if(db)db.onclick=()=>{newPuzzle(true);keepScroll=false;paintPlay();};
+    bindPeek(el);
+    return;
+  }
+  const rest=findPath(cur,Z.to);
+  const hintId=Z.peeked&&rest&&rest.length>1?rest[1]:null;
+  const opts=Array.from(nb[cur]).map(id=>byId[id]).sort((a,b)=>a.label.localeCompare(b.label));
+  el.innerHTML=head+
+  `<div class="pltarget">
+     <span style="flex:1"><span class="lab">GET TO</span><b>${byId[Z.to].label}</b></span>
+     <span class="plcount">${moves} HOP${moves===1?"":"S"}</span>
+   </div>
+   <div class="plchain">${Z.path.map((id,i)=>
+     `${i?'<span class="arr">→</span>':""}<button class="hop${i===Z.path.length-1?" now":""}" data-peek="${id}">${byId[id].label}</button>`).join("")}</div>
+   <p class="hint">Standing on <strong>${byId[cur].label}</strong>. Pick what it connects to.${rest?" Shortest remaining route: "+(rest.length-1)+" hop"+(rest.length-1===1?"":"s")+".":""}</p>
+   <div class="plnb">${opts.map(n=>
+     `<button class="plopt${hintId===n.id?" hint":""}" data-hop="${n.id}">
+        <span class="mk" style="background:${LAYERS[n.layer].c};border-color:${LAYERS[n.layer].c}"></span>
+        <span>${n.label}${hintId===n.id?" &nbsp;← this one":""}</span></button>`).join("")}</div>
+   <div class="plnav">
+     <button class="plbtn" id="plUndo"${moves?"":" disabled"}>↶ Undo</button>
+     <button class="plbtn" id="plHint">Hint</button>
+     <button class="plbtn" id="plNew">New pair</button>
+   </div>`;
+  document.getElementById("plHome").onclick=()=>{Z=null;playGo("hub");};
+  document.getElementById("plUndo").onclick=()=>{if(Z.path.length>1){Z.path.pop();Z.peeked=null;keepScroll=true;paintPlay();}};
+  document.getElementById("plHint").onclick=()=>{Z.peeked=1;Z.hints++;keepScroll=true;paintPlay();};
+  document.getElementById("plNew").onclick=()=>{newPuzzle(false);keepScroll=false;paintPlay();};
+  el.querySelectorAll("[data-hop]").forEach(b=>b.onclick=()=>{
+    Z.path.push(b.dataset.hop);Z.peeked=null;keepScroll=false;paintPlay();});
+  bindPeek(el);
+}
+
+function paintPlay(){
+  const el=document.getElementById("playScroll");
+  const keep=keepScroll?el.scrollTop:0;
+  (MODES[S.mode]?MODES[S.mode].paint:paintPlayHub)(el);
+  el.scrollTop=keep;
+  keepScroll=false;
+}
+
+function paint(){
+  paintGraph();
+  if(S.view==="start")paintStart();
+  else if(S.view==="browse")paintBrowse();
+  else if(S.view==="tensions")paintTensions();
+  else if(S.view==="trace")paintTrace();
+  else if(S.view==="play")paintPlay();
+}
+
+/* ---------- detail ---------- */
+let lastFocus=null;
+function open(id){
+  S.sel=id;const n=byId[id];paintGraph();
+  document.getElementById("dBar").style.background=LAYERS[n.layer].c;
+  document.getElementById("dTitle").textContent=n.label;
+  document.getElementById("dMeta").innerHTML=pills(n)+`<span class="pill literary">${LAYERS[n.layer].n}</span>`;
+  const S2=[];
+  const FULL=REG==="full"||!n.plain;   /* no plain version written → show everything */
+  /* ---- reading register ---- */
+  S2.push(`<div class="register" role="group" aria-label="Reading level">
+    <button data-reg="plain" aria-pressed="${REG==="plain"}">Plain English</button>
+    <button data-reg="full" aria-pressed="${REG==="full"}">Full entry</button>
+  </div>`);
+  if(REG==="plain"){
+    if(n.plain){
+      S2.push(`<div class="plainbox"><dl>
+        <dt>WHAT IT IS</dt><dd>${n.plain.what}</dd>
+        <dt>WHY IT MATTERS</dt><dd>${n.plain.why}</dd>
+        <dt>THE CATCH</dt><dd class="catch">${n.plain.catch}</dd>
+      </dl></div>`);
+    }else{
+      S2.push(`<div class="noplain"><strong>No plain-English version written yet.</strong>
+        ${plainCoverage()} of ${N.length} constructs have one so far. Showing the full entry below —
+        it is denser, not different.</div>`);
+    }
+  }
+  /* ---- connection analysis ---- */
+  const D=reachFrom(id);
+  const at=k=>Object.keys(D).filter(x=>D[x]===k);
+  const r1=at(1),r2=at(2),r3=at(3);
+  const total=Object.keys(D).length-1;
+  const pct=Math.round(total/(N.length-1)*100);
+  const tens=(n.contra||[]).filter(([t])=>byId[t]);
+  const allies=(n.links||[]).filter(([t])=>byId[t]&&!tens.some(([c])=>c===t));
+  const isolated=N.length-1-total;
+  S2.push(`<div class="reach">
+    <h3>CONNECTION MAP</h3>
+    <div class="rings">
+      <div class="ring r1"><b>${r1.length}</b><span>direct</span></div>
+      <div class="ring r2"><b>${r2.length}</b><span>2 steps</span></div>
+      <div class="ring r3"><b>${r3.length}</b><span>3 steps</span></div>
+    </div>
+    <div class="bar2"><i style="width:${pct}%"></i></div>
+    <p class="cap">Reaches <strong>${total} of ${N.length-1}</strong> other constructs (${pct}%)${isolated>0?`; ${isolated} are not connected to it by any recorded path`:`; it reaches every other construct in the atlas`}. ${tens.length?`<strong>${tens.length}</strong> of its direct links ${tens.length===1?"is":"are"} a live dispute.`:`None of its direct links are disputed.`}</p>
+    ${allies.length?`<div class="fits good"><h4>PLAYS WELL WITH</h4><div class="links">${allies.slice(0,8).map(([t,r])=>`<button class="chip" data-go="${t}"><span class="swatch" style="background:${LAYERS[byId[t].layer].c}"></span>${byId[t].label}<small>— ${r}</small></button>`).join("")}</div></div>`:""}
+    ${tens.length?`<div class="fits bad"><h4>DOES NOT PLAY WELL WITH</h4><div class="links">${tens.map(([t,r])=>`<button class="chip warn" data-go="${t}">${byId[t].label}</button>`).join("")}</div></div>`:""}
+  </div>`);
+  if(FULL){
+  S2.push(`<div class="sec"><h3>WHAT IT IS</h3><p>${n.def}</p></div>`);
+  if(n.mech)S2.push(`<div class="sec"><h3>MECHANISM</h3><p>${n.mech}</p></div>`);
+  if(n.mag)S2.push(`<div class="sec"><h3>MAGNITUDE</h3><p>${n.mag}</p></div>`);
+  if(n.bound)S2.push(`<div class="sec flag"><h3>WHERE IT STOPS WORKING</h3><p>${n.bound}</p></div>`);
+  if(n.rep)S2.push(`<div class="sec"><h3>REPLICATION</h3><p>${n.rep}</p></div>`);
+  }
+  const ap=[];
+  if(n.intra)ap.push(`<li><strong>In yourself:</strong> ${n.intra}</li>`);
+  if(n.inter)ap.push(`<li><strong>Between people:</strong> ${n.inter}</li>`);
+  if(n.app)ap.push(`<li><strong>Applied:</strong> ${n.app}</li>`);
+  if(FULL&&ap.length)S2.push(`<div class="sec"><h3>WHAT IT MEANS</h3><ul>${ap.join("")}</ul></div>`);
+  if((n.contra||[]).length)S2.push(`<div class="sec flag"><h3>IN TENSION WITH</h3><ul>${
+    n.contra.map(([t,r])=>`<li><strong>${byId[t]?byId[t].label:t}:</strong> ${r}</li>`).join("")}</ul>
+    <div class="links" style="margin-top:10px">${n.contra.filter(([t])=>byId[t]).map(([t])=>
+      `<button class="chip warn" data-go="${t}">${byId[t].label}</button>`).join("")}</div></div>`);
+  if((n.links||[]).length)S2.push(`<div class="sec"><h3>CONNECTED TO</h3><div class="links">${
+    n.links.filter(([t])=>byId[t]).map(([t,r])=>
+      `<button class="chip" data-go="${t}"><span class="swatch" style="background:${LAYERS[byId[t].layer].c}"></span>${byId[t].label}<small>— ${r}</small></button>`).join("")}</div></div>`);
+  if(n.open)S2.push(`<div class="sec note"><h3>OPEN QUESTIONS</h3><p>${n.open}</p></div>`);
+  S2.push(`<div class="sec src"><h3>SOURCES</h3><ul>${n.src.map(s=>`<li>${s}</li>`).join("")}</ul></div>`);
+  if(n.ver!=="audited")S2.push(`<div class="sec note"><h3>VERIFICATION</h3><p>Carried over from an earlier version and not re-checked against retrieved sources. One fabricated citation was found elsewhere in v1, so treat these references as unconfirmed until audited.</p></div>`);
+  const bd=document.getElementById("dBody");
+  bd.innerHTML=S2.join("");
+  bd.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{open(b.dataset.go);if(S.view==="map")centre(b.dataset.go);});
+  bd.querySelectorAll("[data-reg]").forEach(b=>b.onclick=()=>setRegister(b.dataset.reg));
+  const sh=document.getElementById("sheet");
+  if(!sh.classList.contains("on")&&mob())lastFocus=document.activeElement;
+  sh.classList.add("on");bd.scrollTop=0;
+}
+function closeSheet(){
+  S.sel=null;paintGraph();
+  if(mob()){document.getElementById("sheet").classList.remove("on");if(lastFocus)lastFocus.focus();}
+}
+document.getElementById("dClose").onclick=closeSheet;
+
+/* ---------- controls ---------- */
+function mkOpt(host,key,val,label,color){
+  const b=document.createElement("button");
+  b.className="opt";b.type="button";b.dataset.val=val;b.setAttribute("aria-pressed",S[key]===val);
+  b.innerHTML=(color?`<span class="swatch" style="background:${color}"></span>`:"")+label;
+  b.onclick=()=>{S[key]=val;host.querySelectorAll(".opt").forEach((o,i)=>o.setAttribute("aria-pressed",o===b));
+    const c=filterCount();const bg=document.getElementById("fBadge");
+    bg.hidden=c===0;bg.textContent=c;paint();};
+  host.appendChild(b);
+}
+const oEv=document.getElementById("optEv");
+[["all","All"],["solid","Solid"],["moderate","Moderate"],["contested","Contested"],["failed","Failed"],["literary","Literary"],["disputed","Has disputes"]]
+  .forEach(([v,l])=>mkOpt(oEv,"ev",v,l));
+const oVer=document.getElementById("optVer");
+[["all","All"],["audited","Sources checked"],["inherited","Unverified"]].forEach(([v,l])=>mkOpt(oVer,"ver",v,l));
+const oLay=document.getElementById("optLayer");
+mkOpt(oLay,"layer","all","All layers");
+Object.entries(LAYERS).forEach(([k,l])=>mkOpt(oLay,"layer",k,l.n,l.c));
+
+const qEl=document.getElementById("q"),qClear=document.getElementById("qClear");
+qEl.oninput=e=>{S.q=e.target.value;qClear.classList.toggle("on",!!S.q);paint();};
+qClear.onclick=()=>{S.q="";qEl.value="";qClear.classList.remove("on");qEl.focus();paint();};
+
+const bFilter=document.getElementById("bFilter"),drawer=document.getElementById("drawer");
+bFilter.onclick=()=>{const on=drawer.classList.toggle("on");bFilter.setAttribute("aria-expanded",on);};
+
+const TASKS=[
+ ["◆","What's actually solid?","Only the constructs whose evidence holds up and whose sources I verified.",()=>{S.ev="solid";S.ver="audited";S.layer="all";syncOpts();setView("browse");}],
+ ["✕","What's folklore?","Famous ideas that failed replication — power posing, ego depletion, the 93% nonverbal myth.",()=>{S.ev="failed";S.ver="all";S.layer="all";syncOpts();setView("browse");}],
+ ["⚡","Where do experts disagree?","The live disputes. Two things in here that cannot both be fully right.",()=>{S.ev="all";S.ver="all";S.layer="all";syncOpts();setView("tensions");}],
+ ["⇄","How does X connect to Y?","Trace the shortest route between any two ideas, step by step.",()=>{setView("trace");}],
+ ["◉","Just show me everything","The full network. Drag bubbles to pin them where you want.",()=>{S.ev="all";S.ver="all";S.layer="all";syncOpts();setView("map");}]
+];
+function syncOpts(){
+  [["optEv","ev"],["optVer","ver"],["optLayer","layer"]].forEach(([host,key])=>{
+    const h=document.getElementById(host);
+    [...h.querySelectorAll(".opt")].forEach(o=>o.setAttribute("aria-pressed",o.dataset.val===S[key]));
+  });
+  const c=filterCount(),bg=document.getElementById("fBadge");bg.hidden=c===0;bg.textContent=c;
+}
+function paintStart(){
+  const aud=N.filter(n=>n.ver==="audited").length;
+  const ten=L.filter(l=>l.tension).length;
+  document.getElementById("startScroll").innerHTML=
+  `<p class="lede">A map of <b>what is actually known about people</b> — and how strong the evidence is for each piece.</p>
+   <p class="sub2">${N.length} constructs across ${Object.keys(LAYERS).length} layers, each graded twice: how good the evidence is, and whether I checked the sources myself. Pick a way in.</p>
+   <div class="statline">
+     <div class="stat"><b>${N.length}</b><span>constructs</span></div>
+     <div class="stat"><b>${aud}</b><span>verified</span></div>
+     <div class="stat"><b>${ten}</b><span>disputes</span></div>
+   </div>
+   <div class="tasks">${TASKS.map((t,i)=>`<button class="task" data-t="${i}"><span class="tic" aria-hidden="true">${t[0]}</span><span style="flex:1"><b>${t[1]}</b><span>${t[2]}</span></span></button>`).join("")}</div>
+   <div class="keyrow"><h3>HOW TO READ A BUBBLE</h3>
+     <div class="keyitem"><span class="kd"><svg width="22" height="22"><circle cx="11" cy="11" r="8" fill="#12808a" opacity=".93" stroke="#16233f" stroke-width="2.4"/></svg></span><span><b>Filled</b> — sources checked</span></div>
+     <div class="keyitem"><span class="kd"><svg width="22" height="22"><circle cx="11" cy="11" r="8" fill="#fff" stroke="#16233f" stroke-width="2.4"/><circle cx="11" cy="11" r="3.4" fill="#12808a" opacity=".3"/></svg></span><span><b>Hollow</b> — carried over, not re-checked</span></div>
+     <div class="keyitem"><span class="kd"><svg width="22" height="22"><circle cx="11" cy="11" r="8" fill="#fff" stroke="#a8391f" stroke-width="2.4"/></svg></span><span><b>Red ring</b> — contested or failed evidence</span></div>
+     <div class="keyitem"><span class="kd"><svg width="22" height="22"><line x1="2" y1="11" x2="20" y2="11" stroke="#a8391f" stroke-width="2" stroke-dasharray="5 4"/></svg></span><span><b>Red dashed line</b> — a live dispute</span></div>
+   </div>`;
+  document.getElementById("startScroll").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>TASKS[+b.dataset.t][3]());
+}
+let fittedOnce=false;
+function setView(v){
+  S.view=v;
+  document.querySelectorAll(".nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
+  document.getElementById("vStart").hidden=v!=="start";
+  document.getElementById("vMap").hidden=v!=="map";
+  if(v!=="map")app.classList.remove("focus");
+  if(v==="map"&&!seenOnboard){document.getElementById("onboard").hidden=false;}
+  document.getElementById("vBrowse").hidden=v!=="browse";
+  document.getElementById("vTensions").hidden=v!=="tensions";
+  document.getElementById("vTrace").hidden=v!=="trace";
+  document.getElementById("vPlay").hidden=v!=="play";
+  if(v==="map"&&!fittedOnce){fittedOnce=true;setTimeout(()=>{resize();fitAll(600);},80);}
+  if(v!=="map"&&mob())document.getElementById("sheet").classList.remove("on");
+  paint();
+}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>setView(b.dataset.v));
+
+/* modals */
+function openModal(id){const m=document.getElementById(id);m.classList.add("on");
+  m.querySelector("[data-close]").focus();}
+document.getElementById("bAudit").onclick=()=>openModal("mAudit");
+document.getElementById("bMethod").onclick=()=>openModal("mMethod");
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=e=>e.target.closest(".modal").classList.remove("on"));
+document.querySelectorAll(".modal").forEach(m=>m.onclick=e=>{if(e.target===m)m.classList.remove("on");});
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  const om=document.querySelector(".modal.on");
+  if(om){om.classList.remove("on");return;}
+  if(app.classList.contains("focus")){setFocus(false);return;}
+  if(drawer.classList.contains("on")){drawer.classList.remove("on");bFilter.setAttribute("aria-expanded","false");return;}
+  if(S.sel)closeSheet();
+});
+
+document.getElementById("auditBody").innerHTML=AUDIT;
+document.getElementById("methodBody").innerHTML=METHOD;
+
+/* reach-depth control */
+document.querySelectorAll(".depth button").forEach(b=>b.onclick=()=>{
+  S.depth=+b.dataset.d;
+  document.querySelectorAll(".depth button").forEach(o=>o.setAttribute("aria-pressed",o===b));
+  paintGraph();
+});
+
+/* full-screen map */
+const app=document.querySelector(".app");
+function setFocus(on){
+  app.classList.toggle("focus",on);
+  document.getElementById("zFull").setAttribute("aria-pressed",on);
+  if(on&&document.documentElement.requestFullscreen)
+    document.documentElement.requestFullscreen().catch(()=>{});
+  if(!on&&document.fullscreenElement&&document.exitFullscreen)
+    document.exitFullscreen().catch(()=>{});
+  setTimeout(()=>{resize();fitAll(420);},120);
+}
+document.getElementById("zFull").onclick=()=>setFocus(!app.classList.contains("focus"));
+document.getElementById("fExit").onclick=()=>setFocus(false);
+document.getElementById("fSearch").onclick=()=>{setFocus(false);setTimeout(()=>document.getElementById("q").focus(),160);};
+document.addEventListener("fullscreenchange",()=>{
+  if(!document.fullscreenElement&&app.classList.contains("focus"))setFocus(false);
+});
+
+let seenOnboard=false;
+document.getElementById("onboardOk").onclick=()=>{seenOnboard=true;document.getElementById("onboard").hidden=true;};
+document.getElementById("zUnpin").onclick=releasePins;
+document.getElementById("emptyClear").onclick=()=>{
+  S.q="";S.ev="all";S.ver="all";S.layer="all";
+  const qi=document.getElementById("q");qi.value="";document.getElementById("qClear").classList.remove("on");
+  syncOpts();paint();fitAll(420);
+};
+
+function resize(){
+  W=wrap.clientWidth||W;H=wrap.clientHeight||H;
+  sim.force("center",d3.forceCenter(W/2,H/2))
+     .force("x",d3.forceX(W/2).strength(.05)).force("y",d3.forceY(H/2).strength(.06))
+     .alpha(.25).restart();
+}
+window.addEventListener("resize",()=>{resize();applyGrouping();setTimeout(()=>fitAll(400),700);});
+setTimeout(resize,60);
+paint();
+applyGrouping();
+/* settle the layout, then show the whole map. Desktop opens a starting node in the
+   side panel; mobile does not, because the sheet would cover the map on arrival. */
+setView("start");
+setTimeout(()=>{fitAll(700);},1500);
+</script>
+</body>
+</html>

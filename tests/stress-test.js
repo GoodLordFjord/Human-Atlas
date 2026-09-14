@@ -2,8 +2,10 @@
    Runs the real script against stubs, plus static checks on markup and data. */
 const fs=require('fs');
 const html=fs.readFileSync(require('path').join(__dirname,'..','index.html'),'utf8');
-const s=html.indexOf('<script>\nconst LAYERS'), e=html.lastIndexOf('</script>');
+const s=html.indexOf('<script>'), e=html.lastIndexOf('</script>');
 const src=html.slice(s+8,e);
+/* data now lives in data/*.json; build.js owns the projection the app renders */
+const BUILD=require('../build.js');
 
 let pass=0,fail=0,warn=0;
 const ok =(n,c,d='')=>{c?(pass++,console.log('  PASS  '+n)):(fail++,console.log('  FAIL  '+n+(d?'  → '+d:'')))};
@@ -13,8 +15,8 @@ console.log('\n=== 1. SYNTAX & LOAD ===');
 try{ new Function('d3','document','window','setTimeout',src); ok('script parses',true);}
 catch(err){ ok('script parses',false,err.message); process.exit(1);}
 
-const N=eval(src.match(/const N=(\[[\s\S]*?\n\];)/)[1].slice(0,-1));
-const LAY=eval('('+src.match(/const LAYERS=(\{[\s\S]*?\n\};)/)[1].slice(0,-1)+')');
+const N=BUILD.projected;
+const LAY=Object.fromEntries(Object.entries(BUILD.layers).map(([k,v])=>[k,{n:v.name,c:v.color}]));
 const byId=Object.fromEntries(N.map(n=>[n.id,n]));
 
 console.log('\n=== 2. DATA INTEGRITY ===');
@@ -204,6 +206,41 @@ const appRows=(/\.app\{[^}]*grid-template-rows:([^;]+);/.exec(css.replace(/\s+/g
 ok('.app names a row for every child',appRows.split(/(?=auto|1fr)/).filter(Boolean).length>=5,'rows: '+appRows);
 ok('the map row is the flexible one',/\.app>\.main\{grid-row:4;\}/.test(css.replace(/\s+/g,'')));
 ok('graph canvas is not left to the SVG default height',/#graph\{[^}]*height:100%/.test(css.replace(/\s+/g,'')));
+
+console.log('\n=== 8d. DATA PIPELINE & READING REGISTER ===');
+/* index.html is generated. If someone edits data/ and forgets to rebuild, the
+   site silently serves stale content — so the committed file must match. */
+const rebuilt=BUILD.build();
+ok('index.html is up to date with data/',rebuilt===html,
+   'run: node build.js, then commit index.html');
+ok('data lives outside the renderer',fs.existsSync(require('path').join(__dirname,'..','data','nodes.json')));
+ok('the template carries no embedded node data',
+   !/\{id:"big_two"/.test(fs.readFileSync(require('path').join(__dirname,'..','src','app.html'),'utf8')));
+
+const NODES=BUILD.nodes;
+ok('every node declares schema_version 2',NODES.every(n=>n.schema_version===2));
+ok('claim_type is present on every node',NODES.every(n=>n.facets&&n.facets.claim_type));
+ok('strength rubric matches claim type',NODES.every(n=>n.strength.rubric===n.facets.claim_type));
+
+const plains=NODES.filter(n=>n.plain);
+ok('reading-register toggle is in the UI',/data-reg="plain"/.test(html)&&/data-reg="full"/.test(html));
+ok('missing plain versions are disclosed, not hidden',/No plain-English version written yet/.test(html));
+ok('every plain entry has what / why / catch',
+   plains.every(n=>n.plain.what&&n.plain.why&&n.plain.catch),
+   plains.filter(n=>!(n.plain.what&&n.plain.why&&n.plain.catch)).map(n=>n.id).join(', '));
+/* a "plain" version that is longer than the original is not plain */
+const notShorter=plains.filter(n=>n.plain.what.length>=n.body.def.length);
+ok('plain "what" is shorter than the full definition',notShorter.length===0,notShorter.map(n=>n.id).join(', '));
+const JARGON=/\b(orthogonal|curvilinear|mesolimbic|psychometric|variance|heritability|factor analysis|incentive salience|hedonic)\b/i;
+/* a node may use its own name; what it must not do is import someone else's jargon */
+const longWords=plains.filter(n=>{
+  const m=n.plain.what.match(JARGON);
+  return m&&!n.label.toLowerCase().includes(m[0].toLowerCase());
+});
+wn('plain register avoids jargon in the opening line',longWords.length===0,longWords.map(n=>n.id).join(', '));
+console.log('        plain register '+plains.length+'/'+NODES.length+
+  ' ('+Math.round(plains.length/NODES.length*100)+'%) · provenance '+
+  NODES.filter(n=>n.provenance&&n.provenance.origin).length+'/'+NODES.length);
 
 console.log('\n=== 9. CONTENT SANITY ===');
 const ev={},ver={};N.forEach(n=>{ev[n.ev]=(ev[n.ev]||0)+1;ver[n.ver]=(ver[n.ver]||0)+1;});
