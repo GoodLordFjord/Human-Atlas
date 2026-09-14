@@ -2021,6 +2021,81 @@ function sent(t,k){
   }
   return (out.trim()||s);
 }
+/* inherited nodes deliberately carry no rep/mag/bound text, so fall through to
+   mech, which every node has. Without this the quiz shows a blank explanation. */
+function whyOf(n,k){k=k||2;return sent(n.rep,k)||sent(n.mag,k)||sent(n.mech,k)||sent(n.def,k);}
+/* ---------- quiz question generators ---------- */
+const QGEN=[
+function(){ /* spot the failed replication */
+  const f=N.filter(n=>n.ev==="failed");if(!f.length)return null;
+  const t=pick(f),o=sample(N.filter(n=>n.ev!=="failed"),3);
+  if(o.length<3)return null;
+  return{kicker:"REPLICATION",ask:"Which of these did <em>not</em> survive replication?",
+    opts:shuf([t].concat(o)).map(n=>({id:n.id,text:n.label,ok:n.id===t.id})),
+    lead:t.label+" is the one that broke.",why:whyOf(t),node:t.id};
+},
+function(){ /* evidence grade */
+  const n=pick(N.filter(x=>EVN[x.ev]));
+  const wrong=shuf(Object.keys(EVN).filter(g=>g!==n.ev)).slice(0,3);
+  return{kicker:"EVIDENCE GRADE",ask:"How strong is the evidence for <em>"+n.label+"</em>?",
+    opts:shuf([n.ev].concat(wrong)).map(g=>({text:EVN[g],ok:g===n.ev})),
+    lead:"Graded "+EVN[n.ev]+".",why:whyOf(n),node:n.id};
+},
+function(){ /* real tension partner */
+  const cands=N.filter(n=>(n.contra||[]).some(c=>byId[c[0]]));
+  if(!cands.length)return null;
+  const n=pick(cands),real=pick((n.contra||[]).filter(c=>byId[c[0]]));
+  const banned=new Set((n.contra||[]).map(c=>c[0]));banned.add(n.id);
+  const o=sample(N.filter(x=>!banned.has(x.id)),3);
+  if(o.length<3)return null;
+  return{kicker:"LIVE DISPUTE",ask:"Which of these is <em>"+n.label+"</em> recorded as being in tension with?",
+    opts:shuf([{id:real[0],text:byId[real[0]].label,ok:true}].concat(o.map(x=>({id:x.id,text:x.label,ok:false})))),
+    lead:byId[real[0]].label+".",why:real[1],node:real[0]};
+},
+function(){ /* which one is NOT connected */
+  const cands=N.filter(n=>nb[n.id].size>=3);
+  if(!cands.length)return null;
+  const n=pick(cands);
+  const ins=sample(Array.from(nb[n.id]),3).map(id=>({id:id,text:byId[id].label,ok:false}));
+  const outPool=N.filter(x=>x.id!==n.id&&!nb[n.id].has(x.id));
+  if(!outPool.length)return null;
+  const out=pick(outPool);
+  const p=findPath(n.id,out.id);
+  return{kicker:"THE NETWORK",ask:"Three of these link directly to <em>"+n.label+"</em>. Which one does not?",
+    opts:shuf(ins.concat([{id:out.id,text:out.label,ok:true}])),
+    lead:out.label+" has no direct link.",
+    why:"The atlas records no edge between "+n.label+" and "+out.label+
+      (p?". They are "+(p.length-1)+" hops apart — trace the route to see how they do connect.":". No route between them exists yet."),
+    node:n.id};
+},
+function(){ /* match the definition */
+  let n=null;
+  for(let i=0;i<12;i++){
+    const c=pick(N.filter(x=>x.def&&x.def.length>70));
+    if(sent(c.def,2).toLowerCase().indexOf(c.label.toLowerCase().split(" ")[0])===-1){n=c;break;}
+  }
+  if(!n)return null;
+  const same=N.filter(x=>x.layer===n.layer&&x.id!==n.id);
+  const o=sample(same.length>=3?same:N.filter(x=>x.id!==n.id),3);
+  if(o.length<3)return null;
+  return{kicker:"WHAT IS IT?",ask:"Which construct does this describe?",quote:sent(n.def,2),
+    opts:shuf([n].concat(o)).map(x=>({id:x.id,text:x.label,ok:x.id===n.id})),
+    lead:n.label+".",why:whyOf(n),node:n.id};
+}];
+
+const QLEN=10;
+function buildRound(){
+  const out=[],seen={};let guard=0;
+  while(out.length<QLEN&&guard++<500){
+    const q=QGEN[Math.floor(Math.random()*QGEN.length)]();
+    if(!q)continue;
+    const key=q.kicker+"|"+(q.node||"")+"|"+q.ask;
+    if(seen[key])continue;
+    seen[key]=1;out.push(q);
+  }
+  return out;
+}
+
 /* ---------- play state ---------- */
 S.mode="hub";
 const MODES={};
@@ -2046,6 +2121,76 @@ function paintPlayHub(el){
    <div class="plmodes">${cards}</div>
    <p class="hint">Every answer, route and hop links back to the full bubble — sources, boundary conditions, disputes and all.</p>`;
   el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>playGo(b.dataset.m));
+}
+
+/* ---------- quiz ---------- */
+MODES.quiz={ic:"◆",name:"Quiz",paint:paintQuiz,
+  blurb:"Ten questions built from the map itself — spot the failed replication, grade the evidence, find the real dispute. Wrong answers explain themselves.",
+  best:()=>P.quizRounds?"BEST "+P.quizBest+"/"+QLEN+" · "+P.quizRounds+" round"+(P.quizRounds>1?"s":"")+" played":""};
+function paintQuiz(el){
+  if(!Q){Q={qs:buildRound(),i:0,score:0,chosen:null,streak:0,best:0};}
+  if(Q.i>=Q.qs.length){
+    const pc=Math.round(Q.score/Q.qs.length*100);
+    const rec=Q.score>P.quizBest;
+    if(rec)P.quizBest=Q.score;
+    P.quizRounds++;pSave();
+    el.innerHTML=
+    `<div class="plbar"><button class="plback" id="plHome">← All modes</button></div>
+     <div class="plwin">
+       <div class="big">${Q.score}/${Q.qs.length}</div>
+       <div class="lab">${pc}% · longest streak ${Q.best}</div>
+       <p>${rec?"<b>New best.</b> ":""}${pc===100?"Clean sweep — every grade and dispute called correctly.":pc>=70?"Solid. The misses are the useful part — they point at bubbles worth reading properly.":pc>=40?"Middling, which is the honest result for a first pass. The evidence grades are the hardest part and they are the point.":"Low, and not embarrassing: most of this contradicts what gets taught. Try an expedition first, then come back."}</p>
+     </div>
+     <div class="plnav">
+       <button class="plbtn go" id="plAgain">Play again</button>
+       <button class="plbtn" id="plToExp">Try an expedition</button>
+     </div>`;
+    document.getElementById("plHome").onclick=()=>{Q=null;playGo("hub");};
+    document.getElementById("plAgain").onclick=()=>{Q=null;paintPlay();};
+    document.getElementById("plToExp").onclick=()=>{Q=null;E=null;playGo("exped");};
+    return;
+  }
+  const q=Q.qs[Q.i],done=Q.chosen!==null;
+  const pct=Math.round(Q.i/Q.qs.length*100);
+  el.innerHTML=
+  `<div class="plbar">
+     <button class="plback" id="plHome">←</button>
+     <span class="grow plcount">QUESTION ${Q.i+1} OF ${Q.qs.length}</span>
+     <span class="plcount">SCORE ${Q.score}${Q.streak>1?" · 🔥"+Q.streak:""}</span>
+   </div>
+   <div class="pltrack"><i style="width:${pct}%"></i></div>
+   <div class="plcard">
+     <div class="plkicker">${q.kicker}</div>
+     <div class="plask">${q.ask}</div>
+     ${q.quote?`<div class="plquote">${q.quote}</div>`:""}
+   </div>
+   <div class="plopts">${q.opts.map((o,i)=>{
+      let cls="plopt";
+      if(done){
+        if(o.ok)cls+=" right";
+        else if(i===Q.chosen)cls+=" wrong";
+        else cls+=" muted";
+      }
+      const mk=done?(o.ok?"✓":(i===Q.chosen?"✕":String.fromCharCode(65+i))):String.fromCharCode(65+i);
+      return `<button class="${cls}" data-o="${i}"${done?" disabled":""}><span class="mk">${mk}</span><span>${o.text}</span></button>`;
+    }).join("")}</div>
+   ${done?`<div class="plwhy ${q.opts[Q.chosen].ok?"good":"bad"}">
+      <h4>${q.opts[Q.chosen].ok?"CORRECT":"NOT QUITE"} — ${q.lead}</h4>
+      <p>${q.why||""}</p>
+      ${q.node?`<div class="jump"><button class="chip" data-peek="${q.node}">Open ${byId[q.node].label}</button></div>`:""}
+     </div>
+     <div class="plnav"><button class="plbtn go" id="plNext">${Q.i+1>=Q.qs.length?"See result":"Next question"} →</button></div>`:""}`;
+  document.getElementById("plHome").onclick=()=>{Q=null;playGo("hub");};
+  el.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{
+    if(Q.chosen!==null)return;
+    Q.chosen=+b.dataset.o;
+    if(q.opts[Q.chosen].ok){Q.score++;Q.streak++;if(Q.streak>Q.best)Q.best=Q.streak;}
+    else Q.streak=0;
+    keepScroll=true;paintPlay();
+  });
+  const nx=document.getElementById("plNext");
+  if(nx)nx.onclick=()=>{Q.i++;Q.chosen=null;keepScroll=false;paintPlay();};
+  bindPeek(el);
 }
 
 
