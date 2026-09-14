@@ -2024,6 +2024,9 @@ function sent(t,k){
 /* inherited nodes deliberately carry no rep/mag/bound text, so fall through to
    mech, which every node has. Without this the quiz shows a blank explanation. */
 function whyOf(n,k){k=k||2;return sent(n.rep,k)||sent(n.mag,k)||sent(n.mech,k)||sent(n.def,k);}
+/* recorded link and tension reasons are sentence fragments ("corrected by",
+   "molecular estimates fall short"), so they need a capital when shown alone */
+const cap=t=>{t=String(t||"").trim();return t?t.charAt(0).toUpperCase()+t.slice(1):"";};
 function seeded(str){
   let h=2166136261;
   for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
@@ -2269,7 +2272,7 @@ function paintQuiz(el){
     }).join("")}</div>
    ${done?`<div class="plwhy ${q.opts[Q.chosen].ok?"good":"bad"}">
       <h4>${q.opts[Q.chosen].ok?"CORRECT":"NOT QUITE"} — ${q.lead}</h4>
-      <p>${q.why||""}</p>
+      <p>${cap(q.why)}</p>
       ${q.node?`<div class="jump"><button class="chip" data-peek="${q.node}">Open ${byId[q.node].label}</button></div>`:""}
      </div>
      <div class="plnav"><button class="plbtn go" id="plNext">${Q.i+1>=Q.qs.length?"See result":"Next question"} →</button></div>`:""}`;

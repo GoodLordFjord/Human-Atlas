@@ -145,6 +145,66 @@ console.log('\n=== 8. NEW FEATURES PRESENT ===');
  ['plays-well / doesn\'t-play-well lists',/PLAYS WELL WITH[\s\S]*DOES NOT PLAY WELL WITH/]
 ].forEach(([n,re])=>ok(n,re.test(src)||re.test(html)));
 
+console.log('\n=== 8b. PLAY MODES (quiz / expeditions / puzzle) ===');
+const EXPED=eval(src.match(/const EXPED=(\[[\s\S]*?\n\];)/)[1].slice(0,-1));
+ok('expeditions are registered',Array.isArray(EXPED)&&EXPED.length>=5,EXPED.length+' routes');
+let badStops=[],shortFrame=[],thinRoute=[],noPayoff=[],dupeStop=[];
+EXPED.forEach(x=>{
+  if(x.stops.length<4)thinRoute.push(x.id+' ('+x.stops.length+' stops)');
+  if(!x.end||x.end.length<80)noPayoff.push(x.id);
+  const seenS=new Set();
+  x.stops.forEach(([id,frame])=>{
+    if(!byId[id])badStops.push(x.id+'→'+id);
+    if(seenS.has(id))dupeStop.push(x.id+'→'+id); seenS.add(id);
+    if(!frame||frame.length<40)shortFrame.push(x.id+'→'+id);
+  });
+});
+ok('every expedition stop is a real node',badStops.length===0,badStops.join(', '));
+ok('no expedition repeats a stop',dupeStop.length===0,dupeStop.join(', '));
+ok('every stop carries authored framing',shortFrame.length===0,shortFrame.join(', '));
+ok('every route is long enough to be a walkthrough',thinRoute.length===0,thinRoute.join(', '));
+ok('every route ends on a payoff',noPayoff.length===0,noPayoff.join(', '));
+const covered=new Set();EXPED.forEach(x=>x.stops.forEach(([id])=>covered.add(id)));
+console.log('        routes cover '+covered.size+'/'+N.length+' constructs');
+ok('expeditions reach across layers',new Set([...covered].map(id=>byId[id].layer)).size>=8,
+   new Set([...covered].map(id=>byId[id].layer)).size+' layers');
+
+/* the quiz explains every answer from node text; inherited nodes carry no
+   rep/mag/bound, so the fallback chain must always land on something */
+const noWhy=N.filter(n=>!((n.rep&&n.rep.trim())||(n.mag&&n.mag.trim())||(n.mech&&n.mech.trim())||(n.def&&n.def.trim())));
+ok('every node can produce a quiz explanation',noWhy.length===0,noWhy.map(n=>n.id).join(', '));
+ok('enough failed-replication nodes for the quiz',N.filter(n=>n.ev==='failed').length>=4);
+ok('enough nodes with recorded tensions for the quiz',N.filter(n=>(n.contra||[]).some(c=>byId[c[0]])).length>=10);
+ok('enough well-connected nodes for the odd-one-out question',N.filter(n=>nb[n.id].size>=3).length>=20);
+ok('quiz has more than one question type',(src.match(/kicker:"/g)||[]).length>=5,
+   (src.match(/kicker:"/g)||[]).length+' generators');
+
+/* puzzle: a start/target pair is only playable if a route exists and is long enough */
+let playable=0,sampled=0;
+for(let i=0;i<N.length;i++)for(let j=i+1;j<N.length;j++){
+  sampled++;const p=bfs(N[i].id)[N[j].id];
+  if(p>=3&&p<=5)playable++;
+}
+console.log('        puzzle pool: '+playable+' pairs at 3–5 hops out of '+sampled+' possible');
+ok('puzzle has a deep pool of playable pairs',playable>500,playable+' pairs at 3–5 hops of '+sampled);
+ok('puzzle progress is namespaced in storage',/ha_play_v1/.test(src));
+ok('play progress degrades gracefully without storage',/catch\(e\)\{return\{\};\}/.test(src)&&/function pSave/.test(src));
+
+console.log('\n=== 8c. SHELL INTEGRITY ===');
+const tabCount=(html.match(/role="tab"[^>]*data-v=/g)||[]).length;
+const navCols=(/\.nav\{[^}]*grid-template-columns:repeat\((\d+),/.exec(css.replace(/\s+/g,''))||[])[1];
+ok('nav grid column count matches the tab count',+navCols===tabCount,navCols+' columns vs '+tabCount+' tabs');
+const panels=(html.match(/role="tabpanel"/g)||[]).length;
+ok('every tab has a panel',panels===tabCount,panels+' panels vs '+tabCount+' tabs');
+['vStart','vMap','vBrowse','vTensions','vTrace','vPlay'].forEach(id=>
+  ok('setView toggles #'+id,new RegExp('getElementById\\("'+id+'"\\)\\.hidden').test(src)));
+/* .app has five children; an under-specified row template collapsed the map to
+   the SVG default height of 150px, so the rows must stay explicitly named */
+const appRows=(/\.app\{[^}]*grid-template-rows:([^;]+);/.exec(css.replace(/\s+/g,''))||[])[1]||'';
+ok('.app names a row for every child',appRows.split(/(?=auto|1fr)/).filter(Boolean).length>=5,'rows: '+appRows);
+ok('the map row is the flexible one',/\.app>\.main\{grid-row:4;\}/.test(css.replace(/\s+/g,'')));
+ok('graph canvas is not left to the SVG default height',/#graph\{[^}]*height:100%/.test(css.replace(/\s+/g,'')));
+
 console.log('\n=== 9. CONTENT SANITY ===');
 const ev={},ver={};N.forEach(n=>{ev[n.ev]=(ev[n.ev]||0)+1;ver[n.ver]=(ver[n.ver]||0)+1;});
 console.log('        grades',JSON.stringify(ev));
