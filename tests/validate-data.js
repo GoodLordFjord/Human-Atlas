@@ -104,6 +104,78 @@ edges.forEach(e=>{
 const orphans=nodes.filter(n=>nb[n.id].size===0).map(n=>n.id);
 if(orphans.length)fail('graph','orphan nodes: '+orphans.join(', '));
 
+/* --- roadmaps: every node references a real construct, every prerequisite is
+   inside the same roadmap, the graph is acyclic, and each unit is gated by the
+   previous unit's checkpoint --- */
+const rmDir=path.join(ROOT,'data','roadmaps');
+const roadmaps=fs.existsSync(rmDir)?fs.readdirSync(rmDir).filter(f=>f.endsWith('.json')).sort()
+  .map(f=>({file:f,rm:JSON.parse(fs.readFileSync(path.join(rmDir,f),'utf8'))})):[];
+const RTYPES=['standard','checkpoint','bonus'];
+/* How many distinct question types the app can generate about a construct. Mirrors
+   the five generators exactly — including the page's own sentence splitter — so a
+   roadmap can never ask for more steps than a lesson can supply. */
+const tensionOf={};edges.filter(e=>e.rel==='tension').forEach(e=>{tensionOf[e.from]=1;tensionOf[e.to]=1;});
+function sent(t,k){const s=String(t||'').trim();if(!s)return'';k=k||1;let start=0,count=0,out='';
+  for(let i=0;i<s.length&&count<k;i++){if(s[i]==='.'&&(i+1>=s.length||s[i+1]===' ')){out+=s.slice(start,i+1);start=i+1;count++;}}return(out.trim()||s);}
+const nodeById=Object.fromEntries(nodes.map(n=>[n.id,n]));
+function supportedQuestions(id){
+  const n=nodeById[id];if(!n)return 0;let k=1;               /* evidence grade: always */
+  if(n.strength.label==='failed')k++;                          /* spot the failed replication */
+  if(tensionOf[id])k++;                                        /* real tension partner */
+  if(nb[id]&&nb[id].size>=3)k++;                               /* odd one out */
+  const d=n.body.def||'';
+  if(d.length>70&&sent(d,2).toLowerCase().indexOf(n.label.toLowerCase().split(' ')[0])===-1)k++; /* match the definition */
+  return k;
+}
+roadmaps.forEach(({file,rm})=>{
+  const w='roadmaps/'+file;
+  if(!rm.id||!rm.title||!Array.isArray(rm.units))return fail(w,'needs id, title and units[]');
+  const all=[];rm.units.forEach(u=>(u.nodes||[]).forEach(n=>all.push(n)));
+  const rid=new Set();
+  all.forEach(n=>{
+    const nw=w+' '+n.id;
+    if(rid.has(n.id))fail(nw,'duplicate roadmap node id');rid.add(n.id);
+    if(!RTYPES.includes(n.type))fail(nw,'unknown node type "'+n.type+'"');
+    if(!(n.steps>=1))fail(nw,'steps must be >= 1');
+    if(n.type==='standard'&&!ids.has(n.ref))fail(nw,'ref "'+n.ref+'" is not a construct');
+    else if(n.type==='standard'){
+      const k=supportedQuestions(n.ref);
+      if(n.steps>k)fail(nw,'asks for '+n.steps+' steps but '+n.ref+' supports only '+k+' question type'+(k===1?'':'s'));
+    }
+    if(n.type==='checkpoint'){
+      if(!(n.pass>=1&&n.pass<=n.steps))fail(nw,'pass must be between 1 and steps');
+      (n.pool||[]).forEach(r=>{if(!ids.has(r))fail(nw,'pool ref "'+r+'" is not a construct');});
+      if(!(n.pool||[]).length)fail(nw,'checkpoint has an empty pool');
+    }
+    if(n.type==='bonus'){
+      const pz=n.puzzle||{};
+      if(!ids.has(pz.from)||!ids.has(pz.to))fail(nw,'puzzle endpoints must be constructs');
+      else{ /* must be reachable, or the bonus can never be completed */
+        const d={[pz.from]:0};let f=[pz.from],found=pz.from===pz.to;
+        while(f.length&&!found){const nx=[];for(const u of f)for(const v of nb[u])if(d[v]===undefined){d[v]=1;if(v===pz.to)found=true;nx.push(v);}f=nx;}
+        if(!found)fail(nw,'no route exists between the puzzle endpoints');
+      }
+    }
+  });
+  all.forEach(n=>(n.prerequisites||[]).forEach(p=>{
+    if(!rid.has(p))fail(w+' '+n.id,'prerequisite "'+p+'" is not in this roadmap');
+  }));
+  /* acyclic */
+  const state={},byR=Object.fromEntries(all.map(n=>[n.id,n]));
+  const visit=id=>{if(state[id]==='done')return false;if(state[id]==='in')return true;state[id]='in';
+    for(const p of (byR[id].prerequisites||[]))if(byR[p]&&visit(p))return true;state[id]='done';return false;};
+  if(all.some(n=>visit(n.id)))fail(w,'prerequisite cycle');
+  /* gate contract */
+  rm.units.forEach((u,i)=>{
+    if(i===0)return;
+    const prevCheck=(rm.units[i-1].nodes||[]).find(n=>n.type==='checkpoint');
+    const first=(u.nodes||[]).find(n=>n.type!=='bonus');
+    if(!prevCheck)fail(w+' '+rm.units[i-1].id,'unit has no checkpoint to gate the next unit');
+    else if(!first||!(first.prerequisites||[]).includes(prevCheck.id))
+      fail(w+' '+u.id,'first node must require the previous unit\'s checkpoint');
+  });
+});
+
 /* --- coverage, reported rather than enforced --- */
 const withPlain=nodes.filter(n=>n.plain).length;
 const withOrigin=nodes.filter(n=>n.provenance&&n.provenance.origin).length;

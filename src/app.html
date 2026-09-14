@@ -247,6 +247,42 @@ select{width:100%;min-height:var(--tap);border:1.5px solid var(--line);border-ra
 .today small{display:block;font-size:12px;color:var(--tx-2);margin-top:6px;}
 .gain{font-size:14px;color:var(--focus);font-weight:600;margin-top:8px;}
 
+/* ---- roadmap: winding path, units, nodes, lesson ---- */
+.road{position:relative;margin:4px 0 28px;}
+.rsvg{position:absolute;left:0;top:0;pointer-events:none;}
+.rp{fill:none;stroke:var(--line);stroke-width:6;stroke-linecap:round;}
+.rp.gold{stroke:#c99a2e;}
+.rp.dash{stroke:var(--line);stroke-width:3;stroke-dasharray:6 7;}
+.ru{position:absolute;left:0;right:0;height:78px;background:var(--ink);color:#fff;border-radius:14px;padding:12px 14px;}
+.ru .rut{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+.ru b{font-family:'Bricolage Grotesque',sans-serif;font-size:16.5px;line-height:1.2;}
+.ru span{font-family:'JetBrains Mono',monospace;font-size:11.5px;opacity:.75;white-space:nowrap;}
+.ru .rub{height:6px;background:rgba(255,255,255,.18);border-radius:99px;margin-top:10px;overflow:hidden;}
+.ru .rub i{display:block;height:100%;background:#c99a2e;border-radius:99px;}
+.rn{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:3px solid var(--line);background:#fff;
+  display:flex;align-items:center;justify-content:center;color:var(--ink);box-shadow:0 4px 0 var(--line);transition:transform .12s;padding:0;}
+.rn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line);}
+.rn .rg{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.rn.checkpoint{width:74px;height:74px;margin:-37px 0 0 -37px;border-radius:22px;}
+.rn.bonus{width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:14px;border-style:dashed;}
+.rn.locked{background:var(--paper);color:#9aa5b6;box-shadow:0 4px 0 var(--line-2);}
+.rn.unlocked{border-color:var(--ink);}
+.rn.active{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 4px 0 #0e172b;animation:rpulse 1.6s ease-in-out infinite;}
+.rn.completed{background:#c99a2e;border-color:#a67f1f;color:#fff;box-shadow:0 4px 0 #a67f1f;}
+.rn.just{animation:rburst .7s ease-out 1;}
+.rn.shake{animation:rshake .4s ease-in-out 1;}
+@keyframes rpulse{0%,100%{box-shadow:0 4px 0 #0e172b,0 0 0 0 rgba(22,35,63,.35)}50%{box-shadow:0 4px 0 #0e172b,0 0 0 12px rgba(22,35,63,0)}}
+@keyframes rshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes rburst{0%{transform:scale(.6)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+.rnl{position:absolute;width:132px;margin-left:-66px;text-align:center;font-size:12px;line-height:1.3;color:var(--tx-2);pointer-events:none;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.rtoast{position:fixed;left:50%;bottom:calc(76px + var(--safe-b));transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;z-index:50;box-shadow:0 6px 20px rgba(22,35,63,.25);max-width:90vw;text-align:center;}
+.rlhead{margin-bottom:12px;}
+.rlhead h3{font-family:'Bricolage Grotesque',sans-serif;font-size:20px;color:var(--ink);line-height:1.2;margin-bottom:8px;}
+.rlsum{background:var(--card);border:1.5px solid var(--line);border-left:5px solid var(--focus);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:15px;line-height:1.55;color:var(--tx);}
+.rlsum .jump{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
+
 /* ================= PLAY ================= */
 .plintro{font-size:14px;color:var(--tx-2);line-height:1.55;margin-bottom:16px;}
 .plmodes{display:grid;gap:10px;margin-bottom:20px;}
@@ -940,6 +976,7 @@ P.log=P.log||{};
 /* Reserved for the energy system. Declared now so it never needs a migration;
    nothing reads it yet. */
 P.energy=P.energy||{cur:5,max:5,last:null};
+P.road=P.road||{};
 
 const FREEZE_EVERY=7,FREEZE_CAP=2;
 const TIERS=[[100,"gold","Gold"],[30,"silver","Silver"],[7,"bronze","Bronze"],[1,"ember","Ember"]];
@@ -1096,64 +1133,78 @@ const EXPED=[
 ];
 
 /* ---------- quiz question generators ---------- */
+/* Each generator takes an optional pinned construct. With none it draws at random
+   (the quiz); with one it builds that question about that construct (the roadmap),
+   or returns null if the construct cannot support that question type. */
 const QGEN=[
-function(){ /* spot the failed replication */
+function(pin){ /* spot the failed replication */
   const f=N.filter(n=>n.ev==="failed");if(!f.length)return null;
-  const t=pick(f),o=sample(N.filter(n=>n.ev!=="failed"),3);
+  const t=pin||pick(f);if(t.ev!=="failed")return null;
+  const o=sample(N.filter(n=>n.ev!=="failed"),3);
   if(o.length<3)return null;
-  return{kicker:"REPLICATION",ask:"Which of these did <em>not</em> survive replication?",
+  return{gi:0,kicker:"REPLICATION",ask:"Which of these did <em>not</em> survive replication?",
     opts:shuf([t].concat(o)).map(n=>({id:n.id,text:n.label,ok:n.id===t.id})),
     lead:t.label+" is the one that broke.",why:whyOf(t),node:t.id};
 },
-function(){ /* evidence grade */
-  const n=pick(N.filter(x=>EVN[x.ev]));
+function(pin){ /* evidence grade */
+  const n=pin||pick(N.filter(x=>EVN[x.ev]));
+  if(!EVN[n.ev])return null;
   const wrong=shuf(Object.keys(EVN).filter(g=>g!==n.ev)).slice(0,3);
-  return{kicker:"EVIDENCE GRADE",ask:"How strong is the evidence for <em>"+n.label+"</em>?",
+  return{gi:1,kicker:"EVIDENCE GRADE",ask:"How strong is the evidence for <em>"+n.label+"</em>?",
     opts:shuf([n.ev].concat(wrong)).map(g=>({text:EVN[g],ok:g===n.ev})),
     lead:"Graded "+EVN[n.ev]+".",why:whyOf(n),node:n.id};
 },
-function(){ /* real tension partner */
+function(pin){ /* real tension partner */
   const cands=N.filter(n=>(n.contra||[]).some(c=>byId[c[0]]));
   if(!cands.length)return null;
-  const n=pick(cands),real=pick((n.contra||[]).filter(c=>byId[c[0]]));
+  const n=pin||pick(cands);
+  const cs=(n.contra||[]).filter(c=>byId[c[0]]);if(!cs.length)return null;
+  const real=pick(cs);
   const banned=new Set((n.contra||[]).map(c=>c[0]));banned.add(n.id);
   const o=sample(N.filter(x=>!banned.has(x.id)),3);
   if(o.length<3)return null;
-  return{kicker:"LIVE DISPUTE",ask:"Which of these is <em>"+n.label+"</em> recorded as being in tension with?",
+  return{gi:2,kicker:"LIVE DISPUTE",ask:"Which of these is <em>"+n.label+"</em> recorded as being in tension with?",
     opts:shuf([{id:real[0],text:byId[real[0]].label,ok:true}].concat(o.map(x=>({id:x.id,text:x.label,ok:false})))),
     lead:byId[real[0]].label+".",why:real[1],node:real[0]};
 },
-function(){ /* which one is NOT connected */
+function(pin){ /* which one is NOT connected */
   const cands=N.filter(n=>nb[n.id].size>=3);
   if(!cands.length)return null;
-  const n=pick(cands);
+  const n=pin||pick(cands);if(nb[n.id].size<3)return null;
   const ins=sample(Array.from(nb[n.id]),3).map(id=>({id:id,text:byId[id].label,ok:false}));
   const outPool=N.filter(x=>x.id!==n.id&&!nb[n.id].has(x.id));
   if(!outPool.length)return null;
   const out=pick(outPool);
   const p=findPath(n.id,out.id);
-  return{kicker:"THE NETWORK",ask:"Three of these link directly to <em>"+n.label+"</em>. Which one does not?",
+  return{gi:3,kicker:"THE NETWORK",ask:"Three of these link directly to <em>"+n.label+"</em>. Which one does not?",
     opts:shuf(ins.concat([{id:out.id,text:out.label,ok:true}])),
     lead:out.label+" has no direct link.",
     why:"The atlas records no edge between "+n.label+" and "+out.label+
       (p?". They are "+(p.length-1)+" hops apart — trace the route to see how they do connect.":". No route between them exists yet."),
     node:n.id};
 },
-function(){ /* match the definition */
+function(pin){ /* match the definition */
+  const okDef=c=>c.def&&c.def.length>70&&sent(c.def,2).toLowerCase().indexOf(c.label.toLowerCase().split(" ")[0])===-1;
   let n=null;
-  for(let i=0;i<12;i++){
-    const c=pick(N.filter(x=>x.def&&x.def.length>70));
-    if(sent(c.def,2).toLowerCase().indexOf(c.label.toLowerCase().split(" ")[0])===-1){n=c;break;}
-  }
+  if(pin){if(!okDef(pin))return null;n=pin;}
+  else for(let i=0;i<12;i++){const c=pick(N.filter(x=>x.def&&x.def.length>70));if(okDef(c)){n=c;break;}}
   if(!n)return null;
   const same=N.filter(x=>x.layer===n.layer&&x.id!==n.id);
   const o=sample(same.length>=3?same:N.filter(x=>x.id!==n.id),3);
   if(o.length<3)return null;
-  return{kicker:"WHAT IS IT?",ask:"Which construct does this describe?",quote:sent(n.def,2),
+  return{gi:4,kicker:"WHAT IS IT?",ask:"Which construct does this describe?",quote:sent(n.def,2),
     opts:shuf([n].concat(o)).map(x=>({id:x.id,text:x.label,ok:x.id===n.id})),
     lead:n.label+".",why:whyOf(n),node:n.id};
 }];
-
+/* Questions about one construct, for a roadmap node: grade and definition first,
+   then whatever else that construct can support. */
+const QORDER=[1,4,2,3,0];
+function questionsFor(ref,k,randomOrder){
+  const n=byId[ref];if(!n)return[];
+  const out=[];
+  for(const i of (randomOrder?shuf(QORDER):QORDER)){const q=QGEN[i](n);if(q)out.push(q);if(out.length>=k)break;}
+  return out;
+}
 const QLEN=10;
 function buildRound(){
   const out=[],seen={};let guard=0;
@@ -1218,6 +1269,211 @@ function paintPlayHub(el){
   el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>playGo(b.dataset.m));
   const rb=document.getElementById("plRemind");
   if(rb)rb.onclick=()=>Notification.requestPermission().then(p=>{if(p==="granted"){P.remind=true;pSave();armReminder();}paintPlay();});
+}
+
+/* ---------- roadmap ---------- */
+/* ---- road engine ---- */
+/* Headless. Takes a roadmap and a progress record; returns every node with a
+   computed status and every unit with its completion. No DOM, no globals. */
+function roadState(rm,prog){
+  prog=prog||{};
+  const all=[];rm.units.forEach(u=>u.nodes.forEach(n=>all.push(n)));
+  const byR={};all.forEach(n=>byR[n.id]=n);
+  const stepsOf=id=>(prog[id]&&prog[id].done)||0;
+  const doneOf=id=>byR[id]&&stepsOf(id)>=byR[id].steps;
+  const out=all.map(n=>{
+    const prereqOk=(n.prerequisites||[]).every(doneOf);
+    const status=doneOf(n.id)?"completed":(prereqOk?"unlocked":"locked");
+    return Object.assign({},n,{status,done:stepsOf(n.id)});
+  });
+  /* the pulse goes to the first unlocked node on the main path; bonus nodes are
+     optional and never take it */
+  const act=out.find(n=>n.status==="unlocked"&&n.type!=="bonus");
+  if(act)act.status="active";
+  const byOut={};out.forEach(n=>byOut[n.id]=n);
+  const units=rm.units.map(u=>{
+    const ns=u.nodes.map(n=>byOut[n.id]);
+    const req=ns.filter(n=>n.type!=="bonus");
+    const done=req.filter(n=>n.status==="completed").length;
+    return Object.assign({},u,{nodes:ns,done,total:req.length,pct:req.length?Math.round(done/req.length*100):0});
+  });
+  return{nodes:out,units,active:act?act.id:null,byId:byOut};
+}
+/* ---- road engine end ---- */
+
+const ROAD_XP={standard:20,checkpoint:50,bonus:0};   /* a bonus pays through the puzzle it launches */
+let R=null,roadJust=null;
+const LOCK='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1zm2 0h6V8a3 3 0 0 0-6 0v2z" fill="currentColor"/></svg>';
+function roadProg(id){return P.road[id]=P.road[id]||{};}
+function roadNode(rm,id){for(const u of rm.units)for(const n of u.nodes)if(n.id===id)return n;return null;}
+function labelOf(n){return n.ref&&byId[n.ref]?byId[n.ref].label:n.label;}
+/* Records progress on a node. XP is awarded once, when it first completes. */
+function roadMark(rm,n,steps){
+  const pr=roadProg(rm.id),rec=pr[n.id]=pr[n.id]||{done:0,at:null};
+  rec.done=Math.min(n.steps,Math.max(rec.done,steps));
+  let sr=null;
+  if(rec.done>=n.steps&&!rec.at){rec.at=dayKey();if(ROAD_XP[n.type])sr=award(ROAD_XP[n.type]);}
+  pSave();return sr;
+}
+function roadToast(msg){
+  const old=document.querySelector(".rtoast");if(old)old.remove();
+  const t=document.createElement("div");t.className="rtoast";t.setAttribute("role","status");t.textContent=msg;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),1600);
+}
+function roadBonus(rm,n){
+  const p=findPath(n.puzzle.from,n.puzzle.to);
+  Z={from:n.puzzle.from,to:n.puzzle.to,par:p?p.length-1:3,path:[n.puzzle.from],hints:0,daily:false,peeked:null,road:{rm:rm.id,node:n.id}};
+  playGo("puzzle");
+}
+function qHtml(q,chosen){
+  const done=chosen!==null&&chosen!==undefined;
+  return `<div class="plcard"><div class="plkicker">${q.kicker}</div><div class="plask">${q.ask}</div>${q.quote?`<div class="plquote">${q.quote}</div>`:""}</div>
+  <div class="plopts">${q.opts.map((o,i)=>{
+    let cls="plopt";if(done){if(o.ok)cls+=" right";else if(i===chosen)cls+=" wrong";else cls+=" muted";}
+    const mk=done?(o.ok?"✓":(i===chosen?"✕":String.fromCharCode(65+i))):String.fromCharCode(65+i);
+    return `<button class="${cls}" data-o="${i}"${done?" disabled":""}><span class="mk">${mk}</span><span>${o.text}</span></button>`;}).join("")}</div>
+  ${done?`<div class="plwhy ${q.opts[chosen].ok?"good":"bad"}"><h4>${q.opts[chosen].ok?"CORRECT":"NOT QUITE"} — ${q.lead}</h4><p>${cap(q.why)}</p>${q.node?`<div class="jump"><button class="chip" data-peek="${q.node}">Open ${byId[q.node].label}</button></div>`:""}</div>`:""}`;
+}
+
+MODES.road={ic:"⋔",name:"Roadmap",paint:paintRoad,
+  blurb:"A guided path through the atlas, one construct at a time. Read it, answer a few questions about it, unlock the next. Checkpoints gate each unit; bonus branches are optional.",
+  best:()=>{const rm=ROADMAPS[0];if(!rm)return"";const st=roadState(rm,roadProg(rm.id));
+    const d=st.units.reduce((a,u)=>a+u.done,0),t=st.units.reduce((a,u)=>a+u.total,0);
+    const ui=st.units.findIndex(u=>u.pct<100);return d?d+"/"+t+" STEPS · UNIT "+(ui<0?st.units.length:ui+1)+" OF "+st.units.length:"";}};
+
+function paintRoad(el){
+  const rm=ROADMAPS[0];
+  if(!rm){el.innerHTML=`<p class="hint">No roadmap is defined yet.</p>`;return;}
+  if(!R||R.rm!==rm)R={rm,node:null,q:null,chosen:null,att:null,justDone:null};
+  if(roadJust){R.justDone=roadJust;roadJust=null;}
+  if(R.node)return paintRoadLesson(el,rm);
+  const st=roadState(rm,roadProg(rm.id));
+
+  /* Layout. Rows are fixed-height; the main path's x follows an eight-step wave
+     (0, .6, 1, .6, 0, -.6, -1, -.6) × amplitude around the centre, which gives the
+     winding path without ever placing two consecutive nodes on the same side.
+     Bonus nodes sit on the opposite side to the wave at their own row, joined to
+     their prerequisite by a dashed branch, so they read as optional. */
+  const W=Math.max(300,el.clientWidth-32),ROW=104,HEAD=92,cx=W/2,amp=Math.min(120,W*0.28); /* 104: room for a two-line label under a 64px node */
+  const wave=[0,.6,1,.6,0,-.6,-1,-.6];
+  let y=8,k=0;const pos={},rows=[];
+  st.units.forEach(u=>{
+    rows.push({type:"unit",u,y});y+=HEAD;
+    u.nodes.forEach(n=>{
+      let x;
+      if(n.type==="bonus"){const w=wave[k%8];x=cx-(w>=0?1:-1)*Math.min(amp*1.4,W/2-40);}
+      else{x=cx+wave[k%8]*amp;k++;}
+      pos[n.id]={x,y:y+ROW/2};rows.push({type:"node",n,x,y:y+ROW/2});y+=ROW;
+    });
+  });
+  const H=y+30;
+  let d="",gold="",dash="";
+  const main=st.nodes.filter(n=>n.type!=="bonus");
+  for(let i=1;i<main.length;i++){
+    const a=pos[main[i-1].id],b=pos[main[i].id];
+    const seg=`M${a.x},${a.y} C${a.x},${a.y+ROW/2} ${b.x},${b.y-ROW/2} ${b.x},${b.y}`;
+    if(main[i-1].status==="completed")gold+=seg;else d+=seg;
+  }
+  st.nodes.filter(n=>n.type==="bonus").forEach(n=>{
+    const pre=pos[(n.prerequisites||[])[0]];if(!pre)return;const b=pos[n.id];
+    dash+=`M${pre.x},${pre.y} Q${b.x},${pre.y} ${b.x},${b.y}`;
+  });
+  const glyph=n=>n.status==="completed"?"✓":n.status==="locked"?LOCK:
+    n.type==="checkpoint"?"◆":n.type==="bonus"?"◈":(n.done?n.done+"/"+n.steps:"");
+  const totalDone=st.units.reduce((a,u)=>a+u.done,0),total=st.units.reduce((a,u)=>a+u.total,0);
+  el.innerHTML=
+  `<div class="plbar"><button class="plback" id="plHome">← All modes</button><span class="grow plcount">${rm.title.toUpperCase()} · ${totalDone}/${total}</span></div>
+   <div class="road" style="height:${H}px">
+     <svg class="rsvg" width="${W}" height="${H}" aria-hidden="true"><path d="${d}" class="rp"/><path d="${gold}" class="rp gold"/><path d="${dash}" class="rp dash"/></svg>
+     ${rows.map(r=>r.type==="unit"
+       ?`<div class="ru" style="top:${r.y}px"><div class="rut"><b>${r.u.title}</b><span>${r.u.done}/${r.u.total} · ${r.u.pct}%</span></div><div class="rub"><i style="width:${r.u.pct}%"></i></div></div>`
+       :`<button class="rn ${r.n.type} ${r.n.status}${R.justDone===r.n.id?" just":""}" style="left:${r.x}px;top:${r.y}px" data-rn="${r.n.id}"
+            aria-label="${labelOf(r.n)} — ${r.n.status}"${r.n.status==="locked"?' aria-disabled="true"':""}><span class="rg">${glyph(r.n)}</span></button>
+          <div class="rnl" style="left:${r.x}px;top:${r.y+(r.n.type==="checkpoint"?42:r.n.type==="bonus"?31:37)}px">${labelOf(r.n)}</div>`).join("")}
+   </div>`;
+  R.justDone=null;
+  document.getElementById("plHome").onclick=()=>playGo("hub");
+  el.querySelectorAll("[data-rn]").forEach(b=>b.onclick=()=>{
+    const sn=st.byId[b.dataset.rn];
+    if(sn.status==="locked"){
+      b.classList.remove("shake");void b.offsetWidth;b.classList.add("shake");
+      const need=(sn.prerequisites||[]).map(id=>st.byId[id]).find(p=>p&&p.status!=="completed");
+      roadToast("Finish "+(need?labelOf(need):"the previous step")+" first");return;
+    }
+    if(sn.type==="bonus"){roadBonus(rm,sn);return;}
+    R.node=sn.id;R.q=null;R.chosen=null;R.att=null;R.sr=null;keepScroll=false;paintPlay();
+  });
+  if(st.active&&!keepScroll){const pa=pos[st.active];if(pa)setTimeout(()=>{el.scrollTop=Math.max(0,pa.y-el.clientHeight*0.45);},0);}
+}
+
+function paintRoadLesson(el,rm){
+  const n=roadNode(rm,R.node),rec=roadProg(rm.id)[n.id]||{done:0,at:null};
+  const isCheck=n.type==="checkpoint";
+  if(!R.q){
+    if(isCheck){
+      R.att={i:0,right:0};R.q=[];
+      let guard=0;
+      while(R.q.length<n.steps&&guard++<40){const qs=questionsFor(pick(n.pool),1,true);if(qs.length)R.q.push(qs[0]);}
+    }else R.q=questionsFor(n.ref,n.steps,false);
+    R.chosen=null;
+  }
+  /* a construct may support fewer question types than the roadmap asks for;
+     the lesson ends when the questions do, and the node still counts as complete */
+  const eff=isCheck?R.q.length:Math.max(1,Math.min(n.steps,R.q.length));
+  const idx=isCheck?R.att.i:Math.min(rec.done,eff);
+  const finished=isCheck?(R.att.i>=R.q.length&&R.q.length>0):rec.done>=n.steps;
+  const head=`<div class="plbar"><button class="plback" id="plPath">← Path</button><span class="grow plcount">${isCheck?"CHECKPOINT":"STEP "+Math.min(idx+1,eff)+" OF "+eff}</span>${isCheck?`<span class="plcount">${R.att.right} RIGHT</span>`:""}</div>
+    <div class="pltrack"><i style="width:${Math.round(Math.min(idx,eff)/eff*100)}%"></i></div>`;
+
+  if(finished){
+    if(isCheck&&R.att.right<n.pass){
+      el.innerHTML=head+`<div class="plwin"><div class="big">${R.att.right}/${n.steps}</div><div class="lab">NEEDED ${n.pass}</div>
+        <p><b>Not yet.</b> Re-read the unit's constructs — every miss above links to the bubble — and try the checkpoint again. Nothing is lost.</p></div>
+        <div class="plnav"><button class="plbtn go" id="plRetry">Try again →</button><button class="plbtn" id="plPath2">Back to path</button></div>`;
+      document.getElementById("plRetry").onclick=()=>{R.q=null;R.att=null;keepScroll=false;paintPlay();};
+      document.getElementById("plPath2").onclick=()=>{R.node=null;R.q=null;keepScroll=false;paintPlay();};
+    }else{
+      const sr=R.sr||roadMark(rm,n,n.steps);R.sr=null;
+      const xp=ROAD_XP[n.type];
+      el.innerHTML=head+`<div class="plwin"><div class="big">✓</div><div class="lab">${isCheck?"UNIT COMPLETE":"CONSTRUCT LEARNED"}</div>
+        <p><b>${labelOf(n)}</b>${isCheck?" — the next unit is open.":""}</p>${xp?`<p class="gain">+${xp} XP${streakMsg(sr)}</p>`:""}</div>
+        <div class="plnav"><button class="plbtn go" id="plPath2">Back to path →</button></div>`;
+      document.getElementById("plPath2").onclick=()=>{R.justDone=n.id;R.node=null;R.q=null;R.att=null;keepScroll=false;paintPlay();};
+    }
+    document.getElementById("plPath").onclick=()=>{R.node=null;R.q=null;R.att=null;keepScroll=false;paintPlay();};
+    return;
+  }
+
+  const q=R.q[idx];
+  let intro="";
+  if(!isCheck&&idx===0&&R.chosen===null){
+    const c=byId[n.ref];
+    intro=`<div class="rlhead"><h3>${c.label}</h3><div class="tags">${pills(c)}</div></div>
+      <div class="rlsum">${c.plain?`${c.plain.what} <br><span style="color:var(--tx-2)">${c.plain.why}</span>`:sent(c.def,2)}
+        <div class="jump"><button class="chip" data-peek="${c.id}">Read the full bubble first</button></div></div>`;
+  }
+  const answered=R.chosen!==null;
+  const right=answered&&q.opts[R.chosen].ok;
+  el.innerHTML=head+intro+qHtml(q,R.chosen)+
+    (answered?`<div class="plnav"><button class="plbtn go" id="plNext">${right?(idx+1>=eff?"Finish":"Next")+" →":"Try another →"}</button></div>`:"");
+  document.getElementById("plPath").onclick=()=>{R.node=null;R.q=null;R.att=null;keepScroll=false;paintPlay();};
+  el.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{
+    if(R.chosen!==null)return;
+    R.chosen=+b.dataset.o;
+    if(isCheck&&q.opts[R.chosen].ok)R.att.right++;
+    keepScroll=true;paintPlay();
+  });
+  const nx=document.getElementById("plNext");
+  if(nx)nx.onclick=()=>{
+    if(isCheck){R.att.i++;}
+    else if(right){ /* the step counts only once its explanation has been seen */
+      const sr=roadMark(rm,n,rec.done+1>=eff?n.steps:rec.done+1);if(sr)R.sr=sr;
+    }else{ /* a miss costs nothing: redraw the same kind of question */
+      const fresh=QGEN[q.gi](byId[n.ref]);if(fresh)R.q[idx]=fresh;
+    }
+    R.chosen=null;keepScroll=false;paintPlay();
+  };
+  bindPeek(el);
 }
 
 /* ---------- quiz ---------- */
@@ -1380,6 +1636,7 @@ function paintPuzzle(el){
     const prev=P.puz[key];
     if(!prev||moves<prev)P.puz[key]=moves;
     Z.gain=40+(moves<=Z.par?20:0);Z.sr=award(Z.gain);
+    if(Z.road){const rmz=ROADMAPS.find(r=>r.id===Z.road.rm),nz=rmz&&roadNode(rmz,Z.road.node);if(nz)roadMark(rmz,nz,nz.steps);}
   }
   const head=
   `<div class="plbar">
@@ -1404,13 +1661,15 @@ function paintPuzzle(el){
          `${i?'<span class="arr">→</span>':""}<button class="hop" data-peek="${id}">${byId[id].label}</button>`).join("")}</div>
      </div>
      <div class="plnav">
-       <button class="plbtn go" id="plNew">New pair →</button>
-       ${Z.daily?"":`<button class="plbtn" id="plDaily">Today's challenge</button>`}
+       ${Z.road?`<button class="plbtn go" id="plToRoad">Back to roadmap →</button>`:`<button class="plbtn go" id="plNew">New pair →</button>`}
+       ${Z.road?`<button class="plbtn" id="plNew">New pair</button>`:(Z.daily?"":`<button class="plbtn" id="plDaily">Today's challenge</button>`)}
      </div>`;
     document.getElementById("plHome").onclick=()=>{Z=null;playGo("hub");};
     document.getElementById("plNew").onclick=()=>{newPuzzle(false);keepScroll=false;paintPlay();};
     const db=document.getElementById("plDaily");
     if(db)db.onclick=()=>{newPuzzle(true);keepScroll=false;paintPlay();};
+    const tr=document.getElementById("plToRoad");
+    if(tr)tr.onclick=()=>{roadJust=Z.road.node;Z=null;playGo("road");};
     bindPeek(el);
     return;
   }

@@ -1,0 +1,597 @@
+{
+ "id": "atlas",
+ "title": "Human Atlas",
+ "subtitle": "Six units through what is actually known about people, in an order that argues something.",
+ "units": [
+  {
+   "id": "u_folklore",
+   "title": "What didn't survive",
+   "blurb": "Seven famous findings that broke — and one failure found inside this document. The most useful tour here, because most of these are still being taught.",
+   "nodes": [
+    {
+     "id": "n_folklore_power_posing",
+     "type": "standard",
+     "ref": "power_posing",
+     "prerequisites": [],
+     "steps": 2
+    },
+    {
+     "id": "n_folklore_ego_depletion",
+     "type": "standard",
+     "ref": "ego_depletion",
+     "prerequisites": [
+      "n_folklore_power_posing"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_folklore_wm_training",
+     "type": "standard",
+     "ref": "wm_training",
+     "prerequisites": [
+      "n_folklore_ego_depletion"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_folklore_mehrabian",
+     "type": "standard",
+     "ref": "mehrabian",
+     "prerequisites": [
+      "n_folklore_wm_training"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_folklore_candidate_gene_failure",
+     "type": "standard",
+     "ref": "candidate_gene_failure",
+     "prerequisites": [
+      "n_folklore_mehrabian"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_folklore_oxytocin",
+     "type": "standard",
+     "ref": "oxytocin",
+     "prerequisites": [
+      "n_folklore_candidate_gene_failure"
+     ],
+     "steps": 2
+    },
+    {
+     "id": "n_folklore_fabrication_risk",
+     "type": "standard",
+     "ref": "fabrication_risk",
+     "prerequisites": [
+      "n_folklore_oxytocin"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_folklore_bonus",
+     "type": "bonus",
+     "label": "Connect Brain training and far transfer to The '93% nonverbal' myth",
+     "prerequisites": [
+      "n_folklore_ego_depletion"
+     ],
+     "steps": 1,
+     "puzzle": {
+      "from": "wm_training",
+      "to": "mehrabian"
+     }
+    },
+    {
+     "id": "n_folklore_check",
+     "type": "checkpoint",
+     "label": "Checkpoint: What didn't survive",
+     "prerequisites": [
+      "n_folklore_fabrication_risk"
+     ],
+     "steps": 5,
+     "pass": 4,
+     "pool": [
+      "power_posing",
+      "ego_depletion",
+      "wm_training",
+      "mehrabian",
+      "candidate_gene_failure",
+      "oxytocin",
+      "fabrication_risk"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "u_inherit",
+   "title": "How much of you is inherited?",
+   "blurb": "Seven stops through behaviour genetics, ending somewhere more interesting — and much less deterministic — than the headline numbers suggest.",
+   "nodes": [
+    {
+     "id": "n_inherit_heritability",
+     "type": "standard",
+     "ref": "heritability",
+     "prerequisites": [
+      "n_folklore_check"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_inherit_twin_method",
+     "type": "standard",
+     "ref": "twin_method",
+     "prerequisites": [
+      "n_inherit_heritability"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_inherit_turkheimer_laws",
+     "type": "standard",
+     "ref": "turkheimer_laws",
+     "prerequisites": [
+      "n_inherit_twin_method"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_inherit_wilson_effect",
+     "type": "standard",
+     "ref": "wilson_effect",
+     "prerequisites": [
+      "n_inherit_turkheimer_laws"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_inherit_gene_env_correlation",
+     "type": "standard",
+     "ref": "gene_env_correlation",
+     "prerequisites": [
+      "n_inherit_wilson_effect"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_inherit_nonshared_env",
+     "type": "standard",
+     "ref": "nonshared_env",
+     "prerequisites": [
+      "n_inherit_gene_env_correlation"
+     ],
+     "steps": 2
+    },
+    {
+     "id": "n_inherit_personality_heritability",
+     "type": "standard",
+     "ref": "personality_heritability",
+     "prerequisites": [
+      "n_inherit_nonshared_env"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_inherit_bonus",
+     "type": "bonus",
+     "label": "Connect The classical twin design and its assumptions to Heritability rises with age",
+     "prerequisites": [
+      "n_inherit_twin_method"
+     ],
+     "steps": 1,
+     "puzzle": {
+      "from": "twin_method",
+      "to": "wilson_effect"
+     }
+    },
+    {
+     "id": "n_inherit_check",
+     "type": "checkpoint",
+     "label": "Checkpoint: How much of you is inherited?",
+     "prerequisites": [
+      "n_inherit_personality_heritability"
+     ],
+     "steps": 5,
+     "pass": 4,
+     "pool": [
+      "heritability",
+      "twin_method",
+      "turkheimer_laws",
+      "wilson_effect",
+      "gene_env_correlation",
+      "nonshared_env",
+      "personality_heritability"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "u_firstfive",
+   "title": "The first five seconds",
+   "blurb": "What happens when someone meets you, in the order it happens. Six stops from the instant judgement to the thing that actually makes people like you.",
+   "nodes": [
+    {
+     "id": "n_firstfive_thin_slicing",
+     "type": "standard",
+     "ref": "thin_slicing",
+     "prerequisites": [
+      "n_inherit_check"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_firstfive_big_two",
+     "type": "standard",
+     "ref": "big_two",
+     "prerequisites": [
+      "n_firstfive_thin_slicing"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_firstfive_axes_curvilinear",
+     "type": "standard",
+     "ref": "axes_curvilinear",
+     "prerequisites": [
+      "n_firstfive_big_two"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_firstfive_halo",
+     "type": "standard",
+     "ref": "halo",
+     "prerequisites": [
+      "n_firstfive_axes_curvilinear"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_firstfive_fae",
+     "type": "standard",
+     "ref": "fae",
+     "prerequisites": [
+      "n_firstfive_halo"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_firstfive_huang",
+     "type": "standard",
+     "ref": "huang",
+     "prerequisites": [
+      "n_firstfive_fae"
+     ],
+     "steps": 2
+    },
+    {
+     "id": "n_firstfive_bonus",
+     "type": "bonus",
+     "label": "Connect Thin slices & rapid judgements to Follow-up questions & likability",
+     "prerequisites": [
+      "n_firstfive_big_two"
+     ],
+     "steps": 1,
+     "puzzle": {
+      "from": "thin_slicing",
+      "to": "huang"
+     }
+    },
+    {
+     "id": "n_firstfive_check",
+     "type": "checkpoint",
+     "label": "Checkpoint: The first five seconds",
+     "prerequisites": [
+      "n_firstfive_huang"
+     ],
+     "steps": 5,
+     "pass": 4,
+     "pool": [
+      "thin_slicing",
+      "big_two",
+      "axes_curvilinear",
+      "halo",
+      "fae",
+      "huang"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "u_oversell",
+   "title": "Why influence frameworks oversell",
+   "blurb": "Seven stops from the research base into the commercial tier built on top of it, watching what gets lost in the translation.",
+   "nodes": [
+    {
+     "id": "n_oversell_big_two",
+     "type": "standard",
+     "ref": "big_two",
+     "prerequisites": [
+      "n_firstfive_check"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_oversell_reciprocity",
+     "type": "standard",
+     "ref": "reciprocity",
+     "prerequisites": [
+      "n_oversell_big_two"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_oversell_social_proof",
+     "type": "standard",
+     "ref": "social_proof",
+     "prerequisites": [
+      "n_oversell_reciprocity"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_oversell_obedience",
+     "type": "standard",
+     "ref": "obedience",
+     "prerequisites": [
+      "n_oversell_social_proof"
+     ],
+     "steps": 2
+    },
+    {
+     "id": "n_oversell_elm",
+     "type": "standard",
+     "ref": "elm",
+     "prerequisites": [
+      "n_oversell_obedience"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_oversell_challenger",
+     "type": "standard",
+     "ref": "challenger",
+     "prerequisites": [
+      "n_oversell_elm"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_oversell_gap_selling",
+     "type": "standard",
+     "ref": "gap_selling",
+     "prerequisites": [
+      "n_oversell_challenger"
+     ],
+     "steps": 1
+    },
+    {
+     "id": "n_oversell_bonus",
+     "type": "bonus",
+     "label": "Connect Social proof to Gap Selling",
+     "prerequisites": [
+      "n_oversell_reciprocity"
+     ],
+     "steps": 1,
+     "puzzle": {
+      "from": "social_proof",
+      "to": "gap_selling"
+     }
+    },
+    {
+     "id": "n_oversell_check",
+     "type": "checkpoint",
+     "label": "Checkpoint: Why influence frameworks oversell",
+     "prerequisites": [
+      "n_oversell_gap_selling"
+     ],
+     "steps": 5,
+     "pass": 4,
+     "pool": [
+      "big_two",
+      "reciprocity",
+      "social_proof",
+      "obedience",
+      "elm",
+      "challenger",
+      "gap_selling"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "u_dark",
+   "title": "The dark layer",
+   "blurb": "Six stops into the traits people most want to read about, and the measurement disputes that make the popular version unreliable.",
+   "nodes": [
+    {
+     "id": "n_dark_big_five",
+     "type": "standard",
+     "ref": "big_five",
+     "prerequisites": [
+      "n_oversell_check"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_dark_hexaco",
+     "type": "standard",
+     "ref": "hexaco",
+     "prerequisites": [
+      "n_dark_big_five"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_dark_dark_triad",
+     "type": "standard",
+     "ref": "dark_triad",
+     "prerequisites": [
+      "n_dark_hexaco"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_dark_narcissism",
+     "type": "standard",
+     "ref": "narcissism",
+     "prerequisites": [
+      "n_dark_dark_triad"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_dark_psychopathy_measurement",
+     "type": "standard",
+     "ref": "psychopathy_measurement",
+     "prerequisites": [
+      "n_dark_narcissism"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_dark_dark_outcomes",
+     "type": "standard",
+     "ref": "dark_outcomes",
+     "prerequisites": [
+      "n_dark_psychopathy_measurement"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_dark_bonus",
+     "type": "bonus",
+     "label": "Connect HEXACO and the sixth factor to Narcissism — grandiose and vulnerable",
+     "prerequisites": [
+      "n_dark_hexaco"
+     ],
+     "steps": 1,
+     "puzzle": {
+      "from": "hexaco",
+      "to": "narcissism"
+     }
+    },
+    {
+     "id": "n_dark_check",
+     "type": "checkpoint",
+     "label": "Checkpoint: The dark layer",
+     "prerequisites": [
+      "n_dark_dark_outcomes"
+     ],
+     "steps": 5,
+     "pass": 4,
+     "pool": [
+      "big_five",
+      "hexaco",
+      "dark_triad",
+      "narcissism",
+      "psychopathy_measurement",
+      "dark_outcomes"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "u_change",
+   "title": "Can you actually change?",
+   "blurb": "Seven stops on malleability — what moves, what doesn't, and which of the famous self-improvement findings survived scrutiny.",
+   "nodes": [
+    {
+     "id": "n_change_trait_change",
+     "type": "standard",
+     "ref": "trait_change",
+     "prerequisites": [
+      "n_dark_check"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_change_person_situation",
+     "type": "standard",
+     "ref": "person_situation",
+     "prerequisites": [
+      "n_change_trait_change"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_change_growth_mindset",
+     "type": "standard",
+     "ref": "growth_mindset",
+     "prerequisites": [
+      "n_change_person_situation"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_change_self_efficacy",
+     "type": "standard",
+     "ref": "self_efficacy",
+     "prerequisites": [
+      "n_change_growth_mindset"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_change_habit_formation",
+     "type": "standard",
+     "ref": "habit_formation",
+     "prerequisites": [
+      "n_change_self_efficacy"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_change_wanting_liking",
+     "type": "standard",
+     "ref": "wanting_liking",
+     "prerequisites": [
+      "n_change_habit_formation"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_change_sdt",
+     "type": "standard",
+     "ref": "sdt",
+     "prerequisites": [
+      "n_change_wanting_liking"
+     ],
+     "steps": 3
+    },
+    {
+     "id": "n_change_bonus",
+     "type": "bonus",
+     "label": "Connect Can personality change? to Wanting is not liking",
+     "prerequisites": [
+      "n_change_person_situation"
+     ],
+     "steps": 1,
+     "puzzle": {
+      "from": "trait_change",
+      "to": "wanting_liking"
+     }
+    },
+    {
+     "id": "n_change_check",
+     "type": "checkpoint",
+     "label": "Checkpoint: Can you actually change?",
+     "prerequisites": [
+      "n_change_sdt"
+     ],
+     "steps": 5,
+     "pass": 4,
+     "pool": [
+      "trait_change",
+      "person_situation",
+      "growth_mindset",
+      "self_efficacy",
+      "habit_formation",
+      "wanting_liking",
+      "sdt"
+     ]
+    }
+   ]
+  }
+ ]
+}

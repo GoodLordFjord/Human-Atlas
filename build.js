@@ -14,6 +14,9 @@ const ROOT=__dirname;
 
 const read=f=>JSON.parse(fs.readFileSync(path.join(ROOT,'data',f),'utf8'));
 const nodes=read('nodes.json'), edges=read('edges.json'), layers=read('layers.json');
+/* one roadmap per file; a new subject is a new file, not a code change */
+const roadmaps=fs.readdirSync(path.join(ROOT,'data','roadmaps')).filter(f=>f.endsWith('.json')).sort()
+  .map(f=>JSON.parse(fs.readFileSync(path.join(ROOT,'data','roadmaps',f),'utf8')));
 
 /* The renderer still speaks the original field names. Rather than rewrite it in
    the same change that moves the data out, the build projects v2 records back
@@ -40,7 +43,8 @@ const layersJs=Object.fromEntries(Object.entries(layers).map(([k,v])=>[k,{n:v.na
 
 function build(){
   const payload='const LAYERS='+JSON.stringify(layersJs)+';\n'+
-                'const N='+JSON.stringify(projected)+';';
+                'const N='+JSON.stringify(projected)+';\n'+
+                'const ROADMAPS='+JSON.stringify(roadmaps)+';';
   const tpl=fs.readFileSync(path.join(ROOT,'src','app.html'),'utf8');
   if(!tpl.includes('/*__ATLAS_DATA__*/')){
     console.error('src/app.html is missing the /*__ATLAS_DATA__*/ marker');
@@ -52,13 +56,13 @@ function build(){
 }
 
 /* the tests read the data through here, so the projection is defined once */
-module.exports={nodes,edges,layers,projected,build};
+module.exports={nodes,edges,layers,roadmaps,projected,build};
 
 if(require.main===module){
   const out=build();
   const withPlain=nodes.filter(n=>n.plain).length;
   console.log('built index.html — '+nodes.length+' nodes, '+edges.length+' edges, '+
-    Object.keys(layers).length+' layers, '+(out.length/1024).toFixed(0)+' KB');
+    Object.keys(layers).length+' layers, '+roadmaps.length+' roadmap'+(roadmaps.length===1?'':'s')+', '+(out.length/1024).toFixed(0)+' KB');
   console.log('plain-language register: '+withPlain+'/'+nodes.length+
     ' ('+Math.round(withPlain/nodes.length*100)+'%)');
 }

@@ -47,7 +47,8 @@ const FILE='file://'+path.join(__dirname,'..','index.html');
     await pg.click('.nav button[data-v="play"]');
     await pg.waitForSelector('#vPlay:not([hidden])',{timeout:3000});
     const n=await pg.locator('.plmode').count();
-    if(n!==3)throw new Error('expected 3 mode cards, found '+n);
+    if(n!==4)throw new Error('expected 4 mode cards (roadmap, quiz, expeditions, puzzle), found '+n);
+    if((await pg.locator('.plmode').first().getAttribute('data-m'))!=='road')throw new Error('roadmap should lead the hub');
   });
 
   await step('a full 10-question round scores and explains every answer',async()=>{
@@ -99,7 +100,8 @@ const FILE='file://'+path.join(__dirname,'..','index.html');
         await pg.waitForTimeout(40);
       }
       if(guard>=40)throw new Error('route '+r+' never reached its end');
-      if((await pg.locator('.plwin p').first().innerText()).trim().length<40)
+      /* the card also carries a short "+XP" line; the payoff is the other paragraph */
+      if((await pg.locator('.plwin p:not(.gain)').first().innerText()).trim().length<40)
         throw new Error('route '+r+' has no closing payoff');
       await pg.click('#plBack');
       await pg.waitForSelector('[data-e]');

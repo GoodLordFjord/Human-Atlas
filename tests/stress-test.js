@@ -257,6 +257,57 @@ ok('the freeze rule is stated where a streak starts',/Seven days running earns a
 ok('privacy line still true: nothing leaves the device',
    /Progress is saved on this device only/.test(html)&&!/fetch\(|XMLHttpRequest|navigator\.sendBeacon/.test(src));
 
+console.log('\n=== 8f. ROADMAP ===');
+/* the engine is headless and sits between markers, so it can be lifted out of the
+   page and run here with no DOM */
+const rs=src.indexOf('/* ---- road engine ---- */'),re=src.indexOf('/* ---- road engine end ---- */');
+ok('road engine is isolated between markers',rs>0&&re>rs);
+let roadState=null;
+try{roadState=new Function(src.slice(rs,re)+';return roadState;')();ok('road engine runs with no globals',typeof roadState==='function');}
+catch(e){ok('road engine runs with no globals',false,e.message);}
+if(roadState){
+  const rm={id:'t',units:[
+    {id:'A',nodes:[{id:'a1',type:'standard',ref:'x',prerequisites:[],steps:2},{id:'a2',type:'standard',ref:'y',prerequisites:['a1'],steps:1},
+                   {id:'b',type:'bonus',prerequisites:['a1'],steps:1},{id:'c',type:'checkpoint',prerequisites:['a2'],steps:1,pass:1,pool:[]}]},
+    {id:'B',nodes:[{id:'b1',type:'standard',ref:'z',prerequisites:['c'],steps:1}]}]};
+  const s0=roadState(rm,{});
+  ok('empty progress: first node active, all else locked',s0.byId.a1.status==='active'&&['a2','b','c','b1'].every(i=>s0.byId[i].status==='locked'));
+  const s1=roadState(rm,{a1:{done:1}});
+  ok('partial progress keeps the node active and reports steps',s1.byId.a1.status==='active'&&s1.byId.a1.done===1);
+  const s2=roadState(rm,{a1:{done:2}});
+  ok('completing a node unlocks its dependants',s2.byId.a1.status==='completed'&&s2.byId.a2.status==='active'&&s2.byId.b.status==='unlocked');
+  ok('a bonus never takes the pulse',s2.active==='a2');
+  ok('unit completion counts required nodes only',s2.units[0].total===3&&s2.units[0].done===1&&s2.units[0].pct===33);
+  const s3=roadState(rm,{a1:{done:2},a2:{done:1},c:{done:1}});
+  ok('checkpoint opens the next unit',s3.byId.b1.status==='active'&&s3.units[0].pct===100&&s3.units[1].pct===0);
+  ok('over-reporting steps still counts as complete',roadState(rm,{a1:{done:9}}).byId.a1.status==='completed');
+
+  const real=BUILD.roadmaps[0];
+  const r0=roadState(real,{});
+  const req=r0.nodes.filter(n=>n.type!=='bonus').length;
+  console.log('        '+real.units.length+' units · '+r0.nodes.length+' nodes · '+req+' required · '+(r0.nodes.length-req)+' bonus');
+  ok('real roadmap: one active node from a fresh start, and it is the first construct',
+     r0.nodes.filter(n=>n.status==='active').length===1&&r0.active===real.units[0].nodes[0].id,r0.active);
+  const u1=real.units[0],prog={};u1.nodes.filter(n=>n.type==='standard').forEach(n=>prog[n.id]={done:n.steps});
+  const r1=roadState(real,prog);
+  const ck=u1.nodes.find(n=>n.type==='checkpoint'),u2first=real.units[1].nodes.find(n=>n.type!=='bonus');
+  ok('real roadmap: finishing a unit activates its checkpoint and keeps the next unit locked',
+     r1.byId[ck.id].status==='active'&&r1.byId[u2first.id].status==='locked');
+  prog[ck.id]={done:ck.steps};
+  ok('real roadmap: the checkpoint opens the next unit',roadState(real,prog).byId[u2first.id].status==='active');
+  ok('every standard node references a construct that exists',r0.nodes.filter(n=>n.type==='standard').every(n=>byId[n.ref]));
+}
+ok('roadmaps are inlined by the build',/const ROADMAPS=\[/.test(src));
+ok('roadmap registers ahead of the quiz so it leads the hub',src.indexOf('MODES.road=')<src.indexOf('MODES.quiz='));
+ok('a bonus pays only through the puzzle it launches',/ROAD_XP=\{standard:20,checkpoint:50,bonus:0\}/.test(src));
+ok('puzzle reports bonus completion back to the roadmap',/if\(Z\.road\)\{const rmz=ROADMAPS\.find/.test(src));
+ok('the path winds on an eight-step wave',/wave=\[0,\.6,1,\.6,0,-\.6,-1,-\.6\]/.test(src));
+['rpulse','rshake','rburst'].forEach(k=>ok('animation defined: '+k,new RegExp('@keyframes '+k).test(css)));
+ok('reduced motion disables every animation',/prefers-reduced-motion:reduce\)\{[^}]*\}[^}]*\*\{animation:none !important;\}/.test(css.replace(/\s+/g,''))||/animation:none !important/.test(css));
+ok('locked nodes are announced as disabled',/aria-disabled="true"/.test(src));
+ok('a miss redraws the question instead of costing anything',/a miss costs nothing: redraw/.test(src));
+ok('question generators accept a pinned construct',/function questionsFor\(ref,k,randomOrder\)/.test(src)&&(src.match(/^function\(pin\)\{/gm)||[]).length===5);
+
 console.log('\n=== 9. CONTENT SANITY ===');
 const ev={},ver={};N.forEach(n=>{ev[n.ev]=(ev[n.ev]||0)+1;ver[n.ver]=(ver[n.ver]||0)+1;});
 console.log('        grades',JSON.stringify(ev));

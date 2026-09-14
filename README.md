@@ -18,6 +18,7 @@ only work over a server.
 | `data/nodes.json` | The constructs. **This is what you edit.** |
 | `data/edges.json` | Relationships between them |
 | `data/layers.json` | The 16 layers and their colours |
+| `data/roadmaps/*.json` | One roadmap per file — units, nodes, prerequisites, checkpoints, bonuses |
 | `schema/atlas.schema.json` | The shape every node must have |
 | `src/app.html` | The renderer — markup, styles, logic, no content |
 | `index.html` | **Generated.** Don't edit by hand; run the build |
@@ -25,6 +26,8 @@ only work over a server.
 | `tests/validate-data.js` | Checks `data/` against the schema |
 | `tests/stress-test.js` | Static checks on the built page |
 | `tests/browser-test.js` | Drives the real page in a headless browser |
+| `tests/streak-test.js` | Seeds every streak state and checks what a real round persists |
+| `tests/roadmap-test.js` | Walks the path, a lesson, the bonus branch and the checkpoint gate |
 
 ## The two commands
 
@@ -82,6 +85,43 @@ Coverage is currently **16 of 98** and reported by both the validator and the st
 test. Where a plain version has not been written, the app says so and shows the full
 entry, rather than quietly leaving a gap — the same honesty the evidence grades apply
 to the psychology.
+
+## The roadmap
+
+A top-down, winding path through the atlas — the guided entry point, and the first card
+on the Play hub. `data/roadmaps/atlas.json` turns the six expeditions into six units;
+each construct in a unit is a node, each unit ends in a **checkpoint** (five questions
+drawn from that unit, four to pass) that gates the next unit, and each has one optional
+**bonus** branch that launches a connection puzzle between two of its constructs.
+
+A node's status is computed, never stored: `locked` until its prerequisites are complete,
+`unlocked` once they are, `active` for the first unlocked node on the main path (it
+pulses), `completed` when its steps are done. Bonus nodes are optional and never take the
+pulse. A standard node's lesson is the construct itself — read it, then answer up to three
+questions generated about it by the same generators the quiz uses. A node's `steps` is
+derived from how many question types that construct can actually support (the validator
+refuses a roadmap that asks for more), so no lesson ever runs out of questions. **A wrong
+answer costs nothing**: the question is redrawn, because penalising mistakes measurably
+hurts learning.
+Completion awards XP through the same path as everything else, so it feeds the streak.
+
+The layout is a fixed-height row per node with the main path's x following an
+eight-step wave (`0, .6, 1, .6, 0, -.6, -1, -.6` × amplitude) around the centre — that is
+the whole trick behind the winding path. Bonus nodes sit on the opposite side, joined by a
+dashed branch. The engine (`roadState`) is headless and sits between markers in the
+template so the static suite lifts it out and unit-tests it with no DOM.
+
+A second subject is a second file in `data/roadmaps/` — the validator checks that every
+node references a real construct, prerequisites stay inside the roadmap, the graph is
+acyclic, and every unit is gated by the previous unit's checkpoint.
+
+```
+node tests/roadmap-test.js
+```
+
+Drives the real page: layout and status from a fresh start, locked-click feedback, a
+lesson to completion, the bonus branch round-tripping through the puzzle, and the
+checkpoint gate in both outcomes.
 
 ## Streaks, XP and the progress spine
 
