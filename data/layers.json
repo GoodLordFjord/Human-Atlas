@@ -1,66 +1,82 @@
 {
  "substrate": {
   "name": "Evolved substrate",
-  "color": "#16233f"
+  "color": "#16233f",
+  "plain": "Built-in drives"
  },
  "genetics": {
   "name": "Heredity & genomics",
-  "color": "#1d6b5c"
+  "color": "#1d6b5c",
+  "plain": "What you inherit"
  },
  "neuro": {
   "name": "Reward & motivation neuroscience",
-  "color": "#b5581f"
+  "color": "#b5581f",
+  "plain": "Wanting and reward"
  },
  "emotion": {
   "name": "Emotion",
-  "color": "#7d2e68"
+  "color": "#7d2e68",
+  "plain": "Feelings and moods"
  },
  "dark": {
   "name": "The dark layer",
-  "color": "#4a3b63"
+  "color": "#4a3b63",
+  "plain": "Difficult traits"
  },
  "dev": {
   "name": "Development",
-  "color": "#2a7f6f"
+  "color": "#2a7f6f",
+  "plain": "Growing up"
  },
  "spine": {
   "name": "Spine — organising claims",
-  "color": "#12808a"
+  "color": "#12808a",
+  "plain": "How people judge each other"
  },
  "diffs": {
   "name": "Individual differences",
-  "color": "#6a4fb3"
+  "color": "#6a4fb3",
+  "plain": "Personality"
  },
  "motive": {
   "name": "Motivation & needs",
-  "color": "#b07d2b"
+  "color": "#b07d2b",
+  "plain": "What drives you"
  },
  "cog": {
   "name": "Cognition",
-  "color": "#3f6fb5"
+  "color": "#3f6fb5",
+  "plain": "Thinking and its traps"
  },
  "selfreg": {
   "name": "Self & regulation",
-  "color": "#2e7d4f"
+  "color": "#2e7d4f",
+  "plain": "Self-control and change"
  },
  "percep": {
   "name": "Social perception",
-  "color": "#c99a2e"
+  "color": "#c99a2e",
+  "plain": "First impressions"
  },
  "infl": {
   "name": "Influence",
-  "color": "#b4452f"
+  "color": "#b4452f",
+  "plain": "Persuasion"
  },
  "bond": {
   "name": "Bonding & relationships",
-  "color": "#c25a7c"
+  "color": "#c25a7c",
+  "plain": "Relationships"
  },
  "applied": {
   "name": "Applied frameworks (derivative)",
-  "color": "#6b7a90"
+  "color": "#6b7a90",
+  "plain": "Sales and self-help systems"
  },
  "meta": {
   "name": "Epistemics & method",
-  "color": "#8a6fb0"
+  "color": "#8a6fb0",
+  "plain": "How this atlas checks itself"
  }
 }

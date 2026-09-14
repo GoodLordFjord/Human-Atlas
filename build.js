@@ -39,7 +39,8 @@ const projected=nodes.map(n=>({
   claim_type:n.facets.claim_type, tradition:n.facets.tradition, plain:n.plain
 }));
 
-const layersJs=Object.fromEntries(Object.entries(layers).map(([k,v])=>[k,{n:v.name,c:v.color}]));
+/* n = the precise name, p = the plain gloss a newcomer sees first */
+const layersJs=Object.fromEntries(Object.entries(layers).map(([k,v])=>[k,{n:v.name,c:v.color,p:v.plain||v.name}]));
 
 function build(){
   const payload='const LAYERS='+JSON.stringify(layersJs)+';\n'+

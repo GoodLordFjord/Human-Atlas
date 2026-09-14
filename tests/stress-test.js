@@ -101,7 +101,8 @@ wn('node count within node-link comfort zone (Ghoniem <20)',N.length<=20,N.lengt
 ok('graph is sparse enough to draw (density <10%)',+density<10,density+'%');
 ok('no single node dominates (max degree <35% of nodes)',degs[0]<N.length*0.35,'max degree '+degs[0]);
 // label legibility: how many labels visible at overview zoom thresholds
-const lab = k => N.filter(n=>{const d=deg[n.id]||0; return k>=.72?true:k>=.45?d>=6:d>=10;}).length;
+/* mirrors the page's thresholds; keep in step with the display rule in paintGraph */
+const lab = k => N.filter(n=>{const d=deg[n.id]||0; return k>=.72?true:k>=.5?d>=10:d>=14;}).length;
 console.log('        labels shown — k=1.0: '+lab(1)+'  k=0.5: '+lab(.5)+'  k=0.3: '+lab(.3));
 ok('overview zoom shows a readable number of labels (<25)',lab(.3)<25,lab(.3)+' labels at k=0.3');
 
@@ -137,7 +138,6 @@ console.log('\n=== 8. NEW FEATURES PRESENT ===');
  ['pin release control',/function releasePins/],
  ['pin visual marker',/circle\.pin/],
  ['start screen with task entry points',/const TASKS=\[/],
- ['first-run onboarding card',/id="onboard"/],
  ['filter sync from task buttons',/function syncOpts/],
  ['fit-to-extent',/function fitAll/],
  ['layer clustering',/function applyGrouping/],
@@ -146,6 +146,64 @@ console.log('\n=== 8. NEW FEATURES PRESENT ===');
  ['reach depth dial',/S\.depth/],
  ['plays-well / doesn\'t-play-well lists',/PLAYS WELL WITH[\s\S]*DOES NOT PLAY WELL WITH/]
 ].forEach(([n,re])=>ok(n,re.test(src)||re.test(html)));
+
+console.log('\n=== 8a. FRONT DOOR (first-run navigation) ===');
+/* A. one obvious first move, with the rest visibly secondary */
+ok('Start leads with a single primary action',/<button class="hero" id="hero">/.test(src));
+ok('the hero routes into the guided path',/S\.mode="road";setView\("play"\)/.test(src));
+ok('the hero reads differently once there is progress',/CONTINUE THE GUIDED PATH/.test(src)&&/START HERE/.test(src));
+ok('the five task cards are demoted, not deleted',/class="tasks compact"/.test(src)&&(src.match(/data-t="\$\{i\}"/g)||[]).length===1);
+ok('the secondary set is introduced as an alternative',/OR GO STRAIGHT TO A QUESTION/.test(html));
+
+/* B. the tab says what it gives you, and the habit ask waits for value */
+ok('the guided tab is labelled Learn, not Play',/>Learn<\/button>/.test(html)&&!/>Play<\/button>/.test(html));
+ok('the streak card is withheld until something has been earned',
+   /const showToday=P\.xp>0\|\|s\.count>0/.test(src)&&/\$\{showToday\?today:""\}/.test(src));
+
+/* C. overview first: no blocking modal, fewer labels when zoomed out, a way to see less */
+ok('no modal blocks the map before anything has been seen',!/id="onboard"/.test(html));
+ok('the legend still names every visual channel',
+   ['colour = which layer','solid evidence','contested','not yet source-verified','live dispute']
+     .every(t=>html.includes(t)));
+ok('a first-tap hint points at the payoff',/Tap any bubble\. Bigger means more connected\./.test(src));
+ok('the hint retires after the first bubble is opened',/if\(!P\.tapped\)\{P\.tapped=1/.test(src));
+ok('overview zoom names only the hubs',/if\(k>=\.5\)return d\.deg>=10\?null:"none"/.test(src));
+ok('the map can be narrowed to the current unit',/id="uMine"/.test(src)&&/S\.set=new Set/.test(src));
+ok('and put back to everything',/id="uAll"/.test(src)&&/S\.set=null/.test(src));
+ok('the node whitelist composes with the filters rather than replacing them',
+   /visible=n=>visibleBase\(n\)&&\(!S\.set\|\|S\.set\.has\(n\.id\)\)/.test(src));
+
+/* D. plain names first, precise names kept */
+const LAYERS_B=BUILD.layers;
+ok('every layer carries a plain gloss',Object.values(LAYERS_B).every(l=>l.plain&&l.plain.length>2),
+   Object.entries(LAYERS_B).filter(([,l])=>!l.plain).map(([k])=>k).join(', '));
+const LAYER_JARGON=/substrate|genomic|heredity|mesolimbic|construct|epistem|circumplex|derivative|organising claims/i;
+ok('no layer gloss contains jargon',
+   Object.values(LAYERS_B).every(l=>!LAYER_JARGON.test(l.plain)),
+   Object.entries(LAYERS_B).filter(([,l])=>LAYER_JARGON.test(l.plain)).map(([k,l])=>k+':'+l.plain).join(', '));
+ok('every gloss is short enough to sit in a chip',
+   Object.values(LAYERS_B).every(l=>l.plain.length<=34),
+   Object.entries(LAYERS_B).filter(([,l])=>l.plain.length>34).map(([k,l])=>k+':'+l.plain.length).join(', '));
+ok('filter chips use the plain gloss',/mkOpt\(oLay,"layer",k,l\.p,l\.c\)/.test(src));
+ok('browse headings lead plain, keep the precise name beside it',/\$\{l\.p\}<small>\$\{l\.n\}<\/small>/.test(src));
+ok('the detail pill leads plain and keeps the precise name on hover',/title="\$\{LAYERS\[n\.layer\]\.n\}">\$\{LAYERS\[n\.layer\]\.p\}/.test(src));
+ok('jargon grade labels are spelled out',/"Failed to replicate"/.test(src)&&/"Practitioner books"/.test(src));
+
+/* E. Trace asks a question instead of answering an unasked one */
+ok('Trace opens with nothing chosen',/from:null,to:null/.test(src));
+ok('Trace asks which two, and offers real pairs',/Which two ideas do you want connected\?/.test(src)&&/data-sug=/.test(src));
+
+/* F. no drawer left hanging over the next view */
+ok('changing view closes the filter drawer',
+   /a drawer left open would sit on top of the next view[\s\S]{0,140}drawer\.classList\.remove\("on"\)/.test(src));
+ok('map-only tools are hidden where there is nothing to search',
+   /app\.classList\.toggle\("noSearch",v==="play"\|\|v==="start"\)/.test(src)&&/\.app\.noSearch \.searchrow/.test(css));
+
+/* G. one About door instead of two essays in the header */
+ok('the header carries a single About control',/id="bAbout"/.test(html)&&!/id="bAudit"[^>]*>Audit log/.test(html));
+ok('About fans out to both documents',/id="aMethod"/.test(html)&&/id="aAudit"/.test(html));
+ok('both long documents are still reachable',/id="mMethod"/.test(html)&&/id="mAudit"/.test(html));
+ok('About is also reachable from Start',/id="sAbout"/.test(src));
 
 console.log('\n=== 8b. PLAY MODES (quiz / expeditions / puzzle) ===');
 const EXPED=eval(src.match(/const EXPED=(\[[\s\S]*?\n\];)/)[1].slice(0,-1));

@@ -28,6 +28,7 @@ only work over a server.
 | `tests/browser-test.js` | Drives the real page in a headless browser |
 | `tests/streak-test.js` | Seeds every streak state and checks what a real round persists |
 | `tests/roadmap-test.js` | Walks the path, a lesson, the bonus branch and the checkpoint gate |
+| `tests/firstrun-test.js` | Walks the first-time visitor's journey; guards taps-to-value |
 
 ## The two commands
 
@@ -85,6 +86,53 @@ Coverage is currently **16 of 98** and reported by both the validator and the st
 test. Where a plain version has not been written, the app says so and shows the full
 entry, rather than quietly leaving a gap — the same honesty the evidence grades apply
 to the psychology.
+
+## The front door
+
+The site had six roughly-equal entry points and nothing telling a first-time visitor
+which to walk through. Every individual screen was well made; the sequencing was not.
+What changed, and the reasoning:
+
+- **One obvious first move.** Start now leads with a single hero — the guided path —
+  carrying a time estimate and the no-account promise, with the five task cards demoted
+  beneath *"or go straight to a question"*. Decision time grows with the number of equally
+  weighted options ([Hick's law](https://ixdf.org/literature/article/hick-s-law-making-the-choice-easier-for-users)),
+  so the fix is not fewer doors but one clearly primary one. Returning visitors get
+  *Continue · 2/46* and the name of the next construct instead of a restart.
+- **The tab is called Learn, not Play.** It holds the curriculum; "Play" read as games and
+  hid it.
+- **Overview first, then zoom, then details on demand.** The map used to open on 98
+  overlapping labels behind a legend modal, which is the opposite of
+  [Shneiderman's ordering](https://jtr13.github.io/cc21/ben-shneidermans-visualization-mantra.html).
+  The modal is gone (the permanent legend says the same thing without blocking), only hubs
+  are named at fit zoom, a one-line hint points at the first tap and retires after it, and
+  **My unit / All 98** narrows the map to the eight constructs you are currently learning.
+  Narrowing *removes* rather than dims, because a hairball drawn behind the answer is not
+  context. `fitAll` fits the rectangle left free by the legend, zoom column and unit row.
+- **Plain names lead; precise names survive.** Every layer carries a `plain` gloss —
+  "Evolved substrate" browses as **Built-in drives**, with the formal name beside it, and
+  filter chips use the plain form. Plain language
+  [measurably helps expert readers too](https://www.nngroup.com/articles/plain-language-experts/),
+  so this is a second register, not a simplification.
+- **Trace asks instead of answering.** It used to open with a route between two constructs
+  nobody had chosen. Both pickers now start empty, with three real pairs to try.
+- **The filter drawer closes when the view changes**, and search and filters are hidden on
+  Start and Learn, where there is nothing yet to search.
+- **One About door.** The header carried two long essays; it now carries `About`, which
+  states the promise plainly and fans out to the grading method and the audit log.
+
+Progressive disclosure — revealing complexity as the visitor is ready for it — is the
+thread through all of it, and it
+[improves learnability, efficiency and error rate](https://www.uxpin.com/studio/blog/what-is-progressive-disclosure/).
+
+```
+node tests/firstrun-test.js
+```
+
+Walks the site as someone who has never seen it: the first screen and what competes on it,
+the guided path, the returning-visitor state, the map's overview behaviour, plain naming,
+the drawer, Trace and About. It measures the number that matters — **two taps from a cold
+load to a construct explained in plain English**.
 
 ## The roadmap
 

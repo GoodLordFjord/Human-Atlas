@@ -69,9 +69,14 @@ const check=(name,cond,detail)=>{
     /* re-render the finished state by leaving and re-entering the tab */
     await pg.click('.nav button[data-v="map"]');await pg.waitForTimeout(150);
     await pg.click('.nav button[data-v="play"]');await pg.waitForTimeout(250);
+    await pg.click('.plback').catch(()=>{});await pg.waitForTimeout(200);
+    const hubAfter=await pg.evaluate(()=>({
+      todayCls:(document.querySelector('.today')||{}).className||'',
+      spineText:(document.querySelector('.spine')||{}).textContent||''
+    }));
     const again=await pg.evaluate(k=>JSON.parse(localStorage.getItem(k)),KEY);
     await pg.close();
-    return{hub,score,gain,after,again,inQuizSpine,spineCls,errs};
+    return{hub,hubAfter,score,gain,after,again,inQuizSpine,spineCls,errs};
   }
 
   console.log('\n=== A. first ever activity ===');
@@ -79,7 +84,10 @@ const check=(name,cond,detail)=>{
     const r=await run(null,'fresh');
     check('no page errors',r.errs.length===0,r.errs[0]);
     check('spine renders on the hub',r.hub.spine);
-    check('hub invites a new streak',/today/.test(r.hub.todayCls)&&!/risk|done/.test(r.hub.todayCls));
+    check('no streak nudge before anything has been earned',r.hub.todayCls==='',r.hub.todayCls);
+    check('the spine is still there, just showing zero',r.hub.spine);
+    check('the streak card appears once the first round is banked',
+      /today/.test(r.hubAfter.todayCls)&&/done/.test(r.hubAfter.todayCls),r.hubAfter.todayCls);
     check('spine renders inside the quiz too',r.inQuizSpine===1);
     check('ember tier on day 1',/tier-ember/.test(r.spineCls),r.spineCls);
     check('streak becomes 1',r.after.streak.count===1,'got '+r.after.streak.count);
