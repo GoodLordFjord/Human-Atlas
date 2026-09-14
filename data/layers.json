@@ -1,0 +1,66 @@
+{
+ "substrate": {
+  "name": "Evolved substrate",
+  "color": "#16233f"
+ },
+ "genetics": {
+  "name": "Heredity & genomics",
+  "color": "#1d6b5c"
+ },
+ "neuro": {
+  "name": "Reward & motivation neuroscience",
+  "color": "#b5581f"
+ },
+ "emotion": {
+  "name": "Emotion",
+  "color": "#7d2e68"
+ },
+ "dark": {
+  "name": "The dark layer",
+  "color": "#4a3b63"
+ },
+ "dev": {
+  "name": "Development",
+  "color": "#2a7f6f"
+ },
+ "spine": {
+  "name": "Spine — organising claims",
+  "color": "#12808a"
+ },
+ "diffs": {
+  "name": "Individual differences",
+  "color": "#6a4fb3"
+ },
+ "motive": {
+  "name": "Motivation & needs",
+  "color": "#b07d2b"
+ },
+ "cog": {
+  "name": "Cognition",
+  "color": "#3f6fb5"
+ },
+ "selfreg": {
+  "name": "Self & regulation",
+  "color": "#2e7d4f"
+ },
+ "percep": {
+  "name": "Social perception",
+  "color": "#c99a2e"
+ },
+ "infl": {
+  "name": "Influence",
+  "color": "#b4452f"
+ },
+ "bond": {
+  "name": "Bonding & relationships",
+  "color": "#c25a7c"
+ },
+ "applied": {
+  "name": "Applied frameworks (derivative)",
+  "color": "#6b7a90"
+ },
+ "meta": {
+  "name": "Epistemics & method",
+  "color": "#8a6fb0"
+ }
+}

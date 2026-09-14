@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Human Atlas node, schema version 2",
+  "description": "Every node shares this core. Anything specific to a kind of node lives under body, so a new kind never migrates the existing ones. Facets are deliberately independent of each other: a node is reachable by layer, by claim type, or by tradition, and none of those is the master hierarchy.",
+
+  "type": "object",
+  "required": ["id", "label", "schema_version", "kind", "facets", "strength", "verification", "body", "sources"],
+  "additionalProperties": false,
+
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Stable identifier. Never reused, never renamed — edges and saved progress point at it."
+    },
+    "label": { "type": "string", "minLength": 3 },
+    "schema_version": { "const": 2 },
+
+    "kind": {
+      "enum": ["construct", "convergence", "question", "position", "practice"],
+      "description": "construct is a thing that is claimed to exist. convergence is a claim plus the independent routes that reached it. question and position map a dispute without settling it."
+    },
+
+    "facets": {
+      "type": "object",
+      "required": ["layer", "claim_type", "tradition"],
+      "additionalProperties": false,
+      "description": "Independent axes. Adding a facet is additive; none of them nests inside another.",
+      "properties": {
+        "layer": { "type": "string", "minLength": 2 },
+        "claim_type": {
+          "enum": ["empirical", "formal", "phenomenological", "contemplative", "philosophical", "practitioner"],
+          "description": "What sort of claim this is. Orthogonal to how well it holds up."
+        },
+        "tradition": { "type": "string", "minLength": 2 }
+      }
+    },
+
+    "strength": {
+      "type": "object",
+      "required": ["rubric", "label"],
+      "additionalProperties": true,
+      "description": "How well it holds up, on the rubric appropriate to its claim type. A reader that does not recognise the rubric still renders label.",
+      "properties": {
+        "rubric": {
+          "enum": ["empirical", "formal", "phenomenological", "contemplative", "philosophical", "practitioner"]
+        },
+        "label": { "type": "string", "minLength": 2 },
+        "replication": { "type": "string" },
+        "magnitude": { "type": "string" },
+        "boundaries": { "type": "string" }
+      }
+    },
+
+    "verification": {
+      "enum": ["audited", "inherited"],
+      "description": "Whether the sources on this node were retrieved and checked, or carried over untested. Separate from strength: a well-evidenced claim can still be unverified here."
+    },
+
+    "provenance": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "Who arrived at this, when, and what they had access to. could_have_read is what makes convergence assessable rather than asserted — without it, apparent agreement cannot be told apart from transmission.",
+      "properties": {
+        "origin": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "who": { "type": "string" },
+            "when": { "type": ["number", "string"] },
+            "tradition": { "type": "string" },
+            "work": { "type": "string" }
+          }
+        },
+        "could_have_read": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "plain": {
+      "type": ["object", "null"],
+      "required": ["what", "why", "catch"],
+      "additionalProperties": false,
+      "description": "The layman register, written by hand from the node's own text. null means not yet written, which the app shows honestly rather than hiding. Plain language measurably helps experts too, so this is a second register, not a simplified one.",
+      "properties": {
+        "what": { "type": "string", "minLength": 20 },
+        "why": { "type": "string", "minLength": 20 },
+        "catch": { "type": "string", "minLength": 20 }
+      }
+    },
+
+    "body": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Kind-specific content. For a construct: what it is, how it works, and what it means at each level.",
+      "properties": {
+        "def": { "type": "string" },
+        "mech": { "type": "string" },
+        "intra": { "type": "string" },
+        "inter": { "type": "string" },
+        "app": { "type": "string" }
+      }
+    },
+
+    "sources": { "type": "array", "items": { "type": "string" } },
+    "open": { "type": "string" }
+  }
+}

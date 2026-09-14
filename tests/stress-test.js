@@ -2,8 +2,10 @@
    Runs the real script against stubs, plus static checks on markup and data. */
 const fs=require('fs');
 const html=fs.readFileSync(require('path').join(__dirname,'..','index.html'),'utf8');
-const s=html.indexOf('<script>\nconst LAYERS'), e=html.lastIndexOf('</script>');
+const s=html.indexOf('<script>'), e=html.lastIndexOf('</script>');
 const src=html.slice(s+8,e);
+/* data now lives in data/*.json; build.js owns the projection the app renders */
+const BUILD=require('../build.js');
 
 let pass=0,fail=0,warn=0;
 const ok =(n,c,d='')=>{c?(pass++,console.log('  PASS  '+n)):(fail++,console.log('  FAIL  '+n+(d?'  → '+d:'')))};
@@ -13,8 +15,8 @@ console.log('\n=== 1. SYNTAX & LOAD ===');
 try{ new Function('d3','document','window','setTimeout',src); ok('script parses',true);}
 catch(err){ ok('script parses',false,err.message); process.exit(1);}
 
-const N=eval(src.match(/const N=(\[[\s\S]*?\n\];)/)[1].slice(0,-1));
-const LAY=eval('('+src.match(/const LAYERS=(\{[\s\S]*?\n\};)/)[1].slice(0,-1)+')');
+const N=BUILD.projected;
+const LAY=Object.fromEntries(Object.entries(BUILD.layers).map(([k,v])=>[k,{n:v.name,c:v.color}]));
 const byId=Object.fromEntries(N.map(n=>[n.id,n]));
 
 console.log('\n=== 2. DATA INTEGRITY ===');
@@ -204,6 +206,107 @@ const appRows=(/\.app\{[^}]*grid-template-rows:([^;]+);/.exec(css.replace(/\s+/g
 ok('.app names a row for every child',appRows.split(/(?=auto|1fr)/).filter(Boolean).length>=5,'rows: '+appRows);
 ok('the map row is the flexible one',/\.app>\.main\{grid-row:4;\}/.test(css.replace(/\s+/g,'')));
 ok('graph canvas is not left to the SVG default height',/#graph\{[^}]*height:100%/.test(css.replace(/\s+/g,'')));
+
+console.log('\n=== 8d. DATA PIPELINE & READING REGISTER ===');
+/* index.html is generated. If someone edits data/ and forgets to rebuild, the
+   site silently serves stale content — so the committed file must match. */
+const rebuilt=BUILD.build();
+ok('index.html is up to date with data/',rebuilt===html,
+   'run: node build.js, then commit index.html');
+ok('data lives outside the renderer',fs.existsSync(require('path').join(__dirname,'..','data','nodes.json')));
+ok('the template carries no embedded node data',
+   !/\{id:"big_two"/.test(fs.readFileSync(require('path').join(__dirname,'..','src','app.html'),'utf8')));
+
+const NODES=BUILD.nodes;
+ok('every node declares schema_version 2',NODES.every(n=>n.schema_version===2));
+ok('claim_type is present on every node',NODES.every(n=>n.facets&&n.facets.claim_type));
+ok('strength rubric matches claim type',NODES.every(n=>n.strength.rubric===n.facets.claim_type));
+
+const plains=NODES.filter(n=>n.plain);
+ok('reading-register toggle is in the UI',/data-reg="plain"/.test(html)&&/data-reg="full"/.test(html));
+ok('missing plain versions are disclosed, not hidden',/No plain-English version written yet/.test(html));
+ok('every plain entry has what / why / catch',
+   plains.every(n=>n.plain.what&&n.plain.why&&n.plain.catch),
+   plains.filter(n=>!(n.plain.what&&n.plain.why&&n.plain.catch)).map(n=>n.id).join(', '));
+/* a "plain" version that is longer than the original is not plain */
+const notShorter=plains.filter(n=>n.plain.what.length>=n.body.def.length);
+ok('plain "what" is shorter than the full definition',notShorter.length===0,notShorter.map(n=>n.id).join(', '));
+const JARGON=/\b(orthogonal|curvilinear|mesolimbic|psychometric|variance|heritability|factor analysis|incentive salience|hedonic)\b/i;
+/* a node may use its own name; what it must not do is import someone else's jargon */
+const longWords=plains.filter(n=>{
+  const m=n.plain.what.match(JARGON);
+  return m&&!n.label.toLowerCase().includes(m[0].toLowerCase());
+});
+wn('plain register avoids jargon in the opening line',longWords.length===0,longWords.map(n=>n.id).join(', '));
+console.log('        plain register '+plains.length+'/'+NODES.length+
+  ' ('+Math.round(plains.length/NODES.length*100)+'%) · provenance '+
+  NODES.filter(n=>n.provenance&&n.provenance.origin).length+'/'+NODES.length);
+
+console.log('\n=== 8e. STREAK / XP SPINE ===');
+ok('streak and award logic present',/function touchStreak\(\)/.test(src)&&/function award\(xp\)/.test(src));
+ok('streak keys on the local calendar day',/const s=P\.streak,today=dayKey\(\)/.test(src));
+ok('freezes are earned every 7 days and capped at 2',/FREEZE_EVERY=7,FREEZE_CAP=2/.test(src));
+ok('energy state is reserved without being read',
+   /P\.energy=P\.energy\|\|\{cur:5,max:5,last:null\}/.test(src)&&(src.match(/P\.energy/g)||[]).length===2);
+ok('every completion awards exactly once',
+   /if\(!Q\.done\)\{Q\.done=true/.test(src)&&/if\(!E\.done\)\{E\.done=true/.test(src)&&/if\(won&&!Z\.saved\)/.test(src));
+ok('spine renders on every Play screen',/insertAdjacentHTML\("afterbegin",spineHtml\(\)\)/.test(src));
+['ember','bronze','silver','gold'].forEach(t=>ok('streak tier colour: '+t,new RegExp('\\.spine\\.tier-'+t+'\\b').test(css)));
+ok('reminder is labelled as what it is, not as push',/Real push would need a server/.test(html));
+ok('the freeze rule is stated where a streak starts',/Seven days running earns a freeze/.test(html));
+ok('privacy line still true: nothing leaves the device',
+   /Progress is saved on this device only/.test(html)&&!/fetch\(|XMLHttpRequest|navigator\.sendBeacon/.test(src));
+
+console.log('\n=== 8f. ROADMAP ===');
+/* the engine is headless and sits between markers, so it can be lifted out of the
+   page and run here with no DOM */
+const rs=src.indexOf('/* ---- road engine ---- */'),re=src.indexOf('/* ---- road engine end ---- */');
+ok('road engine is isolated between markers',rs>0&&re>rs);
+let roadState=null;
+try{roadState=new Function(src.slice(rs,re)+';return roadState;')();ok('road engine runs with no globals',typeof roadState==='function');}
+catch(e){ok('road engine runs with no globals',false,e.message);}
+if(roadState){
+  const rm={id:'t',units:[
+    {id:'A',nodes:[{id:'a1',type:'standard',ref:'x',prerequisites:[],steps:2},{id:'a2',type:'standard',ref:'y',prerequisites:['a1'],steps:1},
+                   {id:'b',type:'bonus',prerequisites:['a1'],steps:1},{id:'c',type:'checkpoint',prerequisites:['a2'],steps:1,pass:1,pool:[]}]},
+    {id:'B',nodes:[{id:'b1',type:'standard',ref:'z',prerequisites:['c'],steps:1}]}]};
+  const s0=roadState(rm,{});
+  ok('empty progress: first node active, all else locked',s0.byId.a1.status==='active'&&['a2','b','c','b1'].every(i=>s0.byId[i].status==='locked'));
+  const s1=roadState(rm,{a1:{done:1}});
+  ok('partial progress keeps the node active and reports steps',s1.byId.a1.status==='active'&&s1.byId.a1.done===1);
+  const s2=roadState(rm,{a1:{done:2}});
+  ok('completing a node unlocks its dependants',s2.byId.a1.status==='completed'&&s2.byId.a2.status==='active'&&s2.byId.b.status==='unlocked');
+  ok('a bonus never takes the pulse',s2.active==='a2');
+  ok('unit completion counts required nodes only',s2.units[0].total===3&&s2.units[0].done===1&&s2.units[0].pct===33);
+  const s3=roadState(rm,{a1:{done:2},a2:{done:1},c:{done:1}});
+  ok('checkpoint opens the next unit',s3.byId.b1.status==='active'&&s3.units[0].pct===100&&s3.units[1].pct===0);
+  ok('over-reporting steps still counts as complete',roadState(rm,{a1:{done:9}}).byId.a1.status==='completed');
+
+  const real=BUILD.roadmaps[0];
+  const r0=roadState(real,{});
+  const req=r0.nodes.filter(n=>n.type!=='bonus').length;
+  console.log('        '+real.units.length+' units · '+r0.nodes.length+' nodes · '+req+' required · '+(r0.nodes.length-req)+' bonus');
+  ok('real roadmap: one active node from a fresh start, and it is the first construct',
+     r0.nodes.filter(n=>n.status==='active').length===1&&r0.active===real.units[0].nodes[0].id,r0.active);
+  const u1=real.units[0],prog={};u1.nodes.filter(n=>n.type==='standard').forEach(n=>prog[n.id]={done:n.steps});
+  const r1=roadState(real,prog);
+  const ck=u1.nodes.find(n=>n.type==='checkpoint'),u2first=real.units[1].nodes.find(n=>n.type!=='bonus');
+  ok('real roadmap: finishing a unit activates its checkpoint and keeps the next unit locked',
+     r1.byId[ck.id].status==='active'&&r1.byId[u2first.id].status==='locked');
+  prog[ck.id]={done:ck.steps};
+  ok('real roadmap: the checkpoint opens the next unit',roadState(real,prog).byId[u2first.id].status==='active');
+  ok('every standard node references a construct that exists',r0.nodes.filter(n=>n.type==='standard').every(n=>byId[n.ref]));
+}
+ok('roadmaps are inlined by the build',/const ROADMAPS=\[/.test(src));
+ok('roadmap registers ahead of the quiz so it leads the hub',src.indexOf('MODES.road=')<src.indexOf('MODES.quiz='));
+ok('a bonus pays only through the puzzle it launches',/ROAD_XP=\{standard:20,checkpoint:50,bonus:0\}/.test(src));
+ok('puzzle reports bonus completion back to the roadmap',/if\(Z\.road\)\{const rmz=ROADMAPS\.find/.test(src));
+ok('the path winds on an eight-step wave',/wave=\[0,\.6,1,\.6,0,-\.6,-1,-\.6\]/.test(src));
+['rpulse','rshake','rburst'].forEach(k=>ok('animation defined: '+k,new RegExp('@keyframes '+k).test(css)));
+ok('reduced motion disables every animation',/prefers-reduced-motion:reduce\)\{[^}]*\}[^}]*\*\{animation:none !important;\}/.test(css.replace(/\s+/g,''))||/animation:none !important/.test(css));
+ok('locked nodes are announced as disabled',/aria-disabled="true"/.test(src));
+ok('a miss redraws the question instead of costing anything',/a miss costs nothing: redraw/.test(src));
+ok('question generators accept a pinned construct',/function questionsFor\(ref,k,randomOrder\)/.test(src)&&(src.match(/^function\(pin\)\{/gm)||[]).length===5);
 
 console.log('\n=== 9. CONTENT SANITY ===');
 const ev={},ver={};N.forEach(n=>{ev[n.ev]=(ev[n.ev]||0)+1;ver[n.ver]=(ver[n.ver]||0)+1;});
