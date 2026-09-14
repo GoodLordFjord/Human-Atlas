@@ -2024,6 +2024,79 @@ function sent(t,k){
 /* inherited nodes deliberately carry no rep/mag/bound text, so fall through to
    mech, which every node has. Without this the quiz shows a blank explanation. */
 function whyOf(n,k){k=k||2;return sent(n.rep,k)||sent(n.mag,k)||sent(n.mech,k)||sent(n.def,k);}
+/* ---------- expeditions ---------- */
+const EXPED=[
+{id:"folklore",ic:"✕",name:"What didn't survive",
+ blurb:"Seven famous findings that broke — and one failure found inside this document. The most useful tour here, because most of these are still being taught.",
+ stops:[
+  ["power_posing","Start with the one that reached tens of millions of people. Read the replication record before the claim: that ordering is the whole method of this atlas."],
+  ["ego_depletion","A model that organised a decade of self-control research. Notice the pattern repeating — enormous citation count, then a multi-lab attempt that came back flat."],
+  ["wm_training","An entire consumer industry rests on this. Watch for the distinction between getting better at the task and getting better at anything else."],
+  ["mehrabian","The statistic every presentation-skills course quotes. Look at what the original study actually measured versus what the number is used to claim."],
+  ["candidate_gene_failure","The same collapse, in genetics rather than social psychology. Worth seeing that this is not one field's embarrassment."],
+  ["oxytocin","A molecule with a nickname that outran its evidence. The nickname is doing work the data cannot."],
+  ["fabrication_risk","The last stop is this atlas auditing itself — a fabricated citation found in its own earlier version. A map that grades everything else has to grade itself too."]],
+ end:"None of these were fringe. Each was published, cited, taught, and in several cases sold. The common thread is not stupidity — it is that a result which feels explanatory gets repeated long before anyone re-runs it. That is why every bubble here carries a replication record and a verification status."},
+
+{id:"inherit",ic:"❖",name:"How much of you is inherited?",
+ blurb:"Seven stops through behaviour genetics, ending somewhere more interesting — and much less deterministic — than the headline numbers suggest.",
+ stops:[
+  ["heritability","Everything downstream depends on getting this one right. Heritability is a property of a population, not of you — four boundaries are listed, and most popular uses of the word violate all four."],
+  ["twin_method","The machinery that produces the numbers, and the assumption it cannot fully test. Graded contested for exactly that reason."],
+  ["turkheimer_laws","The regularities that show up no matter which trait you pick. Treat these as the empirical floor of the field."],
+  ["wilson_effect","Now the first complication: the number is not fixed. It moves across the lifespan, in a direction most people find counterintuitive."],
+  ["gene_env_correlation","The second complication, and the sharpest. Some of what gets counted as genetic is running through the environment."],
+  ["nonshared_env","What is left over once genes and shared family environment are subtracted — and why its name is misleading."],
+  ["personality_heritability","With all the caveats loaded, here is what the estimates actually look like for traits."]],
+ end:"The headline number — around half — is real and about as replicated as anything in psychology. But it is a statement about variance in a population, it moves with age, it absorbs effects that travel through the environment, and it says nothing about whether a trait can be changed. Every one of those qualifications is load-bearing."},
+
+{id:"firstfive",ic:"◐",name:"The first five seconds",
+ blurb:"What happens when someone meets you, in the order it happens. Six stops from the instant judgement to the thing that actually makes people like you.",
+ stops:[
+  ["thin_slicing","Begin with the speed. Judgements form from very short exposures, and the interesting question is how accurate they are rather than whether they occur."],
+  ["big_two","What the judgement is made of. Two dimensions — roughly warmth and capability — carry most of it, and warmth is usually weighted first."],
+  ["axes_curvilinear","Immediately, the correction. The two dimensions are not independent, which quietly breaks the advice to maximise both."],
+  ["halo","How one judged dimension leaks into all the others. This is the mechanism that makes a first impression self-reinforcing."],
+  ["fae","And the systematic error in the inference: reading behaviour as character while discounting the situation. Note that its own grade is contested."],
+  ["huang","Finish with something small and actionable that survived testing — asking follow-up questions."]],
+ end:"The sequence is fast, partly accurate, and biased in a direction you can name. Notice the shape of the useful advice at the end: not a power move, just a question. The interventions with the best evidence in this atlas are almost all that unglamorous."},
+
+{id:"oversell",ic:"⚡",name:"Why influence frameworks oversell",
+ blurb:"Seven stops from the research base into the commercial tier built on top of it, watching what gets lost in the translation.",
+ stops:[
+  ["big_two","The research foundation most applied frameworks are implicitly built on, whether or not they cite it."],
+  ["reciprocity","The best-evidenced of the classic influence principles. Start here so the comparison later is fair."],
+  ["social_proof","Same family, weaker footing — graded contested. The gap between these two is the point of this expedition."],
+  ["obedience","The most famous influence study ever run, and a case study in how a result becomes a cultural fact faster than it becomes a settled one."],
+  ["elm","The model that specifies when persuasion routes through argument quality versus surface cues. Also contested — and notice how rarely applied frameworks mention the boundary conditions."],
+  ["challenger","Now the commercial tier. Read its claims against the curvilinearity finding from the atlas spine."],
+  ["gap_selling","Graded literary — a practitioner framework with no independent evidence base. That grade is not an insult, it is a category."]],
+ end:"The commercial tier is not worthless; it is compressed. Each framework takes findings with boundary conditions and sells them as rules without them. The tell is the absence of a failure mode: any system that never says 'this will not work here' has removed the part of the research that made it true."},
+
+{id:"dark",ic:"◭",name:"The dark layer",
+ blurb:"Six stops into the traits people most want to read about, and the measurement disputes that make the popular version unreliable.",
+ stops:[
+  ["big_five","Start on solid ground — the trait model with the strongest base, so the contrast is visible."],
+  ["hexaco","The sixth-factor challenge, and the one that matters most for what follows."],
+  ["dark_triad","The popular construct. The live question is whether it is three things or one, and the answer changes what any of it predicts."],
+  ["narcissism","Where the single label hides two quite different presentations."],
+  ["psychopathy_measurement","A measurement dispute with real consequences — what counts as part of the construct is itself contested."],
+  ["dark_outcomes","Finally, the payoff question: what do these traits actually predict? Graded moderate, which is lower than the internet version implies."]],
+ end:"This layer has the widest gap in the atlas between public confidence and measurement quality. Three of six stops are graded contested. That does not mean the traits are fictional — it means the popular version, where a label explains someone's entire behaviour, is running far ahead of what the instruments can support."},
+
+{id:"change",ic:"↻",name:"Can you actually change?",
+ blurb:"Seven stops on malleability — what moves, what doesn't, and which of the famous self-improvement findings survived scrutiny.",
+ stops:[
+  ["trait_change","The direct evidence on whether personality moves. Graded solid, and the answer is more encouraging than the heritability literature is usually taken to imply."],
+  ["person_situation","The old argument about whether traits or situations drive behaviour, and the synthesis that ended it."],
+  ["growth_mindset","The most commercially successful change claim of the last two decades. Graded contested — read the effect sizes, not the framing."],
+  ["self_efficacy","An older, quieter construct that has held up better. Notice it is graded solid while the more famous one above is not."],
+  ["habit_formation","The mechanism underneath durable change, rather than the motivation to want it."],
+  ["wanting_liking","The dissociation that explains why you can pursue something you no longer enjoy — essential for understanding why change attempts fail."],
+  ["sdt","Close with the framework on what sustains a change once it starts."]],
+ end:"Change is real, slower than the self-help tier promises, and better predicted by structure than by resolve. The pattern across these stops: the constructs about mechanism held up, and the constructs about mindset did less well. That is worth sitting with."}
+];
+
 /* ---------- quiz question generators ---------- */
 const QGEN=[
 function(){ /* spot the failed replication */
@@ -2190,6 +2263,76 @@ function paintQuiz(el){
   });
   const nx=document.getElementById("plNext");
   if(nx)nx.onclick=()=>{Q.i++;Q.chosen=null;keepScroll=false;paintPlay();};
+  bindPeek(el);
+}
+
+/* ---------- expeditions ---------- */
+MODES.exped={ic:"❖",name:"Expeditions",paint:paintExped,
+  blurb:"Guided routes through the network, each a short walkthrough with a point to make. Best place to start if you don't know where to start.",
+  best:()=>{const d=EXPED.filter(x=>P.exped[x.id]).length;return d?d+"/"+EXPED.length+" COMPLETED":"";}};
+function paintExped(el){
+  if(!E){
+    el.innerHTML=
+    `<div class="plbar"><button class="plback" id="plHome">← All modes</button></div>
+     <p class="plintro">Each route is a short walkthrough with an argument to make. Roughly five minutes each.</p>
+     <div class="plmodes">${EXPED.map(x=>
+       `<button class="plmode" data-e="${x.id}"><span class="tic" aria-hidden="true">${x.ic}</span>
+         <span style="flex:1"><b>${x.name}</b><span>${x.blurb}</span>
+         <span class="best">${x.stops.length} STOPS${P.exped[x.id]?" · COMPLETED ✓":""}</span></span></button>`).join("")}</div>`;
+    document.getElementById("plHome").onclick=()=>playGo("hub");
+    el.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{
+      E={x:EXPED.filter(z=>z.id===b.dataset.e)[0],i:0};keepScroll=false;paintPlay();});
+    return;
+  }
+  const x=E.x,last=E.i>=x.stops.length;
+  if(last){
+    P.exped[x.id]=1;pSave();
+    const nextUp=EXPED.filter(z=>!P.exped[z.id]);
+    el.innerHTML=
+    `<div class="plbar"><button class="plback" id="plBack">← Routes</button><span class="grow plcount">${x.name.toUpperCase()}</span></div>
+     <div class="plwin">
+       <div class="big">✓</div>
+       <div class="lab">${x.stops.length} STOPS COMPLETE</div>
+       <p>${x.end}</p>
+     </div>
+     <div class="plnav">
+       ${nextUp.length?`<button class="plbtn go" id="plNextExp">Next: ${nextUp[0].name} →</button>`:`<button class="plbtn go" id="plQuiz">Test it with a quiz →</button>`}
+       <button class="plbtn" id="plRedo">Walk it again</button>
+     </div>`;
+    document.getElementById("plBack").onclick=()=>{E=null;keepScroll=false;paintPlay();};
+    document.getElementById("plRedo").onclick=()=>{E.i=0;keepScroll=false;paintPlay();};
+    const ne=document.getElementById("plNextExp");
+    if(ne)ne.onclick=()=>{E={x:nextUp[0],i:0};keepScroll=false;paintPlay();};
+    const qz=document.getElementById("plQuiz");
+    if(qz)qz.onclick=()=>{E=null;Q=null;playGo("quiz");};
+    return;
+  }
+  const st=x.stops[E.i],n=byId[st[0]];
+  el.innerHTML=
+  `<div class="plbar">
+     <button class="plback" id="plBack">←</button>
+     <span class="grow plcount">${x.name.toUpperCase()}</span>
+     <span class="plcount">${E.i+1}/${x.stops.length}</span>
+   </div>
+   <div class="pldots">${x.stops.map((s,i)=>`<i class="${i<E.i?"past":i===E.i?"on":""}"></i>`).join("")}</div>
+   <div class="plcard">
+     <div class="plkicker">STOP ${E.i+1} · ${LAYERS[n.layer].n.toUpperCase()}</div>
+     <div class="plask">${n.label}</div>
+     <div class="tags" style="margin-top:10px">${pills(n)}</div>
+   </div>
+   <p class="plframe">${st[1]}</p>
+   <div class="plwhy">
+     <h4>WHAT IT IS</h4>
+     <p>${sent(n.def,2)}</p>
+     <div class="jump"><button class="chip" data-peek="${n.id}">Open the full bubble</button></div>
+   </div>
+   <div class="plnav">
+     <button class="plbtn" id="plPrev"${E.i===0?" disabled":""}>← Back</button>
+     <button class="plbtn go" id="plNext">${E.i+1>=x.stops.length?"Finish":"Next stop"} →</button>
+   </div>`;
+  document.getElementById("plBack").onclick=()=>{E=null;keepScroll=false;paintPlay();};
+  document.getElementById("plPrev").onclick=()=>{if(E.i>0){E.i--;keepScroll=false;paintPlay();}};
+  document.getElementById("plNext").onclick=()=>{E.i++;keepScroll=false;paintPlay();};
   bindPeek(el);
 }
 
