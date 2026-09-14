@@ -16,9 +16,10 @@ Open it in any browser on any device.
 
 ## Viewing it
 
-**On the web:** once GitHub Pages is enabled (Settings → Pages → Deploy from a branch →
-`main` → `/ (root)`), the live site is at
-https://goodlordfjord.github.io/human-atlas/
+**On the web:** once this is merged into `main` and GitHub Pages is enabled
+(Settings → Pages → Deploy from a branch → `main` → `/ (root)`), the live site is at
+https://goodlordfjord.github.io/Human-Atlas/ — that link works on any phone, tablet
+or computer, and is shareable with anyone.
 
 **On your computer:** pull the repo in GitHub Desktop, then double-click `index.html`.
 That's it — it opens in your default browser and works fully offline apart from the
