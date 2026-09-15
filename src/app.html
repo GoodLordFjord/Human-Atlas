@@ -283,6 +283,33 @@ select{width:100%;min-height:var(--tap);border:1.5px solid var(--line);border-ra
 .rlsum{background:var(--card);border:1.5px solid var(--line);border-left:5px solid var(--focus);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:15px;line-height:1.55;color:var(--tx);}
 .rlsum .jump{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
 
+/* ---- front door ---- */
+.hero{width:100%;text-align:left;background:var(--ink);color:#fff;border-radius:16px;padding:18px 18px 16px;margin:14px 0 20px;
+  display:flex;flex-direction:column;gap:6px;box-shadow:0 6px 0 #0e172b;}
+.hero:active{transform:translateY(3px);box-shadow:0 3px 0 #0e172b;}
+.hero .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;opacity:.7;}
+.hero b{font-family:'Bricolage Grotesque',sans-serif;font-size:23px;line-height:1.15;}
+.hero > span:not(.eyebrow):not(.go){font-size:14.5px;line-height:1.5;opacity:.88;}
+.hero .go{margin-top:8px;font-size:15px;font-weight:700;color:#c99a2e;}
+.eyebrow2{font-size:11.5px;font-weight:700;color:var(--tx-2);letter-spacing:.5px;margin:4px 0 8px;}
+.tasks.compact{gap:6px;margin-bottom:18px;}
+.tasks.compact .task{padding:10px 12px;}
+.tasks.compact .task b{font-size:14.5px;margin-bottom:1px;}
+.tasks.compact .task span{font-size:12.5px;}
+.tasks.compact .task .tic{font-size:17px;width:22px;}
+.aboutrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 20px;font-size:13px;color:var(--tx-2);}
+.app.noSearch .searchrow,.app.noSearch .drawer{display:none;}
+.grp h2 small{font-weight:500;font-size:12px;color:var(--tx-2);margin-left:6px;}
+.unitrow{position:absolute;left:var(--sp);bottom:72px;display:flex;gap:6px;z-index:6;max-width:calc(100% - 72px);}
+.unitrow .chip{background:rgba(255,255,255,.94);min-height:34px;padding:5px 11px;font-size:12.5px;
+  white-space:nowrap;flex:0 1 auto;min-width:0;overflow:hidden;}
+.unitrow .chip.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.unitrow .chip small{margin-left:5px;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.unitrow .chip.on small{color:rgba(255,255,255,.78);}
+/* sits above the unit row, clear of the legend at top-left and the zoomer at right */
+.maphint{position:absolute;left:var(--sp);bottom:114px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:600;
+  padding:8px 12px;border-radius:10px;z-index:6;box-shadow:0 4px 14px rgba(22,35,63,.2);max-width:calc(100% - 72px);}
+
 /* ================= PLAY ================= */
 .plintro{font-size:14px;color:var(--tx-2);line-height:1.55;margin-bottom:16px;}
 .plmodes{display:grid;gap:10px;margin-bottom:20px;}
@@ -431,15 +458,15 @@ select{width:100%;min-height:var(--tap);border:1.5px solid var(--line);border-ra
 .stat span{font-size:11.5px;color:var(--tx-2);}
 
 /* first-run card over the map */
-.onboard{
+.mapcard{
   position:absolute;left:var(--sp);right:var(--sp);top:44px;z-index:7;
   background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:14px 15px;
   box-shadow:0 8px 26px rgba(22,35,63,.16);
 }
-.onboard[hidden]{display:none;}
-.onboard b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:16px;color:var(--ink);margin-bottom:8px;}
-.onboard p{font-size:14px;color:var(--tx-2);line-height:1.5;margin-bottom:5px;}
-.onboard .ok{margin-top:11px;width:100%;min-height:var(--tap);background:var(--ink);color:#fff;border-radius:10px;font-size:15px;font-weight:600;}
+.mapcard[hidden]{display:none;}
+.mapcard b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-size:16px;color:var(--ink);margin-bottom:8px;}
+.mapcard p{font-size:14px;color:var(--tx-2);line-height:1.5;margin-bottom:5px;}
+.mapcard .ok{margin-top:11px;width:100%;min-height:var(--tap);background:var(--ink);color:#fff;border-radius:10px;font-size:15px;font-weight:600;}
 
 /* focus mode — map takes the whole screen */
 .app.focus .top,.app.focus .searchrow,.app.focus .drawer,.app.focus .nav{display:none;}
@@ -518,8 +545,7 @@ select{width:100%;min-height:var(--tap);border:1.5px solid var(--line);border-ra
     <span class="wordmark">Human Atlas</span>
     <span class="ver">v6 · cycle 4</span>
     <span class="spacer"></span>
-    <button class="iconbtn" id="bAudit">Audit log</button>
-    <button class="iconbtn" id="bMethod">Method</button>
+    <button class="iconbtn" id="bAbout">About</button>
   </header>
 
   <div class="searchrow">
@@ -554,7 +580,7 @@ select{width:100%;min-height:var(--tap);border:1.5px solid var(--line);border-ra
     <button role="tab" aria-selected="false" data-v="browse" aria-label="Browse all constructs"><span class="ic" aria-hidden="true">☰</span>Browse</button>
     <button role="tab" aria-selected="false" data-v="tensions" aria-label="Live disputes"><span class="ic" aria-hidden="true">⚡</span>Tensions</button>
     <button role="tab" aria-selected="false" data-v="trace" aria-label="Trace a route"><span class="ic" aria-hidden="true">⇄</span>Trace</button>
-    <button role="tab" aria-selected="false" data-v="play" aria-label="Play — quizzes, expeditions and puzzles"><span class="ic" aria-hidden="true">◈</span>Play</button>
+    <button role="tab" aria-selected="false" data-v="play" aria-label="Learn — the guided path, plus quiz, expeditions and puzzles"><span class="ic" aria-hidden="true">◈</span>Learn</button>
   </nav>
 
   <main class="main" id="mainview">
@@ -563,6 +589,7 @@ select{width:100%;min-height:var(--tap);border:1.5px solid var(--line);border-ra
       <svg id="graph" role="application" aria-label="Network of psychological constructs. Use Tab to move between constructs, arrow keys to move to a connected construct, Enter to open."></svg>
       <div class="legend" aria-hidden="true">
         <b>Reading the bubbles</b>
+        <div class="row">colour = which layer</div>
         <div class="row"><i></i>solid evidence</div>
         <div class="row"><i class="dash"></i>contested</div>
         <div class="row"><i class="hollow"></i>not yet source-verified</div>
@@ -576,17 +603,10 @@ select{width:100%;min-height:var(--tap);border:1.5px solid var(--line);border-ra
         <button id="zFull" aria-label="Full screen map" style="font-size:15px">⛶</button>
         <button id="zUnpin" aria-label="Release pinned bubbles" style="font-size:13px;display:none">⇱</button>
       </div>
-      <div class="onboard" id="empty" hidden style="border-color:var(--contested)">
+      <div class="mapcard" id="empty" hidden style="border-color:var(--contested)">
         <b>Nothing matches those filters</b>
         <p id="emptyWhy"></p>
         <button class="ok" id="emptyClear" style="background:var(--contested)">Clear filters</button>
-      </div>
-      <div class="onboard" id="onboard" hidden>
-        <b>Three things the bubbles tell you</b>
-        <p><strong>Colour</strong> = which layer of psychology it belongs to.</p>
-        <p><strong>Filled</strong> = I checked the sources myself. <strong>Hollow</strong> = carried over, unverified.</p>
-        <p><strong>Size</strong> = how connected it is. <strong>Red dashed lines</strong> = two things that disagree.</p>
-        <button class="ok" id="onboardOk">Got it</button>
       </div>
       <div class="focusbar">
         <span class="title">Human Atlas</span>
@@ -628,6 +648,15 @@ select{width:100%;min-height:var(--tap);border:1.5px solid var(--line);border-ra
   <div id="auditBody"></div>
 </div></div>
 
+<div class="modal" id="mAbout" role="dialog" aria-modal="true" aria-label="About this atlas"><div class="mbox">
+  <div class="mtop"><strong>About this atlas</strong><button class="closebtn" data-close aria-label="Close">✕</button></div>
+  <p>A map of what is actually known about people, with the strength of the evidence shown for every piece and the disputes left in rather than smoothed over. Nothing here is asserted without a source, and where a source has not yet been checked the entry says so.</p>
+  <p>Progress is saved on this device only. There is no account and nothing is sent anywhere.</p>
+  <div class="plnav" style="margin-top:14px">
+    <button class="plbtn go" id="aMethod">How everything is graded</button>
+    <button class="plbtn" id="aAudit">What went wrong in earlier versions</button>
+  </div>
+</div></div>
 <div class="modal" id="mMethod" role="dialog" aria-modal="true" aria-label="Method"><div class="mbox">
   <div class="mtop"><strong>Method</strong><button class="closebtn" data-close aria-label="Close">✕</button></div>
   <div id="methodBody"></div>
@@ -658,7 +687,7 @@ L.forEach(l=>{nb[l.source].add(l.target);nb[l.target].add(l.source);});
 const relOf=(a,b)=>lmap.get([a,b].sort().join("|"))||{rel:"connected",tension:false};
 
 /* ---------- state ---------- */
-const S={q:"",ev:"all",ver:"all",layer:"all",view:"start",sel:null,from:"greene",to:"heritability",depth:2};
+const S={q:"",ev:"all",ver:"all",layer:"all",view:"start",sel:null,from:null,to:null,depth:2,set:null};
 /* Reading register. Plain language measurably helps experts too, so this is a
    second register rather than a simplified mode — and the default for a first
    visit, because someone who wants the full entry will find the switch. */
@@ -677,7 +706,7 @@ function reachFrom(id,cap){
   }
   return d;
 }
-const visible=n=>{
+let visible=n=>{
   const s=S.q.trim().toLowerCase();
   const okQ=!s||n.label.toLowerCase().includes(s)||(n.def||"").toLowerCase().includes(s)||
             (n.src||[]).join(" ").toLowerCase().includes(s)||LAYERS[n.layer].n.toLowerCase().includes(s);
@@ -686,6 +715,9 @@ const visible=n=>{
   const okL=S.layer==="all"||n.layer===S.layer;
   return okQ&&okE&&okV&&okL;
 };
+/* an optional whitelist on top of the filters — used by "My unit" on the map */
+const visibleBase=visible;
+visible=n=>visibleBase(n)&&(!S.set||S.set.has(n.id));
 const filterCount=()=>["ev","ver","layer"].filter(k=>S[k]!=="all").length;
 
 /* ---------- graph ---------- */
@@ -696,9 +728,10 @@ const zoom=d3.zoom().scaleExtent([.08,4]).on("zoom",e=>{
   g.attr("transform",e.transform);
   const k=e.transform.k;
   g.selectAll("g.nd text").attr("display",d=>{
+    /* overview first: at fit zoom only the hubs are named; labels fill in as you zoom */
     if(k>=.72)return null;
-    if(k>=.45)return d.deg>=6?null:"none";
-    return d.deg>=10?null:"none";
+    if(k>=.5)return d.deg>=10?null:"none";
+    return d.deg>=14?null:"none";
   }).attr("font-size",d=>{
     const base=d.deg>=7?11.5:10.5;
     return k<.6?Math.min(base/k*.62,22):base;
@@ -715,7 +748,14 @@ const sim=d3.forceSimulation(N)
  .force("charge",d3.forceManyBody().strength(mob()?-175:-300))
  .force("center",d3.forceCenter(W/2,H/2))
  .force("collide",d3.forceCollide(d=>rad(d)+(mob()?12:18)))
- .force("x",d3.forceX(W/2).strength(.05)).force("y",d3.forceY(H/2).strength(.06));
+ .force("x",d3.forceX(W/2).strength(.05)).force("y",d3.forceY(H/2).strength(.06))
+ /* when the map is narrowed to a handful, pull just those together — otherwise they
+    keep their positions from the full layout and read as debris in an empty canvas */
+ .force("gather",a=>{
+   if(!S.set)return;
+   const k=a*0.14;
+   N.forEach(d=>{if(S.set.has(d.id)){d.vx+=(W/2-d.x)*k;d.vy+=(H/2-d.y)*k;}});
+ });
 
 const link=g.append("g").attr("fill","none").selectAll("line").data(L).join("line")
  .attr("stroke",d=>d.tension?"#a8391f":"#aab5c6")
@@ -795,13 +835,19 @@ function fitAll(dur=450){
   const vis=N.filter(n=>n.x!=null&&visible(n));
   const set=vis.length?vis:N.filter(n=>n.x!=null);
   if(!set.length)return;
-  const pad=mob()?34:56;
+  /* fit into the rectangle actually free of furniture — the meta bar and legend
+     sit top-left, the zoom column right, the hint and unit row bottom — otherwise
+     the outermost bubbles land underneath them */
+  const pad=mob()?20:40;
+  const inset={t:pad+(mob()?86:70),r:pad+(mob()?56:56),b:pad+(mob()?92:56),l:pad};
+  const fw=Math.max(80,W-inset.l-inset.r),fh=Math.max(80,H-inset.t-inset.b);
   const xs=set.map(n=>n.x),ys=set.map(n=>n.y);
   const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
   const bw=Math.max(x1-x0,1),bh=Math.max(y1-y0,1);
-  const k=Math.max(.08,Math.min(2,Math.min((W-pad*2)/bw,(H-pad*2)/bh)));
+  const maxK=set.length<=14?1.05:2;
+  const k=Math.max(.08,Math.min(maxK,Math.min(fw/bw,fh/bh)));
   const cx=(x0+x1)/2,cy=(y0+y1)/2;
-  const tx=W/2-cx*k,ty=H/2-cy*k;
+  const tx=(inset.l+fw/2)-cx*k,ty=(inset.t+fh/2)-cy*k;
   /* the first fit runs before the map view has ever been shown, so it can be
      handed a zero-size canvas; applying a non-finite transform poisons the
      zoom state for every later transition */
@@ -843,6 +889,9 @@ document.getElementById("zGroup").onclick=e=>{
 /* ---------- render ---------- */
 function paintGraph(){
   const V=new Set(N.filter(visible).map(n=>n.id));
+  const inSet=d=>!S.set||S.set.has(d.id);
+  node.attr("display",d=>inSet(d)?null:"none");
+  link.attr("display",l=>(inSet(l.source)&&inSet(l.target))?null:"none");
   const D=S.sel?reachFrom(S.sel):null;
   const lim=S.depth;
   const shade=id=>{
@@ -887,7 +936,6 @@ function paintGraph(){
       if(S.layer!=="all")bits.push(`the ${LAYERS[S.layer].n} layer`);
       document.getElementById("emptyWhy").textContent=
         `No construct matches ${bits.join(" plus ")}. That combination is genuinely empty — it is not an error.`;
-      document.getElementById("onboard").hidden=true;
     }
   }
 }
@@ -899,7 +947,7 @@ function pills(n){
 function paintBrowse(){
   const gr={};N.filter(visible).forEach(n=>(gr[n.layer]=gr[n.layer]||[]).push(n));
   const html=Object.entries(LAYERS).filter(([k])=>gr[k]).map(([k,l])=>`
-    <div class="grp"><h2><span class="swatch" style="background:${l.c}"></span>${l.n}</h2>
+    <div class="grp"><h2><span class="swatch" style="background:${l.c}"></span>${l.p}<small>${l.n}</small></h2>
     ${gr[k].sort((a,b)=>b.deg-a.deg).map(n=>`
       <button class="card" data-go="${n.id}">
         <div class="hd"><h3>${n.label}</h3></div>
@@ -932,11 +980,17 @@ function findPath(a,b){
   return null;
 }
 function paintTrace(){
-  const opts=sel=>N.slice().sort((x,y)=>x.label.localeCompare(y.label))
+  const opts=sel=>`<option value=""${sel?"":" selected"} disabled>Choose…</option>`+N.slice().sort((x,y)=>x.label.localeCompare(y.label))
     .map(n=>`<option value="${n.id}"${n.id===sel?" selected":""}>${n.label}</option>`).join("");
-  const p=findPath(S.from,S.to);
+  const p=S.from&&S.to?findPath(S.from,S.to):null;
   let body;
-  if(!p)body=`<p class="hint">No route exists between these two yet. That is information: the atlas has not established a connection.</p>`;
+  if(!S.from||!S.to){
+    const sug=[["power_posing","heritability"],["dark_triad","attachment"],["reciprocity","wanting_liking"]].filter(([a,b])=>byId[a]&&byId[b]);
+    body=`<div class="plcard"><div class="plkicker">PICK ANY TWO</div><div class="plask">Which two ideas do you want connected?</div></div>
+      <p class="hint">Choose a start and an end above, or try one of these.</p>
+      <div class="plopts">${sug.map(([a,b])=>`<button class="plopt" data-sug="${a}|${b}"><span class="mk">⇄</span><span>${byId[a].label} → ${byId[b].label}</span></button>`).join("")}</div>`;
+  }
+  else if(!p)body=`<p class="hint">No route exists between these two yet. That is information: the atlas has not established a connection.</p>`;
   else if(p.length===1)body=`<p class="hint">Same construct.</p>`;
   else body=`<p class="hint">${p.length-1} step${p.length>2?"s":""}. Each states the relationship the atlas actually records, not just that a line exists.</p>`+
     p.slice(0,-1).map((u,i)=>{const v=p[i+1],r=relOf(u,v);
@@ -951,6 +1005,7 @@ function paintTrace(){
     </div>`+body;
   document.getElementById("selFrom").onchange=e=>{S.from=e.target.value;paintTrace();};
   document.getElementById("selTo").onchange=e=>{S.to=e.target.value;paintTrace();};
+  document.querySelectorAll("#traceScroll [data-sug]").forEach(b=>b.onclick=()=>{const [a,c]=b.dataset.sug.split("|");S.from=a;S.to=c;paintTrace();});
   bindGo("traceScroll");
 }
 function bindGo(id){
@@ -1252,6 +1307,7 @@ function paintPlayHub(el){
        ${best?`<span class="best">${best}</span>`:""}</span></button>`;
   }).join("");
   const s=P.streak,doneToday=s.last===dayKey();
+  const showToday=P.xp>0||s.count>0;   /* ask for a habit only after there has been some value */
   const canNotify=("Notification" in window)&&Notification.permission!=="denied";
   const remindBtn=!doneToday&&s.count&&canNotify&&!P.remind
     ?`<button class="plbtn" id="plRemind">Remind me at 8pm</button><small>Only fires while this tab stays open, or if you add the site to your home screen. Real push would need a server.</small>`
@@ -1263,7 +1319,7 @@ function paintPlayHub(el){
       :`<div class="today"><b>Start a streak.</b><span>Finish any one thing today. Seven days running earns a freeze — a missed day that does not count against you.</span></div>`;
   el.innerHTML=
   `<p class="plintro">Ways to actually work the material rather than read past it. Progress is saved on this device only — no account, nothing sent anywhere.</p>
-   ${today}
+   ${showToday?today:""}
    <div class="plmodes">${cards}</div>
    <p class="hint">Every answer, route and hop links back to the full bubble — sources, boundary conditions, disputes and all.</p>`;
   el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>playGo(b.dataset.m));
@@ -1711,8 +1767,29 @@ function paintPlay(){
   keepScroll=false;
 }
 
+function currentUnit(){
+  const rm=ROADMAPS[0];if(!rm)return null;
+  const st=roadState(rm,roadProg(rm.id));
+  return st.units.find(u=>u.pct<100)||st.units[st.units.length-1];
+}
+function paintUnitRow(){
+  const host=document.getElementById("vMap");if(!host)return;
+  let row=document.getElementById("unitrow");
+  if(!row){row=document.createElement("div");row.id="unitrow";row.className="unitrow";host.appendChild(row);}
+  const u=currentUnit(),onUnit=!!S.set;
+  row.innerHTML=(u?`<button class="chip${onUnit?" on":""}" id="uMine" aria-pressed="${onUnit}">My unit<small>— ${u.title}</small></button>`:"")+
+    `<button class="chip${onUnit?"":" on"}" id="uAll" aria-pressed="${!onUnit}">All ${N.length}</button>`;
+  const mine=document.getElementById("uMine");
+  const settle=()=>{sim.alpha(.7).restart();setTimeout(()=>fitAll(500),1400);};
+  if(mine)mine.onclick=()=>{S.set=new Set(u.nodes.filter(n=>n.type==="standard").map(n=>n.ref));paint();settle();};
+  document.getElementById("uAll").onclick=()=>{S.set=null;paint();settle();};
+  let hint=document.getElementById("maphint");
+  if(!hint){hint=document.createElement("div");hint.id="maphint";hint.className="maphint";hint.textContent="Tap any bubble. Bigger means more connected.";host.appendChild(hint);}
+  hint.hidden=!!P.tapped;
+}
 function paint(){
   paintGraph();
+  if(S.view==="map")paintUnitRow();
   if(S.view==="start")paintStart();
   else if(S.view==="browse")paintBrowse();
   else if(S.view==="tensions")paintTensions();
@@ -1724,9 +1801,10 @@ function paint(){
 let lastFocus=null;
 function open(id){
   S.sel=id;const n=byId[id];paintGraph();
+  if(!P.tapped){P.tapped=1;pSave();const h=document.getElementById("maphint");if(h)h.hidden=true;}
   document.getElementById("dBar").style.background=LAYERS[n.layer].c;
   document.getElementById("dTitle").textContent=n.label;
-  document.getElementById("dMeta").innerHTML=pills(n)+`<span class="pill literary">${LAYERS[n.layer].n}</span>`;
+  document.getElementById("dMeta").innerHTML=pills(n)+`<span class="pill literary" title="${LAYERS[n.layer].n}">${LAYERS[n.layer].p}</span>`;
   const S2=[];
   const FULL=REG==="full"||!n.plain;   /* no plain version written → show everything */
   /* ---- reading register ---- */
@@ -1815,13 +1893,13 @@ function mkOpt(host,key,val,label,color){
   host.appendChild(b);
 }
 const oEv=document.getElementById("optEv");
-[["all","All"],["solid","Solid"],["moderate","Moderate"],["contested","Contested"],["failed","Failed"],["literary","Literary"],["disputed","Has disputes"]]
+[["all","All"],["solid","Solid"],["moderate","Moderate"],["contested","Contested"],["failed","Failed to replicate"],["literary","Practitioner books"],["disputed","Has disputes"]]
   .forEach(([v,l])=>mkOpt(oEv,"ev",v,l));
 const oVer=document.getElementById("optVer");
 [["all","All"],["audited","Sources checked"],["inherited","Unverified"]].forEach(([v,l])=>mkOpt(oVer,"ver",v,l));
 const oLay=document.getElementById("optLayer");
 mkOpt(oLay,"layer","all","All layers");
-Object.entries(LAYERS).forEach(([k,l])=>mkOpt(oLay,"layer",k,l.n,l.c));
+Object.entries(LAYERS).forEach(([k,l])=>mkOpt(oLay,"layer",k,l.p,l.c));
 
 const qEl=document.getElementById("q"),qClear=document.getElementById("qClear");
 qEl.oninput=e=>{S.q=e.target.value;qClear.classList.toggle("on",!!S.q);paint();};
@@ -1847,22 +1925,37 @@ function syncOpts(){
 function paintStart(){
   const aud=N.filter(n=>n.ver==="audited").length;
   const ten=L.filter(l=>l.tension).length;
+  /* one obvious first move. Progress, if any, is the hero's own copy. */
+  const rm=ROADMAPS[0];let hero="";
+  if(rm){
+    const st=roadState(rm,roadProg(rm.id));
+    const done=st.units.reduce((a,u)=>a+u.done,0),total=st.units.reduce((a,u)=>a+u.total,0);
+    const u=st.units.find(x=>x.pct<100)||st.units[st.units.length-1];
+    const nextNode=st.active?labelOf(st.byId[st.active]):null;
+    hero=done
+      ?`<button class="hero" id="hero"><span class="eyebrow">CONTINUE THE GUIDED PATH · ${done}/${total}</span><b>${u.title}</b><span>Next up: ${nextNode||"the checkpoint"}. Read it, answer a few questions, unlock the next.</span><span class="go">Continue →</span></button>`
+      :`<button class="hero" id="hero"><span class="eyebrow">START HERE · ABOUT 5 MINUTES</span><b>Take the guided path</b><span>One idea at a time, in an order that argues something. Read it in plain English, answer a couple of questions, unlock the next. No account, nothing to install.</span><span class="go">Start the first unit →</span></button>`;
+  }
   document.getElementById("startScroll").innerHTML=
   `<p class="lede">A map of <b>what is actually known about people</b> — and how strong the evidence is for each piece.</p>
-   <p class="sub2">${N.length} constructs across ${Object.keys(LAYERS).length} layers, each graded twice: how good the evidence is, and whether I checked the sources myself. Pick a way in.</p>
+   ${hero}
+   <div class="eyebrow2">OR GO STRAIGHT TO A QUESTION</div>
+   <div class="tasks compact">${TASKS.map((t,i)=>`<button class="task" data-t="${i}"><span class="tic" aria-hidden="true">${t[0]}</span><span style="flex:1"><b>${t[1]}</b><span>${t[2]}</span></span></button>`).join("")}</div>
    <div class="statline">
      <div class="stat"><b>${N.length}</b><span>constructs</span></div>
-     <div class="stat"><b>${aud}</b><span>verified</span></div>
-     <div class="stat"><b>${ten}</b><span>disputes</span></div>
+     <div class="stat"><b>${aud}</b><span>sources checked</span></div>
+     <div class="stat"><b>${ten}</b><span>live disputes</span></div>
    </div>
-   <div class="tasks">${TASKS.map((t,i)=>`<button class="task" data-t="${i}"><span class="tic" aria-hidden="true">${t[0]}</span><span style="flex:1"><b>${t[1]}</b><span>${t[2]}</span></span></button>`).join("")}</div>
-   <div class="keyrow"><h3>HOW TO READ A BUBBLE</h3>
+   <div class="aboutrow"><button class="chip" id="sAbout">About this atlas</button><span>Every grade has a reason and every miss is recorded.</span></div>
+   <div class="keyrow" hidden><h3>HOW TO READ A BUBBLE</h3>
      <div class="keyitem"><span class="kd"><svg width="22" height="22"><circle cx="11" cy="11" r="8" fill="#12808a" opacity=".93" stroke="#16233f" stroke-width="2.4"/></svg></span><span><b>Filled</b> — sources checked</span></div>
      <div class="keyitem"><span class="kd"><svg width="22" height="22"><circle cx="11" cy="11" r="8" fill="#fff" stroke="#16233f" stroke-width="2.4"/><circle cx="11" cy="11" r="3.4" fill="#12808a" opacity=".3"/></svg></span><span><b>Hollow</b> — carried over, not re-checked</span></div>
      <div class="keyitem"><span class="kd"><svg width="22" height="22"><circle cx="11" cy="11" r="8" fill="#fff" stroke="#a8391f" stroke-width="2.4"/></svg></span><span><b>Red ring</b> — contested or failed evidence</span></div>
      <div class="keyitem"><span class="kd"><svg width="22" height="22"><line x1="2" y1="11" x2="20" y2="11" stroke="#a8391f" stroke-width="2" stroke-dasharray="5 4"/></svg></span><span><b>Red dashed line</b> — a live dispute</span></div>
    </div>`;
   document.getElementById("startScroll").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>TASKS[+b.dataset.t][3]());
+  const h=document.getElementById("hero");if(h)h.onclick=()=>{S.mode="road";setView("play");};
+  document.getElementById("sAbout").onclick=()=>openModal("mAbout");
 }
 let fittedOnce=false;
 function setView(v){
@@ -1871,13 +1964,19 @@ function setView(v){
   document.getElementById("vStart").hidden=v!=="start";
   document.getElementById("vMap").hidden=v!=="map";
   if(v!=="map")app.classList.remove("focus");
-  if(v==="map"&&!seenOnboard){document.getElementById("onboard").hidden=false;}
+  /* the legend is on the map itself and the first tap opens a bubble; a modal
+     before either has happened explains things the visitor has not yet seen */
   document.getElementById("vBrowse").hidden=v!=="browse";
   document.getElementById("vTensions").hidden=v!=="tensions";
   document.getElementById("vTrace").hidden=v!=="trace";
   document.getElementById("vPlay").hidden=v!=="play";
   if(v==="map"&&!fittedOnce){fittedOnce=true;setTimeout(()=>{resize();fitAll(600);},80);}
   if(v!=="map"&&mob())document.getElementById("sheet").classList.remove("on");
+  /* a drawer left open would sit on top of the next view */
+  if(drawer.classList.contains("on")){drawer.classList.remove("on");bFilter.setAttribute("aria-expanded","false");}
+  /* search and filters act on the constructs; on the first screen and the guided
+     path there is nothing yet to search, so they only compete with the way in */
+  app.classList.toggle("noSearch",v==="play"||v==="start");
   paint();
 }
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>setView(b.dataset.v));
@@ -1885,8 +1984,10 @@ document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>setView(b.data
 /* modals */
 function openModal(id){const m=document.getElementById(id);m.classList.add("on");
   m.querySelector("[data-close]").focus();}
-document.getElementById("bAudit").onclick=()=>openModal("mAudit");
-document.getElementById("bMethod").onclick=()=>openModal("mMethod");
+document.getElementById("bAbout").onclick=()=>openModal("mAbout");
+/* the About sheet fans out to the two long documents; close it first so Escape behaves */
+document.getElementById("aMethod").onclick=()=>{document.getElementById("mAbout").classList.remove("on");openModal("mMethod");};
+document.getElementById("aAudit").onclick=()=>{document.getElementById("mAbout").classList.remove("on");openModal("mAudit");};
 document.querySelectorAll("[data-close]").forEach(b=>b.onclick=e=>e.target.closest(".modal").classList.remove("on"));
 document.querySelectorAll(".modal").forEach(m=>m.onclick=e=>{if(e.target===m)m.classList.remove("on");});
 document.addEventListener("keydown",e=>{
@@ -1926,8 +2027,6 @@ document.addEventListener("fullscreenchange",()=>{
   if(!document.fullscreenElement&&app.classList.contains("focus"))setFocus(false);
 });
 
-let seenOnboard=false;
-document.getElementById("onboardOk").onclick=()=>{seenOnboard=true;document.getElementById("onboard").hidden=true;};
 document.getElementById("zUnpin").onclick=releasePins;
 document.getElementById("emptyClear").onclick=()=>{
   S.q="";S.ev="all";S.ver="all";S.layer="all";

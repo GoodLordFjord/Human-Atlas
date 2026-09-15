@@ -19,7 +19,11 @@ const KEY='ha_play_v1';
 /* same algorithm as the page; both run in this container's time zone */
 const dayKey=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 const dayShift=(k,n)=>{const p=k.split('-').map(Number);return dayKey(new Date(p[0],p[1]-1,p[2]+n));};
-const TODAY=dayKey(),YESTERDAY=dayShift(TODAY,-1),TWO_AGO=dayShift(TODAY,-2);
+/* Every assertion here is relative to "today". Read the clock once in the harness
+   and once per page load and a run that crosses midnight fails wholesale, so the
+   page is pinned to a fixed instant — midday, so no timezone can shift the date. */
+const FROZEN=new Date(2026,5,15,12,0,0);
+const TODAY=dayKey(FROZEN),YESTERDAY=dayShift(TODAY,-1),TWO_AGO=dayShift(TODAY,-2);
 
 let fails=0;
 const check=(name,cond,detail)=>{
@@ -38,6 +42,7 @@ const check=(name,cond,detail)=>{
     const pg=await ctx.newPage();
     const errs=[];
     pg.on('pageerror',e=>errs.push(e.message));
+    await pg.clock.setFixedTime(FROZEN);
     if(seed)await pg.addInitScript(([k,v])=>localStorage.setItem(k,JSON.stringify(v)),[KEY,seed]);
     else await pg.addInitScript(k=>localStorage.removeItem(k),KEY);
     await pg.goto(FILE,{waitUntil:'load'});
@@ -69,9 +74,14 @@ const check=(name,cond,detail)=>{
     /* re-render the finished state by leaving and re-entering the tab */
     await pg.click('.nav button[data-v="map"]');await pg.waitForTimeout(150);
     await pg.click('.nav button[data-v="play"]');await pg.waitForTimeout(250);
+    await pg.click('.plback').catch(()=>{});await pg.waitForTimeout(200);
+    const hubAfter=await pg.evaluate(()=>({
+      todayCls:(document.querySelector('.today')||{}).className||'',
+      spineText:(document.querySelector('.spine')||{}).textContent||''
+    }));
     const again=await pg.evaluate(k=>JSON.parse(localStorage.getItem(k)),KEY);
     await pg.close();
-    return{hub,score,gain,after,again,inQuizSpine,spineCls,errs};
+    return{hub,hubAfter,score,gain,after,again,inQuizSpine,spineCls,errs};
   }
 
   console.log('\n=== A. first ever activity ===');
@@ -79,7 +89,10 @@ const check=(name,cond,detail)=>{
     const r=await run(null,'fresh');
     check('no page errors',r.errs.length===0,r.errs[0]);
     check('spine renders on the hub',r.hub.spine);
-    check('hub invites a new streak',/today/.test(r.hub.todayCls)&&!/risk|done/.test(r.hub.todayCls));
+    check('no streak nudge before anything has been earned',r.hub.todayCls==='',r.hub.todayCls);
+    check('the spine is still there, just showing zero',r.hub.spine);
+    check('the streak card appears once the first round is banked',
+      /today/.test(r.hubAfter.todayCls)&&/done/.test(r.hubAfter.todayCls),r.hubAfter.todayCls);
     check('spine renders inside the quiz too',r.inQuizSpine===1);
     check('ember tier on day 1',/tier-ember/.test(r.spineCls),r.spineCls);
     check('streak becomes 1',r.after.streak.count===1,'got '+r.after.streak.count);
