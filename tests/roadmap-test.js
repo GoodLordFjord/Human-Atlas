@@ -20,13 +20,15 @@ const label=id=>NODES.find(n=>n.id===id).label;
 const u1=RM.units[0],u2=RM.units[1];
 const std1=u1.nodes.filter(n=>n.type==='standard'),bonus1=u1.nodes.find(n=>n.type==='bonus'),check1=u1.nodes.find(n=>n.type==='checkpoint');
 const dayKey=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+/* pinned so a run crossing midnight cannot break the completion-date assertions */
+const FROZEN=new Date(2026,5,15,12,0,0);
 
 let fails=0;
 const check=(name,cond,detail)=>{
   if(cond)console.log('  PASS  '+name);
   else{fails++;console.log('  FAIL  '+name+(detail!==undefined?'\n          '+detail:''));}
 };
-const doneSeed=ids=>{const o={};ids.forEach(id=>{const n=RM.units.flatMap(u=>u.nodes).find(x=>x.id===id);o[id]={done:n.steps,at:dayKey()};});return o;};
+const doneSeed=ids=>{const o={};ids.forEach(id=>{const n=RM.units.flatMap(u=>u.nodes).find(x=>x.id===id);o[id]={done:n.steps,at:dayKey(FROZEN)};});return o;};
 
 (async()=>{
   const b=await chromium.launch();
@@ -39,6 +41,7 @@ const doneSeed=ids=>{const o={};ids.forEach(id=>{const n=RM.units.flatMap(u=>u.n
     const pg=await ctx.newPage();const errs=[];
     pg.on('pageerror',e=>errs.push(e.message));
     pg.on('console',m=>{if(m.type()==='error')errs.push(m.text());});
+    await pg.clock.setFixedTime(FROZEN);
     if(seed)await pg.addInitScript(([k,v])=>localStorage.setItem(k,JSON.stringify(v)),[KEY,seed]);
     else await pg.addInitScript(k=>localStorage.removeItem(k),KEY);
     await pg.goto(FILE,{waitUntil:'load'});
@@ -107,7 +110,7 @@ const doneSeed=ids=>{const o={};ids.forEach(id=>{const n=RM.units.flatMap(u=>u.n
     check(steps+' right answers complete the node',rights===steps&&guard<30,'rights '+rights+' after '+guard+' attempts');
     check('completion card says learned and pays 20 XP',/CONSTRUCT LEARNED/.test(await pg.locator('.plwin').innerText())&&/\+20 XP/.test(await pg.locator('.gain').innerText()));
     const s1=await store(pg);
-    check('progress persisted with a completion date',s1.road.atlas[std1[0].id].done===steps&&s1.road.atlas[std1[0].id].at===dayKey(),JSON.stringify(s1.road.atlas[std1[0].id]));
+    check('progress persisted with a completion date',s1.road.atlas[std1[0].id].done===steps&&s1.road.atlas[std1[0].id].at===dayKey(FROZEN),JSON.stringify(s1.road.atlas[std1[0].id]));
     check('XP and streak flowed through the shared award',s1.xp===20&&s1.streak.count===1,'xp '+s1.xp+' streak '+s1.streak.count);
     await pg.click('#plPath2');
     await pg.waitForSelector('.road');

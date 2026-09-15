@@ -19,7 +19,11 @@ const KEY='ha_play_v1';
 /* same algorithm as the page; both run in this container's time zone */
 const dayKey=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 const dayShift=(k,n)=>{const p=k.split('-').map(Number);return dayKey(new Date(p[0],p[1]-1,p[2]+n));};
-const TODAY=dayKey(),YESTERDAY=dayShift(TODAY,-1),TWO_AGO=dayShift(TODAY,-2);
+/* Every assertion here is relative to "today". Read the clock once in the harness
+   and once per page load and a run that crosses midnight fails wholesale, so the
+   page is pinned to a fixed instant — midday, so no timezone can shift the date. */
+const FROZEN=new Date(2026,5,15,12,0,0);
+const TODAY=dayKey(FROZEN),YESTERDAY=dayShift(TODAY,-1),TWO_AGO=dayShift(TODAY,-2);
 
 let fails=0;
 const check=(name,cond,detail)=>{
@@ -38,6 +42,7 @@ const check=(name,cond,detail)=>{
     const pg=await ctx.newPage();
     const errs=[];
     pg.on('pageerror',e=>errs.push(e.message));
+    await pg.clock.setFixedTime(FROZEN);
     if(seed)await pg.addInitScript(([k,v])=>localStorage.setItem(k,JSON.stringify(v)),[KEY,seed]);
     else await pg.addInitScript(k=>localStorage.removeItem(k),KEY);
     await pg.goto(FILE,{waitUntil:'load'});
