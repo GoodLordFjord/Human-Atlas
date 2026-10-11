@@ -4,6 +4,14 @@ Read this first. The full plan, the reasoning behind every decision, and the res
 rests on are in `docs/ROADMAP.md`; that file is written as a prompt and can be pasted
 into any chat.
 
+## The brain
+
+This repo is project `HAT` in the owner's brain repo, **GoodLordFjord/BrainRoot-AI**,
+which holds how they like to work, how this project connects to their others, and where
+they left off. When it is available, read its `CLAUDE.md`, `ROOT.md`, `NOMENCLATURE.md`
+and `branches/human-atlas.md` before starting, and record progress in that branch file's
+"Where I left off" at the end of a session. The build rules below still govern this repo.
+
 ## What this is
 
 An interactive, evidence-graded map of what is actually known about people. 98
@@ -85,18 +93,14 @@ puzzle, `streak`, `xp`, `log`, `road`, and reserved `energy`.
 ## State
 
 **On `main` (live):** map, browse, tensions, trace; Play with quiz, expeditions, puzzle;
-the map-height and overflow fixes.
+data extracted from the renderer; schema + validator; plain-English register + toggle;
+streak with freezes, XP, progress spine, honest reminder; the roadmap (six units, 52
+nodes, checkpoints, bonus branches); the front-door rework (single hero on Start, Learn
+tab, overview-first map, plain layer glosses). `claude/brave-bell-az1alo` and
+`claude/ux-front-door` are both merged.
 
-**On `claude/brave-bell-az1alo` (pushed, not merged):** data extracted from the renderer;
-schema + validator; plain-English register + toggle; streak with freezes, XP, progress
-spine, honest reminder; the roadmap (six units, 52 nodes, checkpoints, bonus branches).
-
-**On `claude/ux-front-door` (pushed, not merged):** the front-door rework — single hero on
-Start, Learn tab, overview-first map with unit narrowing, plain layer glosses, empty Trace,
-drawer fix, one About door. See README "The front door".
-
-**Next, in order:** merge the branch → energy system (spec in ROADMAP §6A) → spaced
-review → plain register to 98/98 → provenance backfill → convergence nodes.
+**Next, in order:** energy system (spec in ROADMAP §6A) → spaced review → plain register
+to 98/98 → provenance backfill → convergence nodes.
 
 ## Git
 
